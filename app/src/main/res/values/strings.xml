@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">YellowNote</string>
+    <string name="selectnote">selectNote</string>
+    <string name="addnote">addNote</string>
 </resources>
