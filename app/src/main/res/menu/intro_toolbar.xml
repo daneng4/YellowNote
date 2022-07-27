@@ -11,5 +11,16 @@
         android:id="@+id/addNote"
         android:icon="@drawable/ic_baseline_add_circle_outline_24"
         android:title="@string/addnote"
-        app:showAsAction="always" />
+        app:showAsAction="always">
+        <menu >
+            <item
+                android:id="@+id/addMethodFolder"
+                android:icon="@drawable/ic_baseline_folder_24"
+                android:title="@string/addMethodFile" />
+            <item
+                android:id="@+id/addMethodTemplate"
+                android:icon="@drawable/ic_baseline_sticky_note_2_24"
+                android:title="@string/addMethodTemplate" />
+        </menu>
+    </item>
 </menu>
