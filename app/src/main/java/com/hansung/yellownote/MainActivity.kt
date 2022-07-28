@@ -2,9 +2,17 @@ package com.hansung.yellownote
 
 import android.R.attr
 import android.app.Activity
+import android.content.ContentUris
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.database.Cursor
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.DocumentsContract
+import android.provider.MediaStore
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.result.ActivityResult
@@ -33,31 +41,149 @@ class MainActivity : AppCompatActivity() {
 
     val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){result:ActivityResult->
         if(result.resultCode== RESULT_OK){ // 파일 선택 완료 시
-            val data = result.data // uri 값
+            val data: Intent? = result.data // uri 값
             if (data != null) {
+                println(data)
+                val uri=data.data
+                println(uri!!.path)
+                val path=getPath(uri)
+                println(path)
 
-                //https://stackoverflow.com/questions/51101608/how-to-get-the-folder-path-using-intent-on-android
-                var FilePath = data.data?.path;
-                var FileName = data.data?.lastPathSegment;
-//                var lastPos = (FilePath?.size) - (FileName?.size)
-//                var Folder = FilePath?.substring(0, lastPos);
-
-                println("Full Path:" + FilePath);
-//                println("Folder:" + Folder);
-                println("File Name:" + FileName)
-
-//                val FilePath: String? = data.data?.path
-//                val FileName: String? = data.data?.lastPathSegment
-//                val lastPos = (FilePath?.length ?: 0) - (FileName?.length ?: 0)
-//                val Folder = FilePath?.substring(0, lastPos)
-//
-//                println("Full Path: \n$FilePath\n")
-//                println("Folder: \n$Folder\n")
-//                println("File Name: \n$FileName\n")
 
                 startActivity(Intent(this, NoteActivity::class.java).putExtra("uri",data.toString()))
             }
         }
+    }
+    /**
+     * Get a file path from a Uri. This will get the the path for Storage Access
+     * Framework Documents, as well as the _data field for the MediaStore and
+     * other file-based ContentProviders.
+     *
+     * @param context The context.
+     * @param uri The Uri to query.
+     * @author paulburke
+     */
+    fun getPath(uri:Uri):String? {
+
+        val isKitKat:Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT
+
+        // DocumentProvider
+        if (isKitKat && DocumentsContract.isDocumentUri(this, uri)) {
+            // ExternalStorageProvider
+            if (isExternalStorageDocument(uri)) {
+                val docId = DocumentsContract.getDocumentId(uri);
+                val split = docId.split(":")
+                val type = split[0];
+
+                if ("primary".equals(type,ignoreCase = false)) {
+                    return "${Environment.getExternalStorageDirectory()}/${split[1]}"
+                }
+
+                // TODO handle non-primary volumes
+            }
+            // DownloadsProvider
+            else if (isDownloadsDocument(uri)) {
+
+                val id = DocumentsContract.getDocumentId(uri)
+                val contentUri = ContentUris.withAppendedId(
+                    Uri.parse("content://downloads/public_downloads"), id.toLong())
+
+                return getDataColumn(this, contentUri, null, null)
+            }
+            // MediaProvider
+            else if (isMediaDocument(uri)) {
+                val docId = DocumentsContract.getDocumentId(uri)
+                val split = docId.split(":")
+                val type = split[0]
+
+                var contentUri: Uri? = null;
+                when (type){
+                    "image"-> {
+                        contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                    }
+                    "video" -> {
+                        contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                    }
+                    "audio"-> {
+                        contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                    }
+                }
+
+                val selection = "_id=?";
+                val selectionArgs = arrayOf(
+                    split[1]
+                )
+
+                return getDataColumn(this, contentUri!!, selection, selectionArgs);
+            }
+        }
+        // MediaStore (and general)
+        else if ("content".equals(uri.scheme, ignoreCase = true)) {
+            return getDataColumn(this, uri, null, null)
+        }
+        // File
+        else if ("file".equals(uri.scheme,ignoreCase = true)) {
+            return uri.path!!
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the value of the data column for this Uri. This is useful for
+     * MediaStore Uris, and other file-based ContentProviders.
+     *
+     * @param context The context.
+     * @param uri The Uri to query.
+     * @param selection (Optional) Filter used in the query.
+     * @param selectionArgs (Optional) Selection arguments used in the query.
+     * @return The value of the _data column, which is typically a file path.
+     */
+    private fun getDataColumn(context: Context, uri:Uri , selection:String? ,
+                      selectionArgs:Array<String>?):String? {
+
+        var cursor: Cursor? = null
+        val column = "_data"
+        val projection = arrayOf(
+            column
+        )
+
+        try {
+            cursor = context.contentResolver.query(uri, projection, selection, selectionArgs,
+                null);
+            if (cursor != null && cursor.moveToFirst()) {
+                val column_index = cursor.getColumnIndexOrThrow(column);
+                return cursor.getString(column_index);
+            }
+        } finally {
+            cursor?.close();
+        }
+        return null;
+    }
+
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is ExternalStorageProvider.
+     */
+    private fun isExternalStorageDocument(uri:Uri):Boolean {
+        return "com.android.externalstorage.documents"==(uri.authority);
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is DownloadsProvider.
+     */
+    private fun isDownloadsDocument(uri:Uri):Boolean {
+        return "com.android.providers.downloads.documents" == uri.authority
+    }
+
+    /**
+     * @param uri The Uri to check.
+     * @return Whether the Uri authority is MediaProvider.
+     */
+    private fun isMediaDocument(uri:Uri ):Boolean {
+        return "com.android.providers.media.documents"==(uri.authority);
     }
 
     // 저장소 파일 선택창 띄우기
