@@ -1,12 +1,14 @@
 package com.hansung.yellownote
 
+import android.R.attr
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -29,13 +31,53 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.setDisplayShowTitleEnabled(false) // toolbar 제목 표시 유무
     }
 
+    val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){result:ActivityResult->
+        if(result.resultCode== RESULT_OK){ // 파일 선택 완료 시
+            val data = result.data // uri 값
+            if (data != null) {
+
+                //https://stackoverflow.com/questions/51101608/how-to-get-the-folder-path-using-intent-on-android
+                var FilePath = data.data?.path;
+                var FileName = data.data?.lastPathSegment;
+//                var lastPos = (FilePath?.size) - (FileName?.size)
+//                var Folder = FilePath?.substring(0, lastPos);
+
+                println("Full Path:" + FilePath);
+//                println("Folder:" + Folder);
+                println("File Name:" + FileName)
+
+//                val FilePath: String? = data.data?.path
+//                val FileName: String? = data.data?.lastPathSegment
+//                val lastPos = (FilePath?.length ?: 0) - (FileName?.length ?: 0)
+//                val Folder = FilePath?.substring(0, lastPos)
+//
+//                println("Full Path: \n$FilePath\n")
+//                println("Folder: \n$Folder\n")
+//                println("File Name: \n$FileName\n")
+
+                startActivity(Intent(this, NoteActivity::class.java).putExtra("uri",data.toString()))
+            }
+        }
+    }
+
     // 저장소 파일 선택창 띄우기
     private fun fileChooser(){
         val fileIntent = Intent(Intent.ACTION_GET_CONTENT)
-        var uri = Uri.parse(Environment.getExternalStorageDirectory().getPath())
-        fileIntent.setDataAndType(uri, "application/pdf/*");
+//        var uri = Uri.parse(Environment.getExternalStorageDirectory().getPath())
+//        fileIntent.setDataAndType(uri, "application/pdf/*");
+//        var path = Environment.getExternalStorageDirectory().getPath()
+        fileIntent.setType("application/*");
 
-        startActivity(fileIntent)
+//        startActivity(fileIntent)
+
+        startForResult.launch(fileIntent)
+
+//        val testLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+//            if(result.resultCode == RESULT_CODE) {
+//                // Got data from other activity and process that data
+//                Log.e("${result.data}")
+//            }
+//        }
     }
 
     // toolbar에 menu item 넣기
@@ -57,8 +99,7 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.addMethodFolder -> { // 필기 추가>파일 메뉴 누른 경우
                 println("파일 클릭")
-                // 저장소 권한 확인
-                checkPermissions(permissions)
+                checkPermissions(permissions) // 저장소 권한 확인
                 return true
             }
             R.id.addMethodTemplate-> { // 필기 추가>노트 메뉴 누른 경우
@@ -73,27 +114,26 @@ class MainActivity : AppCompatActivity() {
 
     // 권한 확인
     private fun checkPermissions(permissions:Array<String>) {
-        var targetList = arrayListOf<String>()
+        var targetList = arrayListOf<String>() // 권한 없는 항목들
 
         for(i in 0..permissions.size-1){
             var curPermission = permissions[i]
             var permissionCheck = ContextCompat.checkSelfPermission(this, curPermission)
-            if(permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            if(permissionCheck == PackageManager.PERMISSION_GRANTED) { // 권한이 이미 부여된 경우
                 System.out.println("***** 저장소 권한 있음 *****")
-                fileChooser()///////////////////
+                fileChooser() // 파일 선택창 띄우기
                 return
             }
-            else{
+            else{ // 권한을 부여받지 못한 경우
                 System.out.println("***** 저장소 권한 없음 *****")
                 if(ActivityCompat.shouldShowRequestPermissionRationale(this,curPermission)) {
                     System.out.println("***** 저장소 권한 설명 필요 *****")
                 }
-                targetList.add(curPermission)
+                targetList.add(curPermission) // 권한 없는 항목들에 포함시키기
             }
         }
 
-        // 권한 부여 요청할 target들
-        val targets = arrayOfNulls<String>(targetList.size)
+        val targets = arrayOfNulls<String>(targetList.size) // 권한 요청할 항목들
         targetList.toArray(targets)
 
         ActivityCompat.requestPermissions(this, targets,101) // 위험 권한 부여 요청
@@ -105,7 +145,7 @@ class MainActivity : AppCompatActivity() {
             101 -> { // 사용자 권한 수락했는지 여부 확인
                 if(grantResults.size>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED) {
                     System.out.println("***** 권한 승인 *****")
-                    fileChooser()
+                    fileChooser() // 파일 선택창 띄우기
                 }
                 else
                     System.out.println("***** 권한 거부 *****")
