@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/YellowNote.iml" filepath="$PROJECT_DIR$/.idea/modules/YellowNote.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/YellowNote.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/YellowNote.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/photoview/YellowNote.photoview.iml" filepath="$PROJECT_DIR$/.idea/modules/photoview/YellowNote.photoview.iml" />
     </modules>
   </component>
 </project>

@@ -1,87 +1,127 @@
 package com.hansung.yellownote
 
 import android.annotation.SuppressLint
-import android.content.ContentResolver
-import android.content.Context
-import android.database.Cursor
-import android.net.Uri
+import android.graphics.*
+import android.graphics.pdf.PdfRenderer
 import android.os.Bundle
-import android.provider.MediaStore
-import android.provider.OpenableColumns
-import android.webkit.MimeTypeMap
+import android.os.ParcelFileDescriptor
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewTreeObserver
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import com.hansung.yellownote.databinding.ActivityNoteBinding
 import java.io.File
+import java.io.IOException
+import java.util.ArrayList
 
 
 class NoteActivity : AppCompatActivity() {
     private lateinit var binding : ActivityNoteBinding
+    lateinit var pdfView: ImageView
+    lateinit var rendererPage: PdfRenderer.Page
+    var pdfRenderer: PdfRenderer?=null
+    var fileDescriptor:ParcelFileDescriptor?=null
+    var pageCount=0
+    var count=0
 
+    lateinit var customPaths:ArrayList<CustomPath>
+    lateinit var customPath: CustomPath
+    lateinit var path: Path
+    lateinit var canvas: Canvas
+    lateinit var paint: Paint
+    lateinit var EditImagematrix: Matrix
+    var alteredBitmap: Bitmap? = null
+
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding=ActivityNoteBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        pdfView = binding.pdfView
 
         var intent = intent
-        var uriString = intent.getStringExtra("uri")
-        var uri = Uri.parse(uriString)
+        var filePath = intent.getStringExtra("filePath")
+        System.out.println("intent.getStringExtra = "+filePath)
 
-        System.out.println("ddddddddddddd"+getFileExtension(this,uri))
+        if (filePath != null) {
+            openPdf(filePath)
 
-//        var file = File(uri.toString())
-//        System.out.println(getRealPathFromURI(this,uri))
-//        System.out.println(getFileName(uri))
-//        pdf_view_pager.adapter = PageAdaptor()
-//        val targetFile = uri.toFile()
-//        pdfReader = PdfReader(targetFile).apply {
-//            (pdf_view_pager.adapter as PageAdaptor).setupPdfRenderer(this)
-//        }
-//        TabLayoutMediator(pdf_page_tab, pdf_view_pager) { tab, position ->
-//            tab.text = (position + 1).toString()
-//        }.attach()
+            customPaths = ArrayList<CustomPath>()
 
-    }
+            pdfView.setOnTouchListener{ _: View, event:MotionEvent->
+                val x = event.x
+                val y = event.y
+                val toolType=event.getToolType(0)
+                when(toolType) {
+                    MotionEvent.TOOL_TYPE_FINGER-> {
+                        System.out.println("손가락")
+                    }
+                    else-> {
+                        when (event.action) {
+//                                MotionEvent.ACTION_DOWN -> {
+//                                    System.out.println("펜")
+//                                    path.reset()
+//                                    path.moveTo(x, y)
+//                                }
+//                                MotionEvent.ACTION_MOVE -> path.lineTo(x, y)
+//                                MotionEvent.ACTION_UP -> {
+//                                    path.lineTo(x, y)
+//                                    canvas.drawPath(path, paint) //mBitmap 에 기
+//                                    paths.add(path)
+//                                    System.out.println(paths.size)
+//                                    path.reset()
+//                                }
 
-    private fun getFileExtension(context: Context, uri: Uri): String? =
-        if (uri.scheme == ContentResolver.SCHEME_CONTENT)
-            MimeTypeMap.getSingleton().getExtensionFromMimeType(context.contentResolver.getType(uri))
-        else uri.path?.let { MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(File(it)).toString())
-        }
-
-    fun getRealPathFromURI(context: Context, contentUri: Uri?): String? {
-        var cursor: Cursor? = null
-        val proj = arrayOf(MediaStore.MediaColumns.DISPLAY_NAME)
-        cursor = contentUri?.let { context.getContentResolver().query(it, proj, null, null, null) }
-        var path=""
-        if(cursor!=null){
-            path = cursor.getString(0)
-            cursor.close()
-        }
-        return path
-    }
-
-    @SuppressLint("Range")
-    fun getFileName(uri: Uri): String? {
-        var result: String? = null
-        if (uri.scheme == "content") {
-            val cursor = contentResolver.query(uri, null, null, null, null)
-            try {
-                if (cursor != null && cursor.moveToFirst()) {
-                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+                            MotionEvent.ACTION_DOWN -> {
+                                System.out.println("펜")
+                                System.out.println("(x,y)=("+x+","+y+")")
+                                customPath = CustomPath(Point(x.toInt(),y.toInt()), Color.RED, 10)
+                                customPaths.add(customPath)
+                                path.reset()
+                                path.moveTo(x, y)
+                            }
+                            MotionEvent.ACTION_MOVE -> {
+                                customPath.addPoint(Point(x.toInt(),y.toInt()))
+                                path.lineTo(x, y)
+                            }
+                            MotionEvent.ACTION_UP -> {
+                                customPath.endPoint = Point(x.toInt(),y.toInt())
+                                path.lineTo(x, y)
+                                canvas.drawPath(path, paint)
+                                path.reset()
+                            }
+                        }
+                    }
                 }
-            } finally {
-                cursor!!.close()
+                pdfView.invalidate()
+                true
             }
         }
-        if (result == null) {
-            result = uri.path
-            val cut = result!!.lastIndexOf('/')
-            if (cut != -1) {
-                result = result.substring(cut + 1)
-            }
-        }
-        return result
     }
 
+    fun openPdf(filePath:String){
+        var file = File(filePath)
+        System.out.println("File(filePath).isFile = "+File(filePath).isFile)
+        System.out.println("File(filePath).canRead = "+File(filePath).canRead())
 
+        if(fileDescriptor==null)
+            fileDescriptor=
+                ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+
+        pdfRenderer=
+            PdfRenderer(fileDescriptor!!)
+
+        pageCount= pdfRenderer?.pageCount!!
+
+        rendererPage= pdfRenderer?.openPage(count)!!
+        val rendererPageWidth=rendererPage.width
+        val rendererPageHeight=rendererPage.height
+
+        val bitmap: Bitmap = Bitmap.createBitmap(
+            rendererPageWidth,rendererPageHeight, Bitmap.Config.ARGB_8888
+        )
+        rendererPage.render(bitmap,null,null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+        pdfView.setImageBitmap(bitmap)
+    }
 }

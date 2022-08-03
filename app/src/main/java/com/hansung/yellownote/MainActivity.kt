@@ -1,7 +1,6 @@
 package com.hansung.yellownote
 
-import android.R.attr
-import android.app.Activity
+import android.annotation.SuppressLint
 import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
@@ -13,6 +12,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.result.ActivityResult
@@ -21,11 +21,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.hansung.yellownote.databinding.ActivityMainBinding
+import java.io.File
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private var permissions = arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE,android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    private var permissions = arrayOf(android.Manifest.permission.MANAGE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE,android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    var isKitKat = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_YellowNote)
@@ -37,173 +39,6 @@ class MainActivity : AppCompatActivity() {
         var toolbar = binding.introToolbar
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false) // toolbar 제목 표시 유무
-    }
-
-    val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){result:ActivityResult->
-        if(result.resultCode== RESULT_OK){ // 파일 선택 완료 시
-            val data: Intent? = result.data // uri 값
-            if (data != null) {
-                println(data)
-                val uri=data.data
-                println(uri!!.path)
-                val path=getPath(uri)
-                println(path)
-
-
-                startActivity(Intent(this, NoteActivity::class.java).putExtra("uri",data.toString()))
-            }
-        }
-    }
-    /**
-     * Get a file path from a Uri. This will get the the path for Storage Access
-     * Framework Documents, as well as the _data field for the MediaStore and
-     * other file-based ContentProviders.
-     *
-     * @param context The context.
-     * @param uri The Uri to query.
-     * @author paulburke
-     */
-    fun getPath(uri:Uri):String? {
-
-        val isKitKat:Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT
-
-        // DocumentProvider
-        if (isKitKat && DocumentsContract.isDocumentUri(this, uri)) {
-            // ExternalStorageProvider
-            if (isExternalStorageDocument(uri)) {
-                val docId = DocumentsContract.getDocumentId(uri);
-                val split = docId.split(":")
-                val type = split[0];
-
-                if ("primary".equals(type,ignoreCase = false)) {
-                    return "${Environment.getExternalStorageDirectory()}/${split[1]}"
-                }
-
-                // TODO handle non-primary volumes
-            }
-            // DownloadsProvider
-            else if (isDownloadsDocument(uri)) {
-
-                val id = DocumentsContract.getDocumentId(uri)
-                val contentUri = ContentUris.withAppendedId(
-                    Uri.parse("content://downloads/public_downloads"), id.toLong())
-
-                return getDataColumn(this, contentUri, null, null)
-            }
-            // MediaProvider
-            else if (isMediaDocument(uri)) {
-                val docId = DocumentsContract.getDocumentId(uri)
-                val split = docId.split(":")
-                val type = split[0]
-
-                var contentUri: Uri? = null;
-                when (type){
-                    "image"-> {
-                        contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-                    }
-                    "video" -> {
-                        contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-                    }
-                    "audio"-> {
-                        contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-                    }
-                }
-
-                val selection = "_id=?";
-                val selectionArgs = arrayOf(
-                    split[1]
-                )
-
-                return getDataColumn(this, contentUri!!, selection, selectionArgs);
-            }
-        }
-        // MediaStore (and general)
-        else if ("content".equals(uri.scheme, ignoreCase = true)) {
-            return getDataColumn(this, uri, null, null)
-        }
-        // File
-        else if ("file".equals(uri.scheme,ignoreCase = true)) {
-            return uri.path!!
-        }
-
-        return null;
-    }
-
-    /**
-     * Get the value of the data column for this Uri. This is useful for
-     * MediaStore Uris, and other file-based ContentProviders.
-     *
-     * @param context The context.
-     * @param uri The Uri to query.
-     * @param selection (Optional) Filter used in the query.
-     * @param selectionArgs (Optional) Selection arguments used in the query.
-     * @return The value of the _data column, which is typically a file path.
-     */
-    private fun getDataColumn(context: Context, uri:Uri , selection:String? ,
-                      selectionArgs:Array<String>?):String? {
-
-        var cursor: Cursor? = null
-        val column = "_data"
-        val projection = arrayOf(
-            column
-        )
-
-        try {
-            cursor = context.contentResolver.query(uri, projection, selection, selectionArgs,
-                null);
-            if (cursor != null && cursor.moveToFirst()) {
-                val column_index = cursor.getColumnIndexOrThrow(column);
-                return cursor.getString(column_index);
-            }
-        } finally {
-            cursor?.close();
-        }
-        return null;
-    }
-
-
-    /**
-     * @param uri The Uri to check.
-     * @return Whether the Uri authority is ExternalStorageProvider.
-     */
-    private fun isExternalStorageDocument(uri:Uri):Boolean {
-        return "com.android.externalstorage.documents"==(uri.authority);
-    }
-
-    /**
-     * @param uri The Uri to check.
-     * @return Whether the Uri authority is DownloadsProvider.
-     */
-    private fun isDownloadsDocument(uri:Uri):Boolean {
-        return "com.android.providers.downloads.documents" == uri.authority
-    }
-
-    /**
-     * @param uri The Uri to check.
-     * @return Whether the Uri authority is MediaProvider.
-     */
-    private fun isMediaDocument(uri:Uri ):Boolean {
-        return "com.android.providers.media.documents"==(uri.authority);
-    }
-
-    // 저장소 파일 선택창 띄우기
-    private fun fileChooser(){
-        val fileIntent = Intent(Intent.ACTION_GET_CONTENT)
-//        var uri = Uri.parse(Environment.getExternalStorageDirectory().getPath())
-//        fileIntent.setDataAndType(uri, "application/pdf/*");
-//        var path = Environment.getExternalStorageDirectory().getPath()
-        fileIntent.setType("application/*");
-
-//        startActivity(fileIntent)
-
-        startForResult.launch(fileIntent)
-
-//        val testLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-//            if(result.resultCode == RESULT_CODE) {
-//                // Got data from other activity and process that data
-//                Log.e("${result.data}")
-//            }
-//        }
     }
 
     // toolbar에 menu item 넣기
@@ -235,8 +70,6 @@ class MainActivity : AppCompatActivity() {
             else -> return super.onOptionsItemSelected(item)
         }
     }
-
-
 
     // 권한 확인
     private fun checkPermissions(permissions:Array<String>) {
@@ -278,4 +111,119 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    // 저장소 파일 선택창 띄우기
+    private fun fileChooser(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            isKitKat = true
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+            intent.addCategory(Intent.CATEGORY_OPENABLE)
+            intent.type = "application/pdf"
+            startForResult.launch(Intent.createChooser(intent, "Select file"))
+        } else {
+            isKitKat = false
+            val intent = Intent()
+            intent.type = "application/pdf"
+            intent.action = Intent.ACTION_GET_CONTENT
+            startForResult.launch(Intent.createChooser(intent, "Select file"))
+        }
+    }
+
+    val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){result:ActivityResult->
+        if(result.resultCode== AppCompatActivity.RESULT_OK){ // 파일 선택 완료 시
+            val data: Intent? = result.data
+            if (data != null) {
+                System.out.println("data = "+data)
+                val uri = data.data
+                if (uri != null) {
+                    System.out.println("Uri from onActivityResult: $uri")
+                    var filePath = getPath(this,uri)
+                    System.out.println("filePath = "+filePath)
+                    if(filePath!=null){
+                        System.out.println("File(filePath).isFile = "+File(filePath).isFile)
+                        System.out.println("File(filePath).canRead = "+File(filePath).canRead())
+
+                        if(File(filePath).isFile) {
+                            if (File(filePath).canRead()){
+                                startActivity(
+//                                    Intent(this, NoteActivity::class.java).
+//                                    putExtra("filePath", filePath))
+                                    Intent(this, PdfActivity::class.java).
+                                    putExtra("filePath", filePath))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @SuppressLint("Range")
+    fun getPath(context: Context, uri: Uri): String? {
+        val isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT
+
+        // DocumentProvider
+        if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
+            // ExternalStorageProvider
+            if (isExternalStorageDocument(uri)) { //////////// 해결 완
+                val docId = DocumentsContract.getDocumentId(uri)
+                val split = docId.split(":").toTypedArray()
+                val type = split[0]
+                if ("primary".equals(type, ignoreCase = true)) {
+                    System.out.println(Environment.getExternalStorageDirectory().toString() + "/" + split[1])
+                    return Environment.getExternalStorageDirectory().toString() + "/" + split[1]
+                }
+
+                // TODO handle non-primary volumes
+            } else if (isDownloadsDocument(uri)) {
+                val displayName:String
+                val cursor: Cursor? = contentResolver.query( uri, null, null, null, null, null)
+                cursor?.use {
+                    if (it.moveToFirst())
+                        displayName = it.getString(it.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+                }
+                val id = DocumentsContract.getDocumentId(uri)
+                val split = id.split(":").toTypedArray()
+                System.out.println(id)
+                if (id.startsWith("msf")) {
+                    return null
+                }
+            } else if (isMediaDocument(uri)) {
+                val docId = DocumentsContract.getDocumentId(uri)
+                val split = docId.split(":").toTypedArray()
+                val type = split[0]
+                var contentUri: Uri? = null
+                if ("image" == type) {
+                    contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                } else if ("video" == type) {
+                    contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                } else if ("audio" == type) {
+                    contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+                }
+                val selection = "_id=?"
+                val selectionArgs = arrayOf(
+                    split[1]
+                )
+//                return getDataColumn(context, contentUri, selection, selectionArgs)
+            }
+        } else if ("content".equals(uri.getScheme(), ignoreCase = true)) {
+//            return getDataColumn(context, uri, null, null)
+        } else if ("file".equals(uri.getScheme(), ignoreCase = true)) {
+            return uri.getPath()
+        }
+        return null
+    }
+
+    fun isExternalStorageDocument(uri: Uri): Boolean {
+        return "com.android.externalstorage.documents" == uri.getAuthority()
+    }
+
+    fun isDownloadsDocument(uri: Uri): Boolean {
+        return "com.android.providers.downloads.documents" == uri.getAuthority()
+    }
+
+    fun isMediaDocument(uri: Uri): Boolean {
+        return "com.android.providers.media.documents" == uri.getAuthority()
+    }
 }
+
