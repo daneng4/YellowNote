@@ -19,6 +19,9 @@
     <style name="Theme.YellowNote.SplashScreen" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:windowBackground">@drawable/splash_screen</item>
     </style>
+    <style name="Theme.YellowNote.DrawingScreen" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowBackground">#838383</item>
+    </style>
 
     <style name="MyOverflowMenu" parent="Widget.AppCompat.PopupMenu.Overflow" >
         <item name="overlapAnchor">false</item>

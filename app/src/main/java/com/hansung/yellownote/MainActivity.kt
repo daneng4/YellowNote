@@ -1,7 +1,6 @@
 package com.hansung.yellownote
 
 import android.annotation.SuppressLint
-import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -21,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.hansung.yellownote.databinding.ActivityMainBinding
+import com.hansung.yellownote.drawing.PdfActivity
 import java.io.File
 
 

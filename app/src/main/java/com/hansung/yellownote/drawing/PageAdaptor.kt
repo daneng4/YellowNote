@@ -1,20 +1,17 @@
-package com.hansung.yellownote
+package com.hansung.yellownote.drawing
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager2.widget.ViewPager2
-import com.example.pdfrenderer.PageHolder
-import com.example.pdfrenderer.PdfReader
+import com.hansung.yellownote.R
 
 class PageAdaptor: RecyclerView.Adapter<PageHolder>() {
 
     private var pdfReader: PdfReader? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PageHolder {
+        System.out.println("onCreateViewHoler")
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_page, parent, false)
-//        System.out.println(parent.context)
-//        System.out.println(PageHolder(view))
         return PageHolder(view)
     }
 
