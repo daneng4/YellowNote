@@ -21,6 +21,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.hansung.yellownote.databinding.ActivityMainBinding
 import com.hansung.yellownote.drawing.PdfActivity
+import org.eclipse.paho.client.mqttv3.MqttClient
 import java.io.File
 
 
@@ -39,6 +40,8 @@ class MainActivity : AppCompatActivity() {
         var toolbar = binding.introToolbar
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false) // toolbar 제목 표시 유무
+
+
     }
 
     // toolbar에 menu item 넣기
@@ -148,8 +151,10 @@ class MainActivity : AppCompatActivity() {
                                 startActivity(
 //                                    Intent(this, NoteActivity::class.java).
 //                                    putExtra("filePath", filePath))
-                                    Intent(this, PdfActivity::class.java).
-                                    putExtra("filePath", filePath))
+                                    Intent(this, PdfActivity()::class.java).
+//                                    Intent(this, PdfActivity()::class.java).
+                                    putExtra("filePath", filePath)
+                                )
                             }
                         }
                     }

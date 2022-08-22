@@ -8,8 +8,8 @@
 
    <LinearLayout
        android:id="@+id/linearLayout"
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content"
+       android:layout_width="416dp"
+       android:layout_height="62dp"
        android:orientation="horizontal"
        android:paddingTop="5dp"
        android:paddingEnd="5dp"
@@ -68,6 +68,14 @@
           app:srcCompat="@drawable/eraser" />
 
       <ImageButton
+          android:id="@+id/ClippingBtn"
+          android:layout_width="wrap_content"
+          android:layout_height="50dp"
+          android:layout_weight="1"
+          android:background="@null"
+          app:srcCompat="@drawable/ic_baseline_rounded_corner_24" />
+
+      <ImageButton
           android:id="@+id/TextBtn"
           android:layout_width="wrap_content"
           android:layout_height="50dp"
@@ -85,6 +93,7 @@
 
    <androidx.viewpager2.widget.ViewPager2
        android:id="@+id/view_pager"
+       android:background="#919191"
        android:layout_width="match_parent"
        android:layout_height="0dp"
        app:layout_constraintBottom_toBottomOf="parent"

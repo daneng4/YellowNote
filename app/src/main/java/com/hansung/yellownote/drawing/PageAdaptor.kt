@@ -10,7 +10,6 @@ class PageAdaptor: RecyclerView.Adapter<PageHolder>() {
     private var pdfReader: PdfReader? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PageHolder {
-        System.out.println("onCreateViewHoler")
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_page, parent, false)
         return PageHolder(view)
     }
