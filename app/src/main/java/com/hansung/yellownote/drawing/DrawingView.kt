@@ -433,28 +433,28 @@ class DrawingView @JvmOverloads constructor(
 //            }
 //        }
 
- val path = Environment.getExternalStorageDirectory().absolutePath
-        try{
-            drawingBitmap.compress(Bitmap.CompressFormat.JPEG,100,FileOutputStream(File(Environment.getExternalStorageDirectory().absolutePath+"/selectedPath.jpg")))
-        }catch (e:Exception){
-            System.out.println("testSaveView, Exception: $e")
-        }
-        if (drawingBitmap != null) {
-            try {
-                val f = File("$path/notes")
-                f.mkdir()
-                val f2 = File("$path/notes/selectedPath.png")
-                val fos = FileOutputStream(f2)
-                if (fos != null) {
-                    drawingBitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
-                    fos.close()
-                }
-
-                //setWallpaper( b );
-            } catch (e: Exception) {
-                System.out.println("testSaveView, Exception: $e")
-            }
-        }
+// val path = Environment.getExternalStorageDirectory().absolutePath
+//        try{
+//            drawingBitmap.compress(Bitmap.CompressFormat.JPEG,100,FileOutputStream(File(Environment.getExternalStorageDirectory().absolutePath+"/selectedPath.jpg")))
+//        }catch (e:Exception){
+//            System.out.println("testSaveView, Exception: $e")
+//        }
+//        if (drawingBitmap != null) {
+//            try {
+//                val f = File("$path/notes")
+//                f.mkdir()
+//                val f2 = File("$path/notes/selectedPath.png")
+//                val fos = FileOutputStream(f2)
+//                if (fos != null) {
+//                    drawingBitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+//                    fos.close()
+//                }
+//
+//                //setWallpaper( b );
+//            } catch (e: Exception) {
+//                System.out.println("testSaveView, Exception: $e")
+//            }
+//        }
     }
 
 //    fun setErase(){
