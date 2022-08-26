@@ -42,4 +42,17 @@ class MqttAdapter{
             e.printStackTrace()
         }
     }
+    fun sendImageSizeMessage(width:Int){
+        val message=width.toString()
+        println(width)
+        println(message)
+        println(message.toByteArray())
+        try{
+            if(!client.isConnected)
+                client.connect()
+            client.publish("imagesize",MqttMessage(message.toByteArray()))
+        }catch(e:MqttException){
+            e.printStackTrace()
+        }
+    }
 }

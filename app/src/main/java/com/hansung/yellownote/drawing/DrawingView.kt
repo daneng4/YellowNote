@@ -390,32 +390,36 @@ class DrawingView @JvmOverloads constructor(
 //        }
 //        invalidate()
 
-////////////////////////
-        drawingBitmap = Bitmap.createBitmap(backgroundBitmap.width, backgroundBitmap.height, Bitmap.Config.ARGB_8888)
+        drawingBitmap = Bitmap.createScaledBitmap(drawingBitmap, backgroundBitmap.width,
+            backgroundBitmap.height, false)
         var selectedCanvas = Canvas(drawingBitmap)
         selectedCanvas.setBitmap(drawingBitmap)
-        drawingPaint.color = Color.RED
-
+        selectedCanvas.drawColor(Color.WHITE)
+//        drawingPaint.color = Color.RED
+//
         for(i in 0..selectedPaths.size-1) {
             selectedCanvas.drawPath(selectedPaths[i].path, selectedPaths[i].drawingPaint)
             System.out.println("${selectedPaths[i]},${selectedPaths[i].path.isEmpty}")
         }
 
-        invalidate()
+//        invalidate()
 
         val drawings = IntArray(backgroundBitmap.width * backgroundBitmap.height)
-        drawingBitmap.getPixels(drawings,0,backgroundBitmap.width,0,0,backgroundBitmap.width,backgroundBitmap.height)
-
+        drawingBitmap.getPixels(drawings,0,drawingBitmap.width,0,0,drawingBitmap.width,drawingBitmap.height)
 
         val returnPixels = ByteArray(drawings.size)
-//
+
         for(i in drawings.indices){
             val pix = drawings[i]
-            val b = pix and 0xff
-            returnPixels[i]=(b/255.0).toInt().toByte()
+            var b=pix and 0xff
+            if(b!=0)b=255
+            returnPixels[i]=(b/255).toByte()
         }
+        pdfReader.client.sendImageSizeMessage(backgroundBitmap.width)
+        println(backgroundBitmap.height)
         pdfReader.client.sendPixelMessage(returnPixels)
-//
+
+
 //        var i=0
 //        for (y in drawings) {
 //            if(i%backgroundBitmap.width==0)System.out.println()
@@ -429,28 +433,28 @@ class DrawingView @JvmOverloads constructor(
 //            }
 //        }
 
-// val path = Environment.getExternalStorageDirectory().absolutePath
-//        try{
-//            drawingBitmap.compress(Bitmap.CompressFormat.JPEG,100,FileOutputStream(File(Environment.getExternalStorageDirectory().absolutePath+"/selectedPath.jpg")))
-//        }catch (e:Exception){
-//            System.out.println("testSaveView, Exception: $e")
-//        }
-//        if (drawingBitmap != null) {
-//            try {
-//                val f = File("$path/notes")
-//                f.mkdir()
-//                val f2 = File("$path/notes/selectedPath.png")
-//                val fos = FileOutputStream(f2)
-//                if (fos != null) {
-//                    drawingBitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
-//                    fos.close()
-//                }
-//
-//                //setWallpaper( b );
-//            } catch (e: Exception) {
-//                System.out.println("testSaveView, Exception: $e")
-//            }
-//        }
+ val path = Environment.getExternalStorageDirectory().absolutePath
+        try{
+            drawingBitmap.compress(Bitmap.CompressFormat.JPEG,100,FileOutputStream(File(Environment.getExternalStorageDirectory().absolutePath+"/selectedPath.jpg")))
+        }catch (e:Exception){
+            System.out.println("testSaveView, Exception: $e")
+        }
+        if (drawingBitmap != null) {
+            try {
+                val f = File("$path/notes")
+                f.mkdir()
+                val f2 = File("$path/notes/selectedPath.png")
+                val fos = FileOutputStream(f2)
+                if (fos != null) {
+                    drawingBitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+                    fos.close()
+                }
+
+                //setWallpaper( b );
+            } catch (e: Exception) {
+                System.out.println("testSaveView, Exception: $e")
+            }
+        }
     }
 
 //    fun setErase(){
