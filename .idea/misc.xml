@@ -20,9 +20,11 @@
         <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/layout/activity_main.xml" value="0.3333333333333333" />
         <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/layout/activity_main1.xml" value="0.21614583333333334" />
         <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/layout/activity_note.xml" value="0.22" />
-        <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/layout/activity_pdf.xml" value="0.4466666666666667" />
+        <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/layout/activity_pdf.xml" value="0.43173862310385064" />
+        <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/layout/activity_pdf2.xml" value="0.13073713490959665" />
         <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/layout/add_note_method_item.xml" value="0.359375" />
         <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/layout/add_note_spinner_item.xml" value="0.359375" />
+        <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/layout/clipping_popup.xml" value="0.359375" />
         <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/layout/custom_view_pager.xml" value="0.1" />
         <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/layout/fragment_screen_slide_page.xml" value="0.18333333333333332" />
         <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/layout/item_page.xml" value="0.21614583333333334" />
@@ -30,7 +32,10 @@
         <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/layout/pdf_slide_fragment.xml" value="0.359375" />
         <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/layout/toolbar.xml" value="0.359375" />
         <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/menu/intro_toolbar.xml" value="0.359375" />
+        <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/menu/menu_selectpath.xml" value="0.359375" />
         <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/menu/menu_toolbar.xml" value="0.359375" />
+        <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/menu/note_toolbar.xml" value="0.3333333333333333" />
+        <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/menu/selectpopup_menu.xml" value="0.359375" />
         <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/menu/toolbar_menu.xml" value="0.359375" />
         <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1915" />
         <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.1915" />

@@ -3,14 +3,17 @@ package com.hansung.yellownote.drawing
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
+import android.os.Bundle
 import android.os.Environment
 import android.util.AttributeSet
-import android.view.MotionEvent
-import android.view.ScaleGestureDetector
+import android.view.*
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
+import android.widget.PopupMenu
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.viewpager2.widget.ViewPager2
+import com.hansung.yellownote.MainActivity
 import com.hansung.yellownote.MqttAdapter
+import com.hansung.yellownote.R
 import org.eclipse.paho.client.mqttv3.*
 import org.eclipse.paho.client.mqttv3.MqttException
 import java.io.File
@@ -54,10 +57,10 @@ class DrawingView @JvmOverloads constructor(
     // 선택 영역(사각형)의
     var clippingStartPoint: PointF? = null // 사용자 선택 시작점
     var clippingEndPoint: PointF? = null // 사용자 선택 끝점
-    var minX = 0f // 좌상단 x좌표
-    var minY = 0f // 좌상단 y좌표
-    var maxX = 0f // 우하단 x좌표
-    var maxY = 0f // 우하단 y좌표
+    var pathOldX = 0f // path 위치 이동 시 이용
+    var pathOldY = 0f // path 위치 이동 시 이용
+    var offsetX = 0f
+    var offsetY = 0f
     var selectedPaths:ArrayList<CustomPath> = ArrayList<CustomPath>()
 
     var pageInfo: PageInfo? = null
@@ -69,19 +72,21 @@ class DrawingView @JvmOverloads constructor(
     val SHAPE = 4
     val MOVING = 5
     var drawingMode = PEN
+    var oldDrawingMode = NONE
 
     init{
         System.out.println("***************${this} 생성*****************") //2
         System.out.println("")
         PageMode = NONE
 
-//        mScaleGestureDetector= ScaleGestureDetector(getContext(),ScaleListener())
+//        var popUpMenu = PopupMenu(this.context,this)
+//        popUpMenu.menuInflater.inflate(R.menu.menu_selectpath)
+    //        mScaleGestureDetector= ScaleGestureDetector(getContext(),ScaleListener())
     }
 
     @SuppressLint("ClickableViewAccessibility")
     fun createDrawingBitmap(backgroundBitmap:Bitmap){
         this.backgroundBitmap = backgroundBitmap
-//        System.out.println("backgroundBitmap = ${backgroundBitmap.width}x${backgroundBitmap.height}")
         drawingBitmap = Bitmap.createBitmap(backgroundBitmap.width, backgroundBitmap.height, backgroundBitmap.config)
         setupDrawing()
         getViewTreeObserver ().addOnGlobalLayoutListener(object :
@@ -94,8 +99,6 @@ class DrawingView @JvmOverloads constructor(
 //                System.out.println("Default Position = ${this@DrawingView.x},${this@DrawingView.y}")
             }
         })
-
-        
     }
 
     fun setupDrawing(){
@@ -111,7 +114,6 @@ class DrawingView @JvmOverloads constructor(
 
         this.setImageBitmap(drawingBitmap)
         setupDrawingView()
-
 //        this.setImageBitmap(backgroundBitmap)
     }
 
@@ -135,7 +137,6 @@ class DrawingView @JvmOverloads constructor(
                 strokeWidth = pdfReader.pen.thickness
             }
         }
-
 //        System.out.println("paint.color = ${drawingPaint.color}")
     }
 
@@ -150,7 +151,6 @@ class DrawingView @JvmOverloads constructor(
             strokeCap = Paint.Cap.ROUND
             strokeWidth = 5F
         }
-//        System.out.println("paint.color = ${drawingPaint.color}")
     }
 
     override fun refreshDrawableState() { // 다른 페이지로 이동 시 불림
@@ -162,20 +162,82 @@ class DrawingView @JvmOverloads constructor(
         System.out.println("refreshDrawableState ${pdfReader.drawingView}")
         System.out.println("*****************************************************")
 //        drawingPaint.color = pdfReader.pen.color
-
     }
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
 
         if (canvas != null) {
-            canvas.save()
             canvas.drawBitmap(backgroundBitmap,EditImagematrix,backgroundPaint) // backgroundBitmap 그리기
             canvas.drawBitmap(drawingBitmap,EditImagematrix,backgroundPaint) // drawingBitmap 그리기
-            if(drawingMode==CLIPPING)
-                canvas.drawRect(clippingStartPoint!!.x,clippingStartPoint!!.y,clippingEndPoint!!.x,clippingEndPoint!!.y,drawingPaint)
-            canvas.restore()
+
+            // CLIPPING,MOVING 모드인 경우 사각형 모양의 그물 그리기
+            when(drawingMode){
+                CLIPPING -> {
+                    canvas.drawRect(clippingStartPoint!!.x,clippingStartPoint!!.y,clippingEndPoint!!.x,clippingEndPoint!!.y,drawingPaint)
+                    System.out.println("CLIPPING ON DRAW")
+                }
+                MOVING -> {
+                    canvas.drawRect(clippingStartPoint!!.x,clippingStartPoint!!.y,clippingEndPoint!!.x,clippingEndPoint!!.y,drawingPaint)
+                    for(i in 0..selectedPaths.size-1) {
+                        var selectedCustomPath = selectedPaths[i]
+                        selectedCustomPath.path.offset(offsetX, offsetY)
+                        selectedCustomPath.changePointPosition(offsetX,offsetY)
+                        canvas.drawPath(selectedCustomPath.path, selectedCustomPath.drawingPaint)
+                    }
+                }
+            }
         }
+    }
+
+    fun redrawPath(exceptSeletedPath:Boolean){
+        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
+        drawingBitmap = Bitmap.createBitmap(backgroundBitmap.width, backgroundBitmap.height, backgroundBitmap.config)
+        canvas = Canvas(drawingBitmap)
+        EditImagematrix = Matrix()
+        canvas.drawBitmap(backgroundBitmap, EditImagematrix, drawingPaint)
+        this.setImageBitmap(drawingBitmap)
+
+        if(exceptSeletedPath){
+            for (i in 0..pageInfo!!.customPaths.size - 1) {
+                var customPath = pageInfo!!.customPaths[i]
+                if (selectedPaths.contains(customPath))
+                    continue
+                canvas.drawPath(customPath.path, customPath.drawingPaint)
+            }
+        }
+        else{
+            for (i in 0..pageInfo!!.customPaths.size - 1) {
+                var customPath = pageInfo!!.customPaths[i]
+                if(selectedPaths.contains(customPath)){
+                    customPath.path.offset(offsetX, offsetY)
+                    customPath.changePointPosition(offsetX,offsetY)
+                }
+                canvas.drawPath(customPath.path, customPath.drawingPaint)
+            }
+        }
+//        invalidate()
+    }
+
+    fun showMenu(){
+        var popupMenu = PopupMenu(context, this)
+        popupMenu.menuInflater.inflate(R.menu.popup_menu,popupMenu.menu)
+        popupMenu.setOnMenuItemClickListener(PopupMenu.OnMenuItemClickListener {
+            when(it.itemId){
+                R.id.delete-> {
+                    System.out.println("delete")
+                }
+                R.id.changeColor -> {
+                    System.out.println("changeColor")
+                }
+                R.id.handToText -> {
+                    System.out.println("handToText")
+                }
+            }
+            true
+        })
+        popupMenu.dragToOpenListener
+        popupMenu.show()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -235,8 +297,15 @@ class DrawingView @JvmOverloads constructor(
                                     viewPager2.isUserInputEnabled = false // 페이지 넘기기 비활성화
                                     PageMode = DRAWING // mode 변경
 
-                                    if(selectedPaths.size!=0 && checkContainPoint(PointF(x,y))){
+                                    System.out.println("($x,$y)")
+
+                                    if(selectedPaths.size!=0 && checkContainPoint(PointF(x,y))){ // 선택한 영역 내부 터치한 경우
+                                        // 선택된 path들을 이동시키는 모드로 변경 (MOVING MODE)
                                         drawingMode = MOVING
+                                        pathOldX = x
+                                        pathOldY = y
+                                        redrawPath(true) // selectedPaths 제외한 path들 다시 그리기
+                                        showMenu()
                                     }
                                     else{
                                         selectedPaths.clear()
@@ -246,14 +315,17 @@ class DrawingView @JvmOverloads constructor(
                                 }
                                 MotionEvent.ACTION_MOVE -> {
                                     clippingEndPoint = PointF(motionEvent.x,motionEvent.y)
+                                    invalidate()
                                 }
                                 MotionEvent.ACTION_UP -> {
                                     checkContainSelectedPath()
                                     if(selectedPaths.size==0)
                                         clippingEndPoint = clippingStartPoint
-                                    else
-                                        saveCanvas()
+//                                    else
+//                                        saveCanvas()
+                                    System.out.println("CLIPPING PATH 끝")
                                     PageMode = NONE
+                                    invalidate()
                                 }
                             }
                         }
@@ -284,11 +356,11 @@ class DrawingView @JvmOverloads constructor(
                                     customPath.drawingPaint = drawingPaint
                                     pageInfo?.customPaths?.add(customPath) // pageInfo에 customPath 저장
                                     canvas.drawPath(path, drawingPaint)
-//                                    path.reset()
                                     System.out.println("${customPath.path.isEmpty}")
                                     System.out.println("path 개수 = ${pageInfo?.customPaths?.size}")
                                 }
                             }
+                            invalidate()
                         }
                         ERASER -> { // 지우개 모드
                             when (motionEvent.action) {
@@ -311,31 +383,72 @@ class DrawingView @JvmOverloads constructor(
                                     path.reset()
                                 }
                             }
+                            invalidate()
                         }
                         MOVING -> {
                             when (motionEvent.action) {
+                                MotionEvent.ACTION_DOWN -> {
+                                    if(selectedPaths.size!=0 && checkContainPoint(PointF(x,y))){ // 선택한 영역 내부 터치한 경우
+                                        pathOldX = x
+                                        pathOldY = y
+                                    }
+                                    else{
+                                        redrawPath(false) // path 순서에 맞춰서 다시 그리기
+                                        drawingMode = NONE
+                                        oldDrawingMode = MOVING
+                                        clippingStartPoint = PointF(x,y)
+                                    }
+                                }
                                 MotionEvent.ACTION_MOVE -> {
-                                    System.out.println("MOVING")
-//                                    clippingEndPoint = PointF(motionEvent.x,motionEvent.y)
+                                    // 움직인 정도
+                                    offsetX = x - pathOldX
+                                    offsetY = y - pathOldY
+                                    // 사각형 그물 좌표 변경
+                                    clippingStartPoint!!.x += offsetX
+                                    clippingStartPoint!!.y += offsetY
+                                    clippingEndPoint!!.x += offsetX
+                                    clippingEndPoint!!.y += offsetY
+
+                                    invalidate()
+                                    pathOldX = x
+                                    pathOldY = y
                                 }
                                 MotionEvent.ACTION_UP -> {
-//                                    checkContainSelectedPath()
-//                                    if(selectedPaths.size==0)
-//                                        clippingEndPoint = clippingStartPoint
-//                                    else
-//                                        saveCanvas()
+                                    offsetX = 0f
+                                    offsetY = 0f
+                                }
+                            }
+                        }
+                        else -> { // drawingMode == NONE
+                            when(oldDrawingMode){
+                                MOVING -> {
+                                    when (motionEvent.action) {
+                                        MotionEvent.ACTION_MOVE, MotionEvent.ACTION_UP -> {
+                                            drawingMode = CLIPPING
+                                            selectedPaths.clear()
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
-                    this.invalidate()
+//                    this.invalidate()
                 }
             }
             true
         }
     }
 
-    private fun checkContainSelectedPath(){ // 선택 영역 내에 포함된 path 찾기
+    // 선택 영역 내에 포함된 path 찾기
+    private fun checkContainSelectedPath(){
+        if(clippingStartPoint == null)
+            return
+
+        var minX = 0f // 좌상단 x좌표
+        var minY = 0f // 좌상단 y좌표
+        var maxX = 0f // 우하단 x좌표
+        var maxY = 0f // 우하단 y좌표
+
         if(clippingStartPoint!!.x<clippingEndPoint!!.x){
             minX = clippingStartPoint!!.x
             maxX = clippingEndPoint!!.x
@@ -354,6 +467,11 @@ class DrawingView @JvmOverloads constructor(
             maxY = clippingStartPoint!!.y
         }
 
+        clippingStartPoint = PointF(minX,minY)
+        clippingEndPoint = PointF(maxX,maxY)
+
+        System.out.println("${clippingStartPoint},${clippingEndPoint}")
+
         // customPaths 중 사각형 내에 포함되는 customPath 찾기
         for(i in 0..pageInfo!!.customPaths.size-1){
             var checkPath = pageInfo!!.customPaths[i]
@@ -366,15 +484,15 @@ class DrawingView @JvmOverloads constructor(
                 }
             }
         }
-
         System.out.println("selectedPaths개수 = ${selectedPaths.size}")
     }
 
     // 사각형 안에 point 포함되는지 판단
     private fun checkContainPoint(point:PointF):Boolean{
-        return (point.x in minX..maxX && point.y in minY..maxY)
+        return (point.x in clippingStartPoint!!.x..clippingEndPoint!!.x && point.y in clippingStartPoint!!.y..clippingEndPoint!!.y)
     }
 
+    // mqtt로 선택한 path들 그려서 보내기
     private fun saveCanvas(){
 //        val selectBitmap = Bitmap.createBitmap(backgroundBitmap.width, backgroundBitmap.height, Bitmap.Config.ARGB_8888)
 //        drawingBitmap = Bitmap.createBitmap(backgroundBitmap.width, backgroundBitmap.height, Bitmap.Config.ARGB_8888)
@@ -383,26 +501,18 @@ class DrawingView @JvmOverloads constructor(
 //        selectedCanvas.setBitmap(drawingBitmap)
 ////        this.setImageBitmap(drawingBitmap)
 //        drawingPaint.color = Color.BLUE
-//
-//        for(i in 0..selectedPaths.size-1) {
-//            selectedCanvas.drawPath(selectedPaths[i].path, selectedPaths[i].drawingPaint)
-//            System.out.println("${selectedPaths[i]},${selectedPaths[i].path.isEmpty}")
-//        }
-//        invalidate()
-
         drawingBitmap = Bitmap.createScaledBitmap(drawingBitmap, backgroundBitmap.width,
             backgroundBitmap.height, false)
-        var selectedCanvas = Canvas(drawingBitmap)
+        var selectedCanvas = Canvas(drawingBitmap) // 선택된 path 위한 canvas
         selectedCanvas.setBitmap(drawingBitmap)
         selectedCanvas.drawColor(Color.WHITE)
-//        drawingPaint.color = Color.RED
-//
+
         for(i in 0..selectedPaths.size-1) {
             selectedCanvas.drawPath(selectedPaths[i].path, selectedPaths[i].drawingPaint)
             System.out.println("${selectedPaths[i]},${selectedPaths[i].path.isEmpty}")
         }
 
-//        invalidate()
+        invalidate()
 
         val drawings = IntArray(backgroundBitmap.width * backgroundBitmap.height)
         drawingBitmap.getPixels(drawings,0,drawingBitmap.width,0,0,drawingBitmap.width,drawingBitmap.height)
@@ -415,23 +525,12 @@ class DrawingView @JvmOverloads constructor(
             if(b!=0)b=255
             returnPixels[i]=(b/255).toByte()
         }
+
+        /////////////////////////
         pdfReader.client.sendImageSizeMessage(backgroundBitmap.width)
         println(backgroundBitmap.height)
         pdfReader.client.sendPixelMessage(returnPixels)
-
-
-//        var i=0
-//        for (y in drawings) {
-//            if(i%backgroundBitmap.width==0)System.out.println()
-//                System.out.print("$y ")
-//                i++
-//        }
-//        for (y in 0..backgroundBitmap.height-1) {
-//            for (x in 0..backgroundBitmap.width-1) {
-//                drawings[y * backgroundBitmap.width + x] = b.getPixel(x, y)
-//                System.out.println("BitmapView X=$x,Y=$y")
-//            }
-//        }
+        //////////////////////////
 
 // val path = Environment.getExternalStorageDirectory().absolutePath
 //        try{
@@ -457,11 +556,10 @@ class DrawingView @JvmOverloads constructor(
 //        }
     }
 
-//    fun setErase(){
-//        System.out.println("eraser 모드로 변경")
-//        drawingPaint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))
-//    }
-
+    fun setErase(){
+        System.out.println("eraser 모드로 변경")
+        drawingPaint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))
+    }
 
     fun changePageInfo(pageInfo: PageInfo){
         this.pageInfo = pageInfo
