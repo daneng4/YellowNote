@@ -305,7 +305,6 @@ class DrawingView @JvmOverloads constructor(
                                         pathOldX = x
                                         pathOldY = y
                                         redrawPath(true) // selectedPaths 제외한 path들 다시 그리기
-                                        showMenu()
                                     }
                                     else{
                                         selectedPaths.clear()
@@ -322,7 +321,9 @@ class DrawingView @JvmOverloads constructor(
                                     if(selectedPaths.size==0)
                                         clippingEndPoint = clippingStartPoint
 //                                    else
-//                                        saveCanvas()
+//                                        showMenu()
+                                    else
+                                        saveCanvas()
                                     System.out.println("CLIPPING PATH 끝")
                                     PageMode = NONE
                                     invalidate()
