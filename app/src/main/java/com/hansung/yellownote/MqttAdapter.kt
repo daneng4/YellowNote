@@ -8,7 +8,7 @@ class MqttAdapter{
     private lateinit var client: MqttClient
     constructor(){
         try{
-            client= MqttClient("tcp://223.194.132.247:1883",MqttClient.generateClientId(),null)
+            client= MqttClient("tcp://223.194.129.17:1883",MqttClient.generateClientId(),null)
             if(!client.isConnected){
                 client.connect()
             }

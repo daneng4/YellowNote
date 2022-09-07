@@ -2,6 +2,13 @@ package com.hansung.notedatabase
 
 import androidx.room.*
 
+@Entity(tableName = "pen_data_table")
+data class PenData (
+    @PrimaryKey @ColumnInfo(name="PenMode")val mode: String,
+    val width:Float,
+    val color:Int?,
+    val isActive:Boolean
+)
 
 @Entity(tableName = "note_data_table")    // 테이블 이름을 student_table로 지정함
 data class NoteData (

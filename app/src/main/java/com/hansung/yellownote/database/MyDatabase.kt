@@ -1,13 +1,18 @@
 package com.hansung.notedatabase
 
 import android.content.Context
+import android.graphics.Color
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import kotlinx.coroutines.runBlocking
+import java.util.concurrent.Executors
+import kotlin.concurrent.thread
+import kotlin.math.E
 
-@Database(entities = [NoteData::class, FileData::class, WordAudio::class, Playground::class],
+@Database(entities = [PenData::class, NoteData::class, FileData::class, WordAudio::class, Playground::class],
     exportSchema = false, version = 2)
 abstract class MyDatabase : RoomDatabase() {
     abstract fun getMyDao() : MyDAO
@@ -25,6 +30,7 @@ abstract class MyDatabase : RoomDatabase() {
                 INSTANCE = Room.databaseBuilder(
                     context, MyDatabase::class.java, "yellow_note_database")
                     .addMigrations(MIGRATION_1_2)
+                    .allowMainThreadQueries()
                     .build()
                 // for in-memory database
                 /*INSTANCE = Room.inMemoryDatabaseBuilder(

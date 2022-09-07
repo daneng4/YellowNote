@@ -10,7 +10,7 @@ android {
     buildToolsVersion "30.0.3"
 
     defaultConfig {
-        applicationId "com.example.pdfrenderer"
+        applicationId "com.hansung.yellowNote"
         minSdk 21
         targetSdk 33
         versionCode 1

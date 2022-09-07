@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -19,16 +20,29 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
+import com.hansung.notedatabase.MyDAO
+import com.hansung.notedatabase.MyDatabase
+import com.hansung.notedatabase.PenData
 import com.hansung.yellownote.databinding.ActivityMainBinding
+import com.hansung.yellownote.drawing.PenInfo
 import com.hansung.yellownote.drawing.PdfActivity
-import org.eclipse.paho.client.mqttv3.MqttClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private var permissions = arrayOf(android.Manifest.permission.MANAGE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE,android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.RECORD_AUDIO)
     var isKitKat = false
+
+    lateinit var myDao : MyDAO // 데이터 베이스
+    lateinit var penInfo: PenInfo // 펜 정보 담고 있는 뷰모델
+    val PenModes = ArrayList<String>(Arrays.asList("PEN","ERASER","TEXT","CLIPPING","SHAPE"))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_YellowNote)
@@ -41,7 +55,58 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false) // toolbar 제목 표시 유무
 
+        myDao = MyDatabase.getDatabase(this).getMyDao()
+//        val allStudents = myDao.getAllPenData()
+        setMyDatabase()
 
+
+        // 펜 정보 담고 있는 뷰모델 생성
+        penInfo = ViewModelProvider(this)[PenInfo::class.java]
+   }
+
+    fun setMyDatabase(){
+        CoroutineScope(Dispatchers.Main).launch {
+            if(myDao.getPenDataCount()==0){
+                myDao.insertPenData(PenData("PEN",10f,Color.BLACK,true))
+                myDao.insertPenData(PenData("ERASER",10f, null,false))
+                myDao.insertPenData(PenData("TEXT",10f,Color.BLACK,false))
+                myDao.insertPenData(PenData("CLIPPING",5f,Color.GRAY,false))
+                myDao.insertPenData(PenData("SHAPE",10f, Color.BLACK,false))
+            }
+            else{
+                System.out.println("PenData is not empty")
+                var activePenData = myDao.getActivePenData()
+                if(activePenData[0].color!=null){
+                    penInfo.setPenColor(activePenData[0].color!!)
+                }
+                penInfo.setPenWidth(activePenData[0].width!!)
+                penInfo.setPenMode(PenModes.indexOf(activePenData[0].mode))
+                System.out.println("${penInfo.getPenColor()}, ${penInfo.getPenWidth()}, ${PenModes[penInfo.getPenMode()]}")
+            }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        when(penInfo.getPenColor()){
+            Color.RED -> {
+                System.out.println("PEN COLOR IS RED")
+            }
+            Color.GREEN -> {
+                System.out.println("PEN COLOR IS GREEN")
+            }
+            Color.YELLOW -> {
+                System.out.println("PEN COLOR IS YELLOW")
+            }
+            Color.BLUE -> {
+                System.out.println("PEN COLOR IS BLUE")
+            }
+            Color.BLACK -> {
+                System.out.println("PEN COLOR IS BLACK")
+            }
+        }
+        System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     }
 
     // toolbar에 menu item 넣기
@@ -149,11 +214,11 @@ class MainActivity : AppCompatActivity() {
                         if(File(filePath).isFile) {
                             if (File(filePath).canRead()){
                                 startActivity(
-//                                    Intent(this, NoteActivity::class.java).
-//                                    putExtra("filePath", filePath))
-                                    Intent(this, PdfActivity()::class.java).
-//                                    Intent(this, PdfActivity()::class.java).
-                                    putExtra("filePath", filePath)
+                                    Intent(this, PdfActivity()::class.java)
+                                        .putExtra("filePath", filePath)
+                                        .putExtra("penColor",penInfo.getPenColor()) // penInfo 정보 보내기
+                                        .putExtra("penWidth",penInfo.getPenWidth())
+                                        .putExtra("penMode",penInfo.getPenMode())
                                 )
                             }
                         }

@@ -34,11 +34,13 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2, mqttClient:
     var pen = Pen()
 
     // DrawingView.kt에서 정의된 mode와 같아야함
+    val NONE = -1
     val PEN = 0
     val ERASER = 1
     val TEXT = 2
     val CLIPPING = 3
     val SHAPE = 4
+    val MOVING = 5
     var drawingMode = PEN
 
 //    init{
@@ -53,7 +55,6 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2, mqttClient:
         drawingView.viewPager2 = view_pager
         this.page = page
         currentPage?.close()
-//        currentPage = pdfRenderer.openPage(page)
 
         currentPage = pdfRenderer.openPage(page).apply {
             var pageRatio = width/(height).toDouble()
@@ -75,51 +76,43 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2, mqttClient:
             backgroundBitmap = Bitmap.createBitmap(
                 backgroundWidth,backgroundHeight, Bitmap.Config.ARGB_8888
             )
-//            System.out.println("backgroundBitmap : ${backgroundWidth}x${backgroundHeight}")
 
             render(backgroundBitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
             drawingView.setImageBitmap(backgroundBitmap)
             drawingView.invalidate()
 
-            System.out.println("************ DrawingBitmap ************")
             drawingView.createDrawingBitmap(backgroundBitmap) // 그림 그릴 bitmap 생성
         }
     }
 
     fun setDrawingViewPageInfo(pageInfo: PageInfo){ // 현재 page에 맞는 pageInfo 세팅
-        System.out.println("1. ******* before ${drawingView} ***********")
         this.pageInfo = pageInfo
         drawingView.changePageInfo(pageInfo)
-//        drawingView = pageInfo.drawingView
-        System.out.println("3. setDrawingViewPageInfo to ${drawingView}")
-        System.out.println("4. ${pageInfo.pageNo}의 drawingView ${pageInfo.drawingView}")
     }
 
-    fun setDrawingMode(mode:Int, color:Int = 0, thickness:Float = 10F){
-        drawingMode = mode
-
-        if(drawingMode == PEN){
-            System.out.println("*********** setmode ${pageInfo.drawingView}")
-            drawingView.drawingMode = PEN
-            pen.color=color
-            pen.thickness = thickness
-//            pageInfo.drawingView.drawingPaint.color = pen.color
-//            pageInfo.drawingView.drawingPaint.strokeWidth = pen.thickness
-
-            pageInfo.drawingView.setPenStyle()
-        //            drawingView.setPenStyle()
-        }
-        else if(drawingMode == ERASER){
-            System.out.println("${pageInfo.drawingView}의 mode = eraser")
-//            drawingView.setErase()
-            drawingView.drawingMode = ERASER
-            pageInfo.drawingView.drawingPaint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))
-        }
-        else if(drawingMode == CLIPPING){
-            drawingView.drawingMode = CLIPPING
-            pageInfo.drawingView.setClippingPen()
-        }
-    }
+//    fun setDrawingMode(mode:Int, color:Int = 0, thickness:Float = 10F){
+//        drawingMode = mode
+//
+//        if(drawingMode == PEN){
+//            System.out.println("*********** setmode ${pageInfo.drawingView}")
+//            drawingView.drawingMode = PEN
+//            pen.color=color
+//            pen.thickness = thickness
+//
+//            pageInfo.drawingView.setPenStyle()
+//        //            drawingView.setPenStyle()
+//        }
+//        else if(drawingMode == ERASER){
+//            System.out.println("${pageInfo.drawingView}의 mode = eraser")
+////            drawingView.setErase()
+//            drawingView.drawingMode = ERASER
+//            pageInfo.drawingView.drawingPaint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))
+//        }
+//        else if(drawingMode == CLIPPING){
+//            drawingView.drawingMode = CLIPPING
+//            pageInfo.drawingView.setClippingPen()
+//        }
+//    }
 
 //    fun setColor(color:Int){
 //        System.out.println("${drawingView}의 펜 색 변경 => ${color}")
