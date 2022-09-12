@@ -3,6 +3,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/deletenote"
+        android:icon="@drawable/ic_trash_bin"
+        android:title="@string/deletenote"
+        app:showAsAction="always"/>
+    <item
         android:id="@+id/selectNote"
         android:icon="@drawable/ic_baseline_check_circle_outline_24"
         android:title="@string/selectnote"

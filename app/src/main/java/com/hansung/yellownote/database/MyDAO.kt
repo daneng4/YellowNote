@@ -2,6 +2,7 @@ package com.hansung.notedatabase
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
+import java.util.concurrent.Flow
 
 data class AudioWithFiles( //1:N
     @Embedded val note:NoteData,
@@ -39,10 +40,10 @@ interface MyDAO {
     fun getPenDataCount() : Int
 
     @Query("SELECT * FROM note_data_table")
-    fun getAllNoteData(): LiveData<List<NoteData>>        // LiveData<> 사용
+    fun getAllNoteData(): List<NoteData>
 
-//    @Query("SELECT * FROM note_data_table WHERE noteName = :snote")   // 메소드 인자를 SQL문에서 :을 붙여 사용
-//    suspend fun getNoteByName(snote: String): List<NoteData>
+    @Query("SELECT * FROM note_data_table WHERE noteName = :snote")   // 메소드 인자를 SQL문에서 :을 붙여 사용
+    suspend fun getNoteDataByNoteName(snote: String): List<NoteData>
 
     @Query("UPDATE pen_data_table SET width = :width, color= :color ,isActive= :isActive WHERE PenMode =:mode")
     fun updatePenData(mode:String, width: Float?, color: Int?, isActive: Boolean?)

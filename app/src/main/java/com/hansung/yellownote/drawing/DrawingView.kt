@@ -11,6 +11,7 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.lifecycle.Observer
 import androidx.viewpager2.widget.ViewPager2
 import com.hansung.yellownote.R
+import kotlinx.coroutines.CoroutineScope
 import java.lang.Exception
 
 
@@ -70,7 +71,7 @@ class DrawingView @JvmOverloads constructor(
     var oldDrawingMode = NONE
 
     lateinit var penInfo : PenInfo
-
+    lateinit var scope:CoroutineScope
     init{
         pdfActivity = this.context as PdfActivity
         PageMode = DRAWING
@@ -359,18 +360,21 @@ class DrawingView @JvmOverloads constructor(
                                     if(penInfo.getMovingClipping()){
                                         offsetX = 0f
                                         offsetY = 0f
+                                        invalidate()
                                     }
                                     else{
                                         checkContainSelectedPath()
-                                        if(selectedPaths.size==0)
+                                        if(selectedPaths.size==0) {
                                             clippingEndPoint = clippingStartPoint
+                                            invalidate()
+                                        }
 //                                    else
 //                                        showMenu()
 //                                    else
 //                                        saveCanvas()
                                         PageMode = NONE
+
                                     }
-                                    invalidate()
                                 }
                             }
                         }
@@ -542,19 +546,19 @@ class DrawingView @JvmOverloads constructor(
 //        selectedCanvas.setBitmap(drawingBitmap)
 ////        this.setImageBitmap(drawingBitmap)
 //        drawingPaint.color = Color.BLUE
-        drawingBitmap = Bitmap.createScaledBitmap(drawingBitmap, backgroundBitmap.width,
+
+        val sendBitmap = Bitmap.createScaledBitmap(drawingBitmap, backgroundBitmap.width,
             backgroundBitmap.height, false)
-        var selectedCanvas = Canvas(drawingBitmap) // 선택된 path 위한 canvas
-        selectedCanvas.setBitmap(drawingBitmap)
+        val selectedCanvas = Canvas(sendBitmap) // 선택된 path 위한 canvas
+        selectedCanvas.setBitmap(sendBitmap)
         selectedCanvas.drawColor(Color.WHITE)
 
         for(i in 0..selectedPaths.size-1) {
             selectedCanvas.drawPath(selectedPaths[i].path, selectedPaths[i].drawingPaint)
         }
-        invalidate()
 
         val drawings = IntArray(backgroundBitmap.width * backgroundBitmap.height)
-        drawingBitmap.getPixels(drawings,0,drawingBitmap.width,0,0,drawingBitmap.width,drawingBitmap.height)
+        sendBitmap.getPixels(drawings,0,sendBitmap.width,0,0,sendBitmap.width,sendBitmap.height)
 
         val returnPixels = ByteArray(drawings.size)
 
@@ -566,9 +570,8 @@ class DrawingView @JvmOverloads constructor(
         }
 
         /////////////////////////
-        pdfReader.client.sendImageSizeMessage(backgroundBitmap.width)
-        println(backgroundBitmap.height)
-        pdfReader.client.sendPixelMessage(returnPixels)
+        pdfActivity.client.sendImageSizeMessage(sendBitmap.width)
+        pdfActivity.client.sendNumberPixelMessage(returnPixels)
         //////////////////////////
 
 // val path = Environment.getExternalStorageDirectory().absolutePath

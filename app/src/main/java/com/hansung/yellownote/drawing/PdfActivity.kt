@@ -4,15 +4,18 @@ import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.ImageButton
+import androidx.activity.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
 import com.hansung.notedatabase.MyDAO
 import com.hansung.notedatabase.MyDatabase
+import com.hansung.notedatabase.NoteData
 import com.hansung.yellownote.MqttAdapter
 import com.hansung.yellownote.databinding.ActivityPdfBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.util.*
 import kotlin.collections.ArrayList
@@ -39,7 +42,7 @@ class PdfActivity() : AppCompatActivity(){
     var penWidth = 10F
     var clippingPenWidth = 5F
 
-    val client:MqttAdapter=MqttAdapter()
+    lateinit var client:MqttAdapter
 
     // DrawingView.kt에서 정의된 mode와 같아야함
     val PenModes = ArrayList<String>(Arrays.asList("PEN","ERASER","TEXT","CLIPPING","SHAPE"))
@@ -61,13 +64,17 @@ class PdfActivity() : AppCompatActivity(){
         viewPager = binding.viewPager
 
         viewPager.adapter = PageAdaptor()
-
+        //client=MqttAdapter()
         filePath = intent.getStringExtra("filePath")!!
         val targetFile = File(filePath)
+        val lastPage=intent.getIntExtra("lastPage",0)
 
-        pdfReader = PdfReader(targetFile, filePath, viewPager,client).apply {
+        viewPager.currentItem=lastPage
+        pdfReader = PdfReader(targetFile, filePath, viewPager).apply {
 //        pdfReader = PdfReader(targetFile, filePath, viewPager).apply {
             (viewPager.adapter as PageAdaptor).setupPdfRenderer(this)
+            pageNo = lastPage
+            viewPager.setCurrentItem(lastPage,false)
         }
 
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
@@ -89,37 +96,7 @@ class PdfActivity() : AppCompatActivity(){
         penInfo.setPenColor(intent.getIntExtra("penColor",Color.BLACK))
         penInfo.setPenWidth(intent.getFloatExtra("penWidth",10F))
         penInfo.setPenMode(intent.getIntExtra("penMode",PEN))
-//        customPen.color.observe(this){
-////            updatePenDatatable()
-//            System.out.println("color Change")
-//        }
-//        customPen.width.observe(this){
-////            updatePenDatatable()
-//            System.out.println("width Change")
-//        }
-//
-//        customPen.PenMode.observe(this){
-//            System.out.println("PenMode Change")
-//        }
-//        customPen.colorLiveData.observe(this){
-//            when(customPen.colorLiveData.value){
-//                Color.RED -> {
-//                    System.out.println("CHANGE TO RED")
-//                }
-//                Color.GREEN -> {
-//                    System.out.println("CHANGE TO GREEN")
-//                }
-//                Color.YELLOW -> {
-//                    System.out.println("CHANGE TO YELLOW")
-//                }
-//                Color.BLUE -> {
-//                    System.out.println("CHANGE TO BLUE")
-//                }
-//                Color.BLACK -> {
-//                    System.out.println("CHANGE TO BLACK")
-//                }
-//            }
-//        }
+
 
         redBtn = binding.RedPenBtn
         yellowBtn = binding.YellowPenBtn
@@ -208,8 +185,19 @@ class PdfActivity() : AppCompatActivity(){
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        val pathArray=filePath.split('/').last()
+        val noteName=pathArray.split('.')[0]
+        // DB에 스키마 insert
+        runBlocking {
+            myDao.insertNoteData(NoteData(noteName, pageNo, filePath))
+//            myDao.insertFileData(FileData(noteName,pdf의 페이지, 각 페이지당 path저장된 배열))
+        }
+    }
     override fun onDestroy() {
         super.onDestroy()
+
         pdfReader?.close()
     }
 }
