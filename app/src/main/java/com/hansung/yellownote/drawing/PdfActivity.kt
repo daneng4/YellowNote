@@ -39,7 +39,7 @@ class PdfActivity() : AppCompatActivity(){
     var penWidth = 10F
     var clippingPenWidth = 5F
 
-    val client:MqttAdapter=MqttAdapter()
+//    val client:MqttAdapter=MqttAdapter()
 
     // DrawingView.kt에서 정의된 mode와 같아야함
     val PenModes = ArrayList<String>(Arrays.asList("PEN","ERASER","TEXT","CLIPPING","SHAPE"))
@@ -61,12 +61,13 @@ class PdfActivity() : AppCompatActivity(){
         viewPager = binding.viewPager
 
         viewPager.adapter = PageAdaptor()
+//        client=MqttAdapter()
 
         filePath = intent.getStringExtra("filePath")!!
         val targetFile = File(filePath)
 
-        pdfReader = PdfReader(targetFile, filePath, viewPager,client).apply {
-//        pdfReader = PdfReader(targetFile, filePath, viewPager).apply {
+
+        pdfReader = PdfReader(targetFile, filePath, viewPager).apply {
             (viewPager.adapter as PageAdaptor).setupPdfRenderer(this)
         }
 
@@ -89,37 +90,6 @@ class PdfActivity() : AppCompatActivity(){
         penInfo.setPenColor(intent.getIntExtra("penColor",Color.BLACK))
         penInfo.setPenWidth(intent.getFloatExtra("penWidth",10F))
         penInfo.setPenMode(intent.getIntExtra("penMode",PEN))
-//        customPen.color.observe(this){
-////            updatePenDatatable()
-//            System.out.println("color Change")
-//        }
-//        customPen.width.observe(this){
-////            updatePenDatatable()
-//            System.out.println("width Change")
-//        }
-//
-//        customPen.PenMode.observe(this){
-//            System.out.println("PenMode Change")
-//        }
-//        customPen.colorLiveData.observe(this){
-//            when(customPen.colorLiveData.value){
-//                Color.RED -> {
-//                    System.out.println("CHANGE TO RED")
-//                }
-//                Color.GREEN -> {
-//                    System.out.println("CHANGE TO GREEN")
-//                }
-//                Color.YELLOW -> {
-//                    System.out.println("CHANGE TO YELLOW")
-//                }
-//                Color.BLUE -> {
-//                    System.out.println("CHANGE TO BLUE")
-//                }
-//                Color.BLACK -> {
-//                    System.out.println("CHANGE TO BLACK")
-//                }
-//            }
-//        }
 
         redBtn = binding.RedPenBtn
         yellowBtn = binding.YellowPenBtn
@@ -134,49 +104,30 @@ class PdfActivity() : AppCompatActivity(){
         redBtn.setOnClickListener {
             System.out.println("Click redBtn")
             setPenData(Color.RED,penWidth, PEN)
-//            pdfReader!!.setDrawingMode(PEN,Color.RED)
-//            customPen.setPenColor(Color.RED)
-//            customPen.color.value = Color.RED
-//            pdfReader!!.pageInfoMap[pageNo]?.penColor = Color.RED
-//            pdfReader!!.setColor(Color.RED)
         }
         yellowBtn.setOnClickListener {
             System.out.println("Click yellowBtn")
             setPenData(Color.YELLOW,penWidth, PEN)
-//            pdfReader!!.setDrawingMode(PEN,Color.YELLOW)
-//            customPen.setPenColor(Color.YELLOW)
-//            customPen.color.value = Color.YELLOW
         }
 
         greenBtn.setOnClickListener {
             System.out.println("Click greenBtn")
             setPenData(Color.GREEN,penWidth, PEN)
-//            pdfReader!!.setDrawingMode(PEN,Color.GREEN)
-//            customPen.setPenColor(Color.GREEN)
-//            customPen.color.value = Color.GREEN
         }
         blueBtn.setOnClickListener {
             System.out.println("Click blueBtn")
             setPenData(Color.BLUE,penWidth, PEN)
-//            pdfReader!!.setDrawingMode(PEN,Color.BLUE)
-//            customPen.setPenColor(Color.BLUE)
-//            customPen.color.value = Color.BLUE
         }
         blackBtn.setOnClickListener {
             System.out.println("Click blackBtn")
             setPenData(Color.BLACK,penWidth, PEN)
-//            pdfReader!!.setDrawingMode(PEN,Color.BLACK)
-//            customPen.setPenColor(Color.BLACK)
-//            customPen.color.value = Color.BLACK
         }
         eraserBtn.setOnClickListener {
             setPenData(null, penWidth, ERASER)
-//            pdfReader!!.setDrawingMode(ERASER)
         }
         clippingBtn.setOnClickListener {
             System.out.println("CLIPPING CLICK")
             setPenData(Color.GRAY,clippingPenWidth, CLIPPING)
-//            pdfReader!!.setDrawingMode(CLIPPING)
         }
         textBtn.setOnClickListener {
 //            pdfReader!!.setMode("text")
@@ -186,13 +137,15 @@ class PdfActivity() : AppCompatActivity(){
     private fun setPenData(color:Int?, width:Float, penMode:Int){
         System.out.println("${PenModes[penInfo.getPenMode()]} -> ${PenModes[penMode]}")
         if(penInfo.getPenMode()!=penMode){
-            myDao.updatePenData(PenModes[penInfo.getPenMode()],width,color,false)
+            myDao.updatePenData(PenModes[penInfo.getPenMode()],penInfo.getPenWidth(),penInfo.getPenColor(),false)
         }
         myDao.updatePenData(PenModes[penMode],width,color,true)
         penInfo.setPenMode(penMode)
-        if (color != null) {
-            penInfo.setPenColor(color)
+        if (penMode != ERASER) {
+            penInfo.setPenColor(color!!)
         }
+        else
+            penInfo.setPenColor(null)
         penInfo.setPenWidth(width)
     }
 

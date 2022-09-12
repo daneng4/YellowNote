@@ -13,8 +13,7 @@ import org.eclipse.paho.client.mqttv3.MqttClient
 import java.io.File
 
 
-class PdfReader(file: File, filePath: String, view_pager:ViewPager2, mqttClient: MqttAdapter) {
-//class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
+class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
     private var currentPage: PdfRenderer.Page? = null
     private val fileDescriptor =
         ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
@@ -25,7 +24,7 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2, mqttClient:
     private lateinit var backgroundBitmap:Bitmap
 
     val pageCount = pdfRenderer.pageCount
-    var client : MqttAdapter = mqttClient
+//    var client : MqttAdapter = mqttClient
 
     lateinit var drawingView: DrawingView
     var pageInfoMap = HashMap<Int,PageInfo>() // <page번호, PageInfo>
@@ -89,38 +88,6 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2, mqttClient:
         this.pageInfo = pageInfo
         drawingView.changePageInfo(pageInfo)
     }
-
-//    fun setDrawingMode(mode:Int, color:Int = 0, thickness:Float = 10F){
-//        drawingMode = mode
-//
-//        if(drawingMode == PEN){
-//            System.out.println("*********** setmode ${pageInfo.drawingView}")
-//            drawingView.drawingMode = PEN
-//            pen.color=color
-//            pen.thickness = thickness
-//
-//            pageInfo.drawingView.setPenStyle()
-//        //            drawingView.setPenStyle()
-//        }
-//        else if(drawingMode == ERASER){
-//            System.out.println("${pageInfo.drawingView}의 mode = eraser")
-////            drawingView.setErase()
-//            drawingView.drawingMode = ERASER
-//            pageInfo.drawingView.drawingPaint.setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))
-//        }
-//        else if(drawingMode == CLIPPING){
-//            drawingView.drawingMode = CLIPPING
-//            pageInfo.drawingView.setClippingPen()
-//        }
-//    }
-
-//    fun setColor(color:Int){
-//        System.out.println("${drawingView}의 펜 색 변경 => ${color}")
-//        pen.color = color
-//        drawingView.setPenStyle()
-////        pageInfo.drawingView.setPenStyle(color,10F)
-////        pageInfo.drawingView.penColor = color
-//    }
 
     fun close() {
         currentPage?.close()

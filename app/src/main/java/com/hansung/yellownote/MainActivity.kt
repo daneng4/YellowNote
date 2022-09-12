@@ -74,39 +74,48 @@ class MainActivity : AppCompatActivity() {
                 myDao.insertPenData(PenData("SHAPE",10f, Color.BLACK,false))
             }
             else{
-                System.out.println("PenData is not empty")
-                var activePenData = myDao.getActivePenData()
-                if(activePenData[0].color!=null){
-                    penInfo.setPenColor(activePenData[0].color!!)
-                }
-                penInfo.setPenWidth(activePenData[0].width!!)
-                penInfo.setPenMode(PenModes.indexOf(activePenData[0].mode))
-                System.out.println("${penInfo.getPenColor()}, ${penInfo.getPenWidth()}, ${PenModes[penInfo.getPenMode()]}")
+                getActivePenData()
             }
         }
     }
 
+    fun getActivePenData(){
+        var activePenData = myDao.getActivePenData()
+
+        if(activePenData[0].color!=null){
+            penInfo.setPenColor(activePenData[0].color!!)
+        }
+        penInfo.setPenWidth(activePenData[0].width!!)
+        penInfo.setPenMode(PenModes.indexOf(activePenData[0].mode))
+        System.out.println("${penInfo.getPenColor()}, ${penInfo.getPenWidth()}, ${PenModes[penInfo.getPenMode()]}")
+    }
+
     override fun onStart() {
         super.onStart()
-        System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-        when(penInfo.getPenColor()){
-            Color.RED -> {
-                System.out.println("PEN COLOR IS RED")
-            }
-            Color.GREEN -> {
-                System.out.println("PEN COLOR IS GREEN")
-            }
-            Color.YELLOW -> {
-                System.out.println("PEN COLOR IS YELLOW")
-            }
-            Color.BLUE -> {
-                System.out.println("PEN COLOR IS BLUE")
-            }
-            Color.BLACK -> {
-                System.out.println("PEN COLOR IS BLACK")
-            }
+        try{
+            getActivePenData()
+        } catch(e:Exception){
+
         }
-        System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+//        System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+//        when(penInfo.getPenColor()){
+//            Color.RED -> {
+//                System.out.println("PEN COLOR IS RED")
+//            }
+//            Color.GREEN -> {
+//                System.out.println("PEN COLOR IS GREEN")
+//            }
+//            Color.YELLOW -> {
+//                System.out.println("PEN COLOR IS YELLOW")
+//            }
+//            Color.BLUE -> {
+//                System.out.println("PEN COLOR IS BLUE")
+//            }
+//            Color.BLACK -> {
+//                System.out.println("PEN COLOR IS BLACK")
+//            }
+//        }
+//        System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     }
 
     // toolbar에 menu item 넣기
