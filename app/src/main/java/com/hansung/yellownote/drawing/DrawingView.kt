@@ -11,6 +11,7 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.lifecycle.Observer
 import androidx.viewpager2.widget.ViewPager2
 import com.hansung.yellownote.R
+import kotlinx.coroutines.CoroutineScope
 import java.lang.Exception
 
 
@@ -76,7 +77,7 @@ class DrawingView @JvmOverloads constructor(
     var oldDrawingMode = NONE
 
     lateinit var penInfo : PenInfo
-
+    lateinit var scope:CoroutineScope
     init{
         pdfActivity = this.context as PdfActivity
         PageMode = DRAWING
@@ -399,18 +400,21 @@ class DrawingView @JvmOverloads constructor(
                                     if(penInfo.getMovingClipping()){
                                         offsetX = 0f
                                         offsetY = 0f
+                                        invalidate()
                                     }
                                     else{
                                         checkContainSelectedPath()
-                                        if(selectedPaths.size==0)
+                                        if(selectedPaths.size==0) {
                                             clippingEndPoint = clippingStartPoint
+                                            invalidate()
+                                        }
 //                                    else
 //                                        showMenu()
 //                                    else
 //                                        saveCanvas()
                                         PageMode = NONE
+
                                     }
-                                    invalidate()
                                 }
                             }
                         }
@@ -587,8 +591,10 @@ class DrawingView @JvmOverloads constructor(
             returnPixels[i]=(b/255).toByte()
         }
 
-//        pdfActivity.client.sendImageSizeMessage(sendBitmap.width)
-//        pdfActivity.client.sendNumberPixelMessage(returnPixels)
+        /////////////////////////
+        pdfActivity.client.sendImageSizeMessage(sendBitmap.width)
+        pdfActivity.client.sendNumberPixelMessage(returnPixels)
+        //////////////////////////
     }
 
     fun changePageInfo(pageInfo: PageInfo){

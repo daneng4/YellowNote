@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.database.Cursor
 import android.graphics.Color
+import android.graphics.Point
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -13,8 +15,9 @@ import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.provider.OpenableColumns
-import android.view.Menu
-import android.view.MenuItem
+import android.text.TextUtils
+import android.view.*
+import android.widget.*
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -23,6 +26,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.hansung.notedatabase.MyDAO
 import com.hansung.notedatabase.MyDatabase
+import com.hansung.notedatabase.NoteData
 import com.hansung.notedatabase.PenData
 import com.hansung.yellownote.databinding.ActivityMainBinding
 import com.hansung.yellownote.drawing.PenInfo
@@ -30,6 +34,8 @@ import com.hansung.yellownote.drawing.PdfActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import org.w3c.dom.Text
 import java.io.File
 import java.util.*
 import kotlin.collections.ArrayList
@@ -39,26 +45,28 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private var permissions = arrayOf(android.Manifest.permission.MANAGE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE,android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.RECORD_AUDIO)
     var isKitKat = false
-
+    private lateinit var linearLayout:LinearLayout
     lateinit var myDao : MyDAO // 데이터 베이스
     lateinit var penInfo: PenInfo // 펜 정보 담고 있는 뷰모델
     val PenModes = ArrayList<String>(Arrays.asList("PEN","ERASER","TEXT","CLIPPING","SHAPE"))
-
+    lateinit var noteList:List<NoteData>
+    val deleteButtons=ArrayList<CheckBox>()
+    var isLongButtonClick=false
+    var trashBin: MenuItem?=null
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_YellowNote)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        println("onCreate")
         // toolbar 설정
         var toolbar = binding.introToolbar
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false) // toolbar 제목 표시 유무
-
+        linearLayout=binding.linearLayout
         myDao = MyDatabase.getDatabase(this).getMyDao()
 //        val allStudents = myDao.getAllPenData()
         setMyDatabase()
-
 
         // 펜 정보 담고 있는 뷰모델 생성
         penInfo = ViewModelProvider(this)[PenInfo::class.java]
@@ -90,43 +98,154 @@ class MainActivity : AppCompatActivity() {
         System.out.println("${penInfo.getPenColor()}, ${penInfo.getPenWidth()}, ${PenModes[penInfo.getPenMode()]}")
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     override fun onStart() {
         super.onStart()
-        try{
+        try {
             getActivePenData()
-        } catch(e:Exception){
+        } catch (e: Exception) {
 
         }
-//        System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-//        when(penInfo.getPenColor()){
-//            Color.RED -> {
-//                System.out.println("PEN COLOR IS RED")
-//            }
-//            Color.GREEN -> {
-//                System.out.println("PEN COLOR IS GREEN")
-//            }
-//            Color.YELLOW -> {
-//                System.out.println("PEN COLOR IS YELLOW")
-//            }
-//            Color.BLUE -> {
-//                System.out.println("PEN COLOR IS BLUE")
-//            }
-//            Color.BLACK -> {
-//                System.out.println("PEN COLOR IS BLACK")
-//            }
-//        }
-//        System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+
+        System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        when(penInfo.getPenColor()){
+            Color.RED -> {
+                System.out.println("PEN COLOR IS RED")
+            }
+            Color.GREEN -> {
+                System.out.println("PEN COLOR IS GREEN")
+            }
+            Color.YELLOW -> {
+                System.out.println("PEN COLOR IS YELLOW")
+            }
+            Color.BLUE -> {
+                System.out.println("PEN COLOR IS BLUE")
+            }
+            Color.BLACK -> {
+                System.out.println("PEN COLOR IS BLACK")
+            }
+        }
+        makeNoteList()
+
+//        val editText=EditText(this)
+//        editText.hint="여기에 입력하세요"
+//        linearLayout.addView(editText)
+
+    }
+    fun makeNoteList(){
+        noteList=myDao.getAllNoteData()
+        linearLayout.removeAllViews()
+        deleteButtons.clear()
+        val display=windowManager.defaultDisplay
+        val size= Point()
+        display.getRealSize(size)
+        val width=size.x
+        val divValue=width/230
+
+        var innerLayout:LinearLayout?=null
+        for((i, noteInfo) in noteList.withIndex()) {
+
+                if (i % divValue == 0) {
+                    innerLayout = LinearLayout(this)
+                    val param = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT)
+                    innerLayout.layoutParams = param
+                    innerLayout.orientation=LinearLayout.HORIZONTAL
+                    linearLayout.addView(innerLayout)
+                }
+
+            val noteLayout=LinearLayout(this)
+            val noteParams= LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT)
+            noteLayout.gravity=Gravity.CENTER
+            noteLayout.layoutParams=noteParams
+            noteLayout.orientation=LinearLayout.VERTICAL
+
+            val noteView = RelativeLayout(this)
+            val noteViewName=TextView(this)
+            val deleteButton=CheckBox(this)
+
+            val deleteParams= RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT)
+            val textParams=RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT)
+
+            deleteParams.addRule(RelativeLayout.CENTER_IN_PARENT,RelativeLayout.TRUE)
+            deleteButton.layoutParams=deleteParams
+            deleteButton.id = i
+            deleteButton.visibility= View.INVISIBLE
+            deleteButtons.add(deleteButton)
+            noteView.addView(deleteButton)
+
+            noteViewName.layoutParams=textParams
+            noteViewName.gravity=Gravity.CENTER
+            noteViewName.textAlignment=View.TEXT_ALIGNMENT_CENTER
+            noteViewName.text=noteInfo.noteName
+            noteViewName.ellipsize= TextUtils.TruncateAt.END
+            noteViewName.setEms(6)
+            noteViewName.maxLines=2
+
+            noteView.background= resources.getDrawable(R.drawable.ic_note)
+            val noteParam= RelativeLayout.LayoutParams(230, 230)
+//            noteParam.leftMargin=Math.round(20*getResources().getDisplayMetrics().density)
+            noteView.layoutParams=noteParam
+            noteView.setOnLongClickListener{
+                println("long click")
+                isLongButtonClick=true
+                trashBin?.isVisible=true
+                for(b in deleteButtons)
+                    b.visibility=View.VISIBLE
+                true
+            }
+            noteView.setOnClickListener {
+                if (!isLongButtonClick) {
+                    if (File(noteInfo.recordFileLocation).isFile) {
+                        if (File(noteInfo.recordFileLocation).canRead()) {
+                            startActivity(
+                                Intent(this, PdfActivity()::class.java)
+                                    .putExtra("filePath", noteInfo.recordFileLocation)
+                                    .putExtra("lastPage", noteInfo.lastPageNo)
+                                    .putExtra("penColor", penInfo.getPenColor()) // penInfo 정보 보내기
+                                    .putExtra("penWidth", penInfo.getPenWidth())
+                                    .putExtra("penMode", penInfo.getPenMode())
+                            )
+                        }
+                    }
+                }
+            }
+            noteLayout.addView(noteView)
+            noteLayout.addView(noteViewName)
+            innerLayout?.addView(noteLayout)
+        }
     }
 
     // toolbar에 menu item 넣기
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.intro_toolbar, menu)
+        trashBin=menu?.findItem(R.id.deletenote)
+        trashBin?.isVisible=false
         return true
     }
 
     //item 버튼 클릭 했을 때
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item?.itemId) {
+            R.id.deletenote->{
+                println("삭제 메뉴 클릭")
+                for(b in deleteButtons){
+                    if(b.isChecked){
+                        val note=noteList[b.id]
+                        runBlocking {
+                            myDao.deleteNoteData(note)
+                        }
+                    }
+
+                }
+                isLongButtonClick=false
+                trashBin?.isVisible=false
+                makeNoteList()
+                return true
+            }
             R.id.selectNote -> { // 필기 선택 메뉴 누른 경우
                 println("선택 메뉴 클릭")
                 return true

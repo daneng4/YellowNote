@@ -1,15 +1,9 @@
 package com.hansung.yellownote.drawing
 
-import android.annotation.SuppressLint
 import android.graphics.*
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
-import android.view.MotionEvent
-import android.widget.ImageView
 import androidx.viewpager2.widget.ViewPager2
-import com.hansung.yellownote.MainActivity
-import com.hansung.yellownote.MqttAdapter
-import org.eclipse.paho.client.mqttv3.MqttClient
 import java.io.File
 
 
@@ -24,7 +18,6 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
     private lateinit var backgroundBitmap:Bitmap
 
     val pageCount = pdfRenderer.pageCount
-//    var client : MqttAdapter = mqttClient
 
     lateinit var drawingView: DrawingView
     var pageInfoMap = HashMap<Int,PageInfo>() // <page번호, PageInfo>
@@ -57,7 +50,6 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
 
         currentPage = pdfRenderer.openPage(page).apply {
             var pageRatio = width/(height).toDouble()
-
             System.out.println("view_pager : ${view_pager.width}x${view_pager.height}")
             System.out.println("currentPage : ${width}x${height}")
 
