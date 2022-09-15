@@ -1,6 +1,9 @@
 package com.hansung.notedatabase
 
 import androidx.room.*
+import androidx.room.ForeignKey.CASCADE
+import com.hansung.yellownote.drawing.PageInfo
+
 
 @Entity(tableName = "pen_data_table")
 data class PenData (
@@ -18,14 +21,17 @@ data class NoteData (
 )
 
 @Entity(tableName = "file_data_table",
-    primaryKeys = ["fileName"],
-    foreignKeys = [ForeignKey(entity = NoteData::class, parentColumns = ["NoteName"], childColumns = ["fileName"])
+    primaryKeys = ["fileName","pageNo"],
+    foreignKeys = [ForeignKey(onDelete=CASCADE, entity = NoteData::class,
+        parentColumns = ["NoteName"], childColumns = ["fileName"])
     ]
 )
+
 data class FileData (
     val fileName:String,
-    val pageNo:Int,
-    val drawingInfo:String
+    @Embedded
+    val drawingInfo:PageInfo
+
 )
 
 @Entity(tableName = "word_audio_table")

@@ -7,6 +7,7 @@ import kotlinx.android.synthetic.main.item_page.view.*
 
 class PageHolder(view: View) : RecyclerView.ViewHolder(view) {
     fun openPage(page: Int, pdfReader: PdfReader) {
+        println("pageHolder openPage")
         pdfReader.openPage(page, itemView.pdf_image as DrawingView)
     }
 }

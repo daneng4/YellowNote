@@ -4,6 +4,7 @@ import android.graphics.*
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import androidx.viewpager2.widget.ViewPager2
+import com.hansung.notedatabase.FileData
 import java.io.File
 
 
@@ -18,7 +19,7 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
     private lateinit var backgroundBitmap:Bitmap
 
     val pageCount = pdfRenderer.pageCount
-
+    var firstOpen=true
     lateinit var drawingView: DrawingView
     var pageInfoMap = HashMap<Int,PageInfo>() // <page번호, PageInfo>
     lateinit var pageInfo:PageInfo // 현재 page의 PageInfo
@@ -47,7 +48,7 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
         drawingView.viewPager2 = view_pager
         this.page = page
         currentPage?.close()
-
+        println("pdfRender page: $page")
         currentPage = pdfRenderer.openPage(page).apply {
             var pageRatio = width/(height).toDouble()
             System.out.println("view_pager : ${view_pager.width}x${view_pager.height}")
@@ -73,11 +74,32 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
             drawingView.invalidate()
 
             drawingView.createDrawingBitmap(backgroundBitmap) // 그림 그릴 bitmap 생성
+            //setDrawingViewPageInfo(pageInfoMap[page]!!
+        }
+        println("pdfReader openpdf end")
+    }
+    fun setPageNumberToPageInfo(page:Int){
+        println("setPageNumberToPageInfo")
+        if(pageInfoMap[page]!=null)
+            pageInfo=pageInfoMap[page]!!
+    }
+    fun makePageInfoMap(fileDatas:List<FileData>){
+        if(fileDatas.isEmpty()){
+            return
+        }
+        println("makePageInfo")
+        for(data in fileDatas){
+            val pageInfo=PageInfo(data.drawingInfo.pageNo)
+            pageInfo.setCustomPaths(data.drawingInfo.customPaths)
+            pageInfo.changePathColor(data.drawingInfo.penColor!!)
+            pageInfoMap[data.drawingInfo.pageNo]=pageInfo
+            println(pageInfo)
         }
     }
 
     fun setDrawingViewPageInfo(pageInfo: PageInfo){ // 현재 page에 맞는 pageInfo 세팅
         this.pageInfo = pageInfo
+        println(this.pageInfo)
         drawingView.changePageInfo(pageInfo)
     }
 

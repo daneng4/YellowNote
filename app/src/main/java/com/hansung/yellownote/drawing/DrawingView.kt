@@ -82,7 +82,7 @@ class DrawingView @JvmOverloads constructor(
         pdfActivity = this.context as PdfActivity
         PageMode = DRAWING
         penInfo = pdfActivity.penInfo
-
+        println("DrawingView PageInfo: ${pageInfo}")
         penInfo.PenMode.observe(pdfActivity){
             System.out.println("${penInfo.getPenMode()}, ${penInfo.getMovingClipping()}")
             if(penInfo.getMovingClipping()){
@@ -206,7 +206,6 @@ class DrawingView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-
         if (canvas != null) {
             canvas.drawBitmap(backgroundBitmap,EditImagematrix,backgroundPaint) // backgroundBitmap 그리기
             canvas.drawBitmap(drawingBitmap,EditImagematrix,backgroundPaint) // drawingBitmap 그리기
@@ -255,7 +254,7 @@ class DrawingView @JvmOverloads constructor(
         EditImagematrix = Matrix()
         canvas.drawBitmap(backgroundBitmap, EditImagematrix, drawingPaint)
         this.setImageBitmap(drawingBitmap)
-
+        println("readrawPath PageInfo: ${pageInfo!!}")
         if(exceptSeletedPath){
             for (i in 0..pageInfo!!.customPaths.size - 1) {
                 var customPath = pageInfo!!.customPaths[i]
@@ -301,7 +300,6 @@ class DrawingView @JvmOverloads constructor(
     fun setupDrawingView(){
         mScaleGestureDetector= ScaleGestureDetector(context,ScaleListener())
         viewPager2.isUserInputEnabled = false // 페이지 넘기기 비활성화
-
         // DrawingView의 touchListener 설정
         this.setOnTouchListener { view, motionEvent ->
             val toolType=motionEvent?.getToolType(0)
@@ -546,7 +544,7 @@ class DrawingView @JvmOverloads constructor(
 
         clippingStartPoint = PointF(minX,minY)
         clippingEndPoint = PointF(maxX,maxY)
-
+        println("checkContainSelectedPath pageInfo: $pageInfo")
         // customPaths 중 사각형 내에 포함되는 customPath 찾기
         for(i in 0..pageInfo!!.customPaths.size-1){
             var checkPath = pageInfo!!.customPaths[i]
@@ -592,16 +590,19 @@ class DrawingView @JvmOverloads constructor(
         }
 
         /////////////////////////
-        pdfActivity.client.sendImageSizeMessage(sendBitmap.width)
-        pdfActivity.client.sendNumberPixelMessage(returnPixels)
+//        pdfActivity.client.sendImageSizeMessage(sendBitmap.width)
+//        pdfActivity.client.sendNumberPixelMessage(returnPixels)
         //////////////////////////
     }
 
     fun changePageInfo(pageInfo: PageInfo){
         this.pageInfo = pageInfo
+        println("changePageInfo: $pageInfo")
+        println("changePageInfo thisPageInfo: ${this.pageInfo}")
         if(pageInfo.customPaths.size>0){
             for(i in 0..pageInfo.customPaths.size-1){
                 var customPath = pageInfo.customPaths[i]
+//                println("customPath: $customPath")
                 canvas.drawPath(customPath.path, customPath.drawingPaint)
             }
             invalidate()
