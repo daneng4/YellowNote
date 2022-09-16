@@ -94,87 +94,147 @@
 
    <LinearLayout
        android:id="@+id/linearLayout"
-       android:layout_width="416dp"
-       android:layout_height="62dp"
+       android:layout_width="0dp"
+       android:layout_height="55dp"
        android:orientation="horizontal"
        android:paddingTop="5dp"
        android:paddingEnd="5dp"
        android:paddingRight="5dp"
        android:paddingBottom="5dp"
+       android:divider="?android:dividerHorizontal"
+       android:showDividers="middle"
        app:layout_constraintEnd_toEndOf="parent"
        app:layout_constraintStart_toStartOf="parent"
        app:layout_constraintTop_toBottomOf="@+id/tabLayout">
 
-      <ImageButton
-          android:id="@+id/RedPenBtn"
-          android:layout_width="wrap_content"
-          android:layout_height="50dp"
-          android:layout_weight="1"
-          android:background="@null"
-          app:srcCompat="@drawable/pen_red" />
-
-      <ImageButton
-          android:id="@+id/YellowPenBtn"
-          android:layout_width="wrap_content"
-          android:layout_height="50dp"
-          android:layout_weight="1"
-          android:background="@null"
-          app:srcCompat="@drawable/pen_yellow" />
-
-      <ImageButton
-          android:id="@+id/GreenPenBtn"
-          android:layout_width="wrap_content"
-          android:layout_height="50dp"
-          android:layout_weight="1"
-          android:background="@null"
-          app:srcCompat="@drawable/pen_green" />
-
-      <ImageButton
-          android:id="@+id/BluePenBtn"
-          android:layout_width="wrap_content"
-          android:layout_height="50dp"
-          android:layout_weight="1"
-          android:background="@null"
-          app:srcCompat="@drawable/pen_blue" />
-
-      <ImageButton
-          android:id="@+id/BlackPenBtn"
-          android:layout_width="wrap_content"
-          android:layout_height="50dp"
-          android:layout_weight="1"
-          android:background="@null"
-          app:srcCompat="@drawable/pen_black" />
-
-      <ImageButton
-          android:id="@+id/EraserBtn"
-          android:layout_width="wrap_content"
-          android:layout_height="50dp"
-          android:layout_weight="1"
-          android:background="@null"
-          app:srcCompat="@drawable/eraser" />
-
-      <ImageButton
-          android:id="@+id/ClippingBtn"
-          android:layout_width="wrap_content"
-          android:layout_height="50dp"
-          android:layout_weight="1"
-          android:background="@null"
-          app:srcCompat="@drawable/ic_baseline_rounded_corner_24" />
-
-      <ImageButton
-          android:id="@+id/TextBtn"
-          android:layout_width="wrap_content"
-          android:layout_height="50dp"
-          android:layout_weight="1"
-          android:background="@null"
-          app:srcCompat="@drawable/text" />
-
-      <ImageButton
-          android:id="@+id/RecordBtn"
-          android:layout_width="15dp"
+      <LinearLayout
+          android:layout_width="match_parent"
           android:layout_height="match_parent"
           android:layout_weight="1"
-          app:srcCompat="@drawable/ic_record" />
+          android:orientation="horizontal">
+
+         <ImageButton
+             android:id="@+id/PenBtn"
+             android:layout_width="wrap_content"
+             android:layout_height="match_parent"
+             android:layout_weight="1"
+             android:background="@null"
+             app:srcCompat="@drawable/ic_pen" />
+
+         <ImageButton
+             android:id="@+id/HighlighterBtn"
+             android:layout_width="wrap_content"
+             android:layout_height="match_parent"
+             android:layout_weight="1"
+             android:background="@null"
+             app:srcCompat="@drawable/ic_highlighter" />
+
+         <ImageButton
+             android:id="@+id/EraserBtn"
+             android:layout_width="wrap_content"
+             android:layout_height="match_parent"
+             android:layout_weight="1"
+             android:background="@null"
+             app:srcCompat="@drawable/ic_eraser" />
+
+         <ImageButton
+             android:id="@+id/ClippingBtn"
+             android:layout_width="wrap_content"
+             android:layout_height="match_parent"
+             android:layout_weight="1"
+             android:background="@null"
+             app:srcCompat="@drawable/ic_lasso" />
+
+         <ImageButton
+             android:id="@+id/TextBtn"
+             android:layout_width="wrap_content"
+             android:layout_height="match_parent"
+             android:layout_weight="1"
+             android:background="@null"
+             app:srcCompat="@drawable/ic_text" />
+      </LinearLayout>
+
+      <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:layout_weight="1"
+          android:orientation="horizontal"
+          android:showDividers="middle"
+          android:paddingTop="10dp"
+          android:paddingEnd="10dp"
+          android:paddingRight="10dp"
+          android:paddingBottom="10dp"
+          android:paddingLeft="10dp">
+
+         <Button
+             android:id="@+id/color1Btn"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_gravity="center"
+             android:layout_marginRight="10dp"
+             android:layout_weight="1"
+             android:background="@drawable/circle_button"
+             android:minWidth="0dp"
+             android:minHeight="0dp"
+             app:backgroundTint="#FF0000" />
+
+         <Button
+             android:id="@+id/color2Btn"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_gravity="center"
+             android:layout_marginRight="10dp"
+             android:layout_weight="1"
+             android:background="@drawable/circle_button"
+             android:minWidth="0dp"
+             android:minHeight="0dp"
+             app:backgroundTint="#0000FF" />
+
+         <Button
+             android:id="@+id/color3Btn"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_gravity="center"
+             android:layout_marginRight="10dp"
+             android:layout_weight="1"
+             android:background="@drawable/circle_button"
+             android:minWidth="0dp"
+             android:minHeight="0dp"
+             app:backgroundTint="#000000" />
+
+         <Button
+             android:id="@+id/button5"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_weight="1"
+             android:minWidth="0dp"
+             android:minHeight="0dp"
+             android:background="@drawable/circle_button"
+             android:layout_gravity="center"
+             android:layout_marginRight="10dp"/>
+
+         <Button
+             android:id="@+id/button8"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_gravity="center"
+             android:layout_marginRight="10dp"
+             android:layout_weight="1"
+             android:background="@drawable/circle_button"
+             android:minWidth="0dp"
+             android:minHeight="0dp" />
+
+         <Button
+             android:id="@+id/button6"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_weight="1"
+             android:minWidth="0dp"
+             android:minHeight="0dp"
+             android:background="@drawable/circle_button"
+             android:layout_gravity="center"/>
+      </LinearLayout>
+
    </LinearLayout>
 
    <androidx.viewpager2.widget.ViewPager2

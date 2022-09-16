@@ -2,17 +2,24 @@ package com.hansung.yellownote.drawing
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.DialogInterface
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.*
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
-import android.widget.PopupMenu
+import android.widget.Button
+import android.widget.ImageButton
+import android.widget.PopupWindow
 import androidx.appcompat.widget.AppCompatImageView
-import androidx.lifecycle.Observer
 import androidx.viewpager2.widget.ViewPager2
 import com.hansung.yellownote.R
+import com.skydoves.colorpickerview.ColorEnvelope
+import com.skydoves.colorpickerview.ColorPickerDialog
+import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import kotlinx.coroutines.CoroutineScope
 import java.lang.Exception
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class DrawingView @JvmOverloads constructor(
@@ -52,6 +59,7 @@ class DrawingView @JvmOverloads constructor(
     val dashPath = DashPathEffect(floatArrayOf(5f, 25f), 2F)
 
     // 선택 영역(사각형)의
+    var drawClippingBox = true
     var clippingPaint : Paint
     var clippingStartPoint: PointF? = null // 사용자 선택 시작점
     var clippingEndPoint: PointF? = null // 사용자 선택 끝점
@@ -60,6 +68,9 @@ class DrawingView @JvmOverloads constructor(
     var offsetX = 0f
     var offsetY = 0f
     var selectedPaths:ArrayList<CustomPath> = ArrayList<CustomPath>()
+    lateinit var popupWindow:PopupWindow
+    var popup:View? = null
+//    var clickChangeColorBtn = false
 
     var eraserPaint:Paint
     var erasedPaths:ArrayList<CustomPath> = ArrayList<CustomPath>()
@@ -70,10 +81,10 @@ class DrawingView @JvmOverloads constructor(
     var pageInfo: PageInfo? = null
 
     val PEN = 0
-    val ERASER = 1
-    val TEXT = 2
-    val CLIPPING = 3
-    val SHAPE = 4
+    val HIGHLIGHTER = 1
+    val ERASER = 2
+    val TEXT = 3
+    val CLIPPING = 4
     var oldDrawingMode = NONE
 
     lateinit var penInfo : PenInfo
@@ -115,8 +126,7 @@ class DrawingView @JvmOverloads constructor(
             this.color = Color.BLACK
 //            setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))
         }
-//        var popUpMenu = PopupMenu(this.context,this)
-//        popUpMenu.menuInflater.inflate(R.menu.menu_selectpath)
+
 //        mScaleGestureDetector= ScaleGestureDetector(getContext(),ScaleListener())
     }
 
@@ -155,8 +165,6 @@ class DrawingView @JvmOverloads constructor(
     fun setPenStyle(){
         when(penInfo.getPenMode()){
             PEN -> setDrawingPen()
-//            CLIPPING -> setClippingPen()
-//            ERASER -> setEraser()s
         }
     }
 
@@ -214,7 +222,8 @@ class DrawingView @JvmOverloads constructor(
             when(penInfo.getPenMode()){
                 CLIPPING -> { // CLIPPING 모드인 경우 사각형 모양의 그물 그리기
                     try{
-                        canvas.drawRect(clippingStartPoint!!.x,clippingStartPoint!!.y,clippingEndPoint!!.x,clippingEndPoint!!.y,clippingPaint)
+                        if(drawClippingBox)
+                            canvas.drawRect(clippingStartPoint!!.x,clippingStartPoint!!.y,clippingEndPoint!!.x,clippingEndPoint!!.y,clippingPaint)
                         if(penInfo.getMovingClipping()){
                             for(i in 0..selectedPaths.size-1) {
                                 var selectedCustomPath = selectedPaths[i]
@@ -276,25 +285,152 @@ class DrawingView @JvmOverloads constructor(
         }
     }
 
-    fun showMenu(){
-        var popupMenu = PopupMenu(context, this)
-        popupMenu.menuInflater.inflate(R.menu.popup_menu,popupMenu.menu)
-        popupMenu.setOnMenuItemClickListener(PopupMenu.OnMenuItemClickListener {
-            when(it.itemId){
-                R.id.delete-> {
-                    System.out.println("delete")
-                }
-                R.id.changeColor -> {
-                    System.out.println("changeColor")
-                }
-                R.id.handToText -> {
-                    System.out.println("handToText")
-                }
+    // 클리핑 후 뜨는 팝업창
+    fun showClippingPopup(){
+        System.out.println("${this.x},${this.y}")
+        popupWindow = PopupWindow(this)
+        var layoutInflater = LayoutInflater.from(this.context)
+        popup = layoutInflater.inflate(R.layout.clipping_popup,null)
+
+        popupWindow.contentView = popup
+        popupWindow.setWindowLayoutMode(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT)
+        popupWindow.isTouchable = true
+
+        popup!!.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+        setPopupLocation(popupWindow, popup!!.measuredWidth, popup!!.measuredHeight)
+        popupWindow.showAsDropDown(this)
+
+        var deleteClippingBtn = popup!!.findViewById<Button>(R.id.deleteClipping)
+        var handToTextBtn = popup!!.findViewById<Button>(R.id.handToText)
+        var changeColorBtn = popup!!.findViewById<Button>(R.id.changeColor)
+
+        // 삭제 버튼 클릭 시 선택된 path들 삭제
+        deleteClippingBtn.setOnClickListener {
+            pageInfo!!.customPaths.removeAll(selectedPaths)
+            selectedPaths.clear()
+            redrawPath(false)
+
+            popupWindow.dismiss()
+            popup=null
+
+            drawClippingBox = false
+            invalidate()
+        }
+
+        // 텍스트로 변환 버튼 클릭 시 선택된 글자 텍스트로 변환
+        handToTextBtn.setOnClickListener {
+            popupWindow.dismiss() // 기존 팝업창 끄기
+
+            // 영어,한글, 숫자 선택 팝업창 생성
+            popup = layoutInflater.inflate(R.layout.clipping_handtotext_pop,null)
+
+            popupWindow.contentView = popup
+            popupWindow.setWindowLayoutMode(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT)
+            popupWindow.isTouchable = true
+
+            popup!!.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+            setPopupLocation(popupWindow, popup!!.measuredWidth, popup!!.measuredHeight)
+
+            var englishBtn = popup!!.findViewById<Button>(R.id.englishBtn)
+            var hangulBtn = popup!!.findViewById<Button>(R.id.hangulBtn)
+            var numberBtn = popup!!.findViewById<Button>(R.id.numberBtn)
+
+            englishBtn.setOnClickListener {
+                saveCanvas("English")
+                popupWindow.dismiss()
+                popup=null
+                drawClippingBox = false
+                redrawPath(false)
             }
-            true
-        })
-        popupMenu.dragToOpenListener
-        popupMenu.show()
+            hangulBtn.setOnClickListener {
+                saveCanvas("Hangul")
+                popupWindow.dismiss()
+                popup=null
+                drawClippingBox = false
+                redrawPath(false)
+            }
+            numberBtn.setOnClickListener {
+                saveCanvas("Number")
+                popupWindow.dismiss()
+                popup=null
+                drawClippingBox = false
+                redrawPath(false)
+            }
+        }
+
+        // 색상 버튼 클릭 시 색상 선택 팝업창 뜸
+        changeColorBtn.setOnClickListener {
+            popupWindow.dismiss() // 기존 팝업창 끄기
+
+            // 색상 선택할 수 있는 팝업창 생성
+            popupWindow = PopupWindow(this)
+            var layoutInflater = LayoutInflater.from(this.context)
+            popup = layoutInflater.inflate(R.layout.clipping_color_popup,null)
+
+            popupWindow.contentView = popup
+            popupWindow.setWindowLayoutMode(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT)
+            popupWindow.isTouchable = true
+
+            popup!!.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+            setPopupLocation(popupWindow, popup!!.measuredWidth, popup!!.measuredHeight)
+
+            var redBtn = popup!!.findViewById<ImageButton>(R.id.redBtn)
+            var blueBtn = popup!!.findViewById<ImageButton>(R.id.blueBtn)
+            var blackBtn = popup!!.findViewById<ImageButton>(R.id.blackBtn)
+            var selectColorBtn = popup!!.findViewById<ImageButton>(R.id.selectColorBtn)
+
+            // 색 버튼 클릭 시 색 변경
+            redBtn.setOnClickListener {
+                changePathColor(Color.RED)
+            }
+            blueBtn.setOnClickListener {
+                changePathColor(Color.BLUE)
+            }
+            blackBtn.setOnClickListener {
+                changePathColor(Color.BLACK)
+            }
+            // 무지개색 버튼 클릭 시 색상 직접 선택 가능
+            selectColorBtn.setOnClickListener {
+                ColorPickerDialog.Builder(this.context,android.app.AlertDialog.THEME_DEVICE_DEFAULT_LIGHT).apply{
+                    setTitle("")
+                    setPreferenceName("ColorPickerDialog")
+                    setPositiveButton("SELECT",ColorEnvelopeListener(){ colorEnvelope: ColorEnvelope, b: Boolean ->
+                        changePathColor(colorEnvelope.color)
+                    })
+                    setNegativeButton("CANCEL",DialogInterface.OnClickListener(){
+                            dialog: DialogInterface?, which: Int ->  dialog!!.dismiss()
+                    })
+                    attachAlphaSlideBar(false)
+                    attachBrightnessSlideBar(true)
+                    setBottomSpace(12)
+                }.show()
+            }
+        }
+    }
+
+    // 선택된 path 색 변경
+    private fun changePathColor(color:Int){
+        for(i in 0..selectedPaths.size-1){
+            var selectedPath = selectedPaths[i]
+            var idx = pageInfo!!.customPaths.indexOf(selectedPath)
+            selectedPath.drawingPaint.color = color
+            pageInfo!!.customPaths[idx] = selectedPath
+            canvas.drawPath(selectedPath.path, selectedPath.drawingPaint)
+        }
+        invalidate()
+    }
+
+    // 팝업창 위치 지정
+    private fun setPopupLocation(popupWindow: PopupWindow, popupWidth:Int, popupHeight:Int){
+        var x = this.x+clippingEndPoint!!.x-popupWidth
+        var y = this.y+pdfReader.view_pager.y+clippingStartPoint!!.y-popupHeight
+
+        if(x<=0)
+            x = 0f
+        if(y<pdfReader.view_pager.y)
+            y = pdfReader.view_pager.y+popupHeight/2
+
+        popupWindow.showAtLocation(this@DrawingView,Gravity.NO_GRAVITY,x.toInt(),y.toInt())
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -346,6 +482,10 @@ class DrawingView @JvmOverloads constructor(
                 else-> { // 필기 모드 (S펜 사용 시)
                     val x = motionEvent.x
                     val y = motionEvent.y
+                    if(popup!=null&&!popup!!.isFocused){
+                        popupWindow.dismiss()
+                        popup=null
+                    }
                     when(penInfo.getPenMode()){
                         CLIPPING -> { // 영역 선택 모드 (사각형으로)
                             when (motionEvent.action) {
@@ -354,8 +494,10 @@ class DrawingView @JvmOverloads constructor(
                                     System.out.println("현재 drawingView ==> ${this}")
                                     viewPager2.isUserInputEnabled = false // 페이지 넘기기 비활성화
                                     PageMode = DRAWING // mode 변경
+                                    drawClippingBox = true
 
-                                    if(selectedPaths.size!=0 && checkContainPoint(PointF(x,y))){ // 선택한 영역 내부 터치한 경우
+                                    // 클리핑한 영역 내부 터치한 경우
+                                    if(selectedPaths.size!=0 && checkContainPoint(PointF(x,y))){
                                         // 선택된 path들을 이동시키는 모드로 변경 (MOVING MODE)
                                         penInfo.setMovingClipping(true)
                                         System.out.println("${penInfo.getPenMode()}, ${penInfo.getMovingClipping()}")
@@ -363,6 +505,7 @@ class DrawingView @JvmOverloads constructor(
                                         pathOldY = y
                                         redrawPath(true) // selectedPaths 제외한 path들 다시 그리기
                                     }
+                                    // 클리핑한 영역 밖을 터치한 경우
                                     else{
                                         if(penInfo.getMovingClipping()){
                                             penInfo.setMovingClipping(false)
@@ -408,10 +551,10 @@ class DrawingView @JvmOverloads constructor(
                                             clippingEndPoint = clippingStartPoint
                                             invalidate()
                                         }
-//                                    else
-//                                        showMenu()
-//                                    else
-//                                        saveCanvas()
+                                        else {
+                                            System.out.println("showMenu")
+                                            showClippingPopup()
+                                        }
                                         PageMode = NONE
 
                                     }
@@ -421,6 +564,8 @@ class DrawingView @JvmOverloads constructor(
                         PEN -> { // 펜 모드
                             when (motionEvent.action) {
                                 MotionEvent.ACTION_DOWN -> {
+                                    if(selectedPaths.size!=0)
+                                        selectedPaths.clear()
                                     setDrawingPen()
 //                                    System.out.println("현재 drawingView ==> ${this}")
                                     viewPager2.isUserInputEnabled = false // 페이지 넘기기 비활성화
@@ -454,6 +599,8 @@ class DrawingView @JvmOverloads constructor(
                             eraserPointY = y
                             when (motionEvent.action) {
                                 MotionEvent.ACTION_DOWN -> {
+                                    if(selectedPaths.size!=0)
+                                        selectedPaths.clear()
                                     setEraser()
                                     viewPager2.isUserInputEnabled = false // 페이지 넘기기 비활성화
                                     PageMode = DRAWING // mode 변경
@@ -568,7 +715,7 @@ class DrawingView @JvmOverloads constructor(
     }
 
     // mqtt로 선택한 path들 그려서 보내기
-    private fun saveCanvas(){
+    private fun saveCanvas(textType:String){
         val sendBitmap = Bitmap.createScaledBitmap(drawingBitmap, backgroundBitmap.width,
             backgroundBitmap.height, false)
         val selectedCanvas = Canvas(sendBitmap) // 선택된 path 위한 canvas
@@ -591,10 +738,13 @@ class DrawingView @JvmOverloads constructor(
             returnPixels[i]=(b/255).toByte()
         }
 
-        /////////////////////////
-        pdfActivity.client.sendImageSizeMessage(sendBitmap.width)
-        pdfActivity.client.sendNumberPixelMessage(returnPixels)
-        //////////////////////////
+//        pdfActivity.client.sendImageSizeMessage(sendBitmap.width)
+
+        when(textType){
+//            "English" -> pdfActivity.client.sendEnglishPixelMessage(returnPixels)
+//            "Hangul" -> pdfActivity.client.sendHangulPixelMessage(returnPixels)
+//            "Number" -> pdfActivity.client.sendNumberPixelMessage(returnPixels)
+        }
     }
 
     fun changePageInfo(pageInfo: PageInfo){

@@ -3,6 +3,8 @@ package com.hansung.yellownote.drawing
 import android.graphics.Color
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import java.util.*
+import kotlin.collections.ArrayList
 
 class PenInfo : ViewModel() {
    val color:MutableLiveData<Int?> = MutableLiveData<Int?>()
@@ -11,10 +13,10 @@ class PenInfo : ViewModel() {
 
     val NONE = -1
     val PEN = 0
-    val ERASER = 1
-    val TEXT = 2
-    val CLIPPING = 3
-    val SHAPE = 4
+    val HIGHLIGHTER = 1
+    val ERASER = 2
+    val TEXT = 3
+    val CLIPPING = 4
     var MovingClipping = false
 
     init{
@@ -24,13 +26,13 @@ class PenInfo : ViewModel() {
     }
 
     fun setPenColor(color:Int?){
-        when(this.color.value){
-            Color.BLACK -> System.out.println("BLACK")
-            Color.RED -> System.out.println("RED")
-            Color.YELLOW -> System.out.println("YELLOW")
-            Color.GREEN -> System.out.println("GREEN")
-            Color.BLUE -> System.out.println("BLUE")
-        }
+//        when(this.color.value){
+//            Color.BLACK -> System.out.println("BLACK")
+//            Color.RED -> System.out.println("RED")
+//            Color.YELLOW -> System.out.println("YELLOW")
+//            Color.GREEN -> System.out.println("GREEN")
+//            Color.BLUE -> System.out.println("BLUE")
+//        }
         this.color.value = color
     }
 
@@ -47,7 +49,6 @@ class PenInfo : ViewModel() {
     }
 
     fun setPenMode(mode:Int){
-//        MovingClipping = false
         this.PenMode.value = mode
     }
 

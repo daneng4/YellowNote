@@ -6,12 +6,6 @@ import java.nio.file.Paths
 class PageInfo(pageNo:Int) {
     var pageNo = pageNo
     var customPaths = ArrayList<CustomPath>()
-    var penColor:Int? = Color.BLACK
-    lateinit var drawingView:DrawingView
-
-    fun changePathColor(penColor:Int){
-        this.penColor = penColor
-    }
 
     fun removeSelectedPaths(selectedPaths: ArrayList<CustomPath>){
         for(i in 0..selectedPaths.size-1){

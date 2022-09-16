@@ -5,6 +5,9 @@ import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import androidx.viewpager2.widget.ViewPager2
 import java.io.File
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 
 class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
@@ -28,17 +31,12 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
     // DrawingView.kt에서 정의된 mode와 같아야함
     val NONE = -1
     val PEN = 0
-    val ERASER = 1
-    val TEXT = 2
-    val CLIPPING = 3
-    val SHAPE = 4
+    val HIGHLIGHTER = 1
+    val ERASER = 2
+    val TEXT = 3
+    val CLIPPING = 4
     val MOVING = 5
     var drawingMode = PEN
-
-//    init{
-//        System.out.println("client 생성")
-////        client = MqttAdapter()
-//    }
 
     fun openPage(page: Int, drawingView: DrawingView) {
         if (page >= pageCount) return
@@ -76,7 +74,7 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
         }
     }
 
-    fun setDrawingViewPageInfo(pageInfo: PageInfo){ // 현재 page에 맞는 pageInfo 세팅
+    fun changePageInfo(pageInfo: PageInfo){ // 현재 page에 맞는 pageInfo 세팅
         this.pageInfo = pageInfo
         drawingView.changePageInfo(pageInfo)
     }
