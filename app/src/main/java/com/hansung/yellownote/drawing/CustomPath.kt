@@ -32,4 +32,7 @@ class CustomPath(startPoint: PointF){
             points[i].y += offsetY
         }
     }
+    fun setPoints(point: PointF){
+        points.add(point)
+    }
 }

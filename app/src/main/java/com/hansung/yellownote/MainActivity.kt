@@ -206,6 +206,7 @@ class MainActivity : AppCompatActivity() {
                                 Intent(this, PdfActivity()::class.java)
                                     .putExtra("filePath", noteInfo.recordFileLocation)
                                     .putExtra("lastPage", noteInfo.lastPageNo)
+                                    .putExtra("noteName",noteInfo.noteName)
                                     .putExtra("penColor", penInfo.getPenColor()) // penInfo 정보 보내기
                                     .putExtra("penWidth", penInfo.getPenWidth())
                                     .putExtra("penMode", penInfo.getPenMode())

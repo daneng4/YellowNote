@@ -1,11 +1,19 @@
 package com.hansung.yellownote.drawing
 
 import android.graphics.Color
+import androidx.room.Embedded
+import java.io.Serializable
 import java.nio.file.Paths
+
 
 class PageInfo(pageNo:Int) {
     var pageNo = pageNo
     var customPaths = ArrayList<CustomPath>()
+    var penColor:Int? = Color.BLACK
+
+    fun changePathColor(penColor:Int){
+        this.penColor = penColor
+    }
 
     fun removeSelectedPaths(selectedPaths: ArrayList<CustomPath>){
         for(i in 0..selectedPaths.size-1){
@@ -13,4 +21,9 @@ class PageInfo(pageNo:Int) {
         }
         System.out.println(customPaths.size)
     }
+    @JvmName("setCustomPaths1")
+    fun setCustomPaths(paths: ArrayList<CustomPath>){
+        customPaths=paths
+    }
+
 }

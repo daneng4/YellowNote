@@ -3,8 +3,9 @@ package com.hansung.notedatabase
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import java.util.concurrent.Flow
+import com.hansung.yellownote.drawing.*
 
-data class AudioWithFiles( //1:N
+data class NoteWithFiles( //1:N
     @Embedded val note:NoteData,
     @Relation(
         parentColumn = "NoteName",
@@ -42,6 +43,9 @@ interface MyDAO {
     @Query("SELECT * FROM note_data_table")
     fun getAllNoteData(): List<NoteData>
 
+    @Query("SELECT * FROM file_data_table WHERE fileName=:sfile")
+    fun getFileDataByFileName(sfile:String):List<FileData>
+
     @Query("SELECT * FROM note_data_table WHERE noteName = :snote")   // 메소드 인자를 SQL문에서 :을 붙여 사용
     suspend fun getNoteDataByNoteName(snote: String): List<NoteData>
 
@@ -49,7 +53,8 @@ interface MyDAO {
     fun updatePenData(mode:String, width: Float?, color: Int?, isActive: Boolean?)
 
     @Delete
-    suspend fun deleteNoteData(noteData: NoteData); // primary key is used to find the student
+    suspend fun deleteNoteData(noteData: NoteData) // primary key is used to find the student
+
 //
 //    @Transaction
 //    @Query("SELECT * FROM student_table WHERE student_id = :id")
