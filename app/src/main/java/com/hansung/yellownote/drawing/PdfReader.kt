@@ -81,19 +81,17 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
         if(pageInfoMap[page]!=null)
             pageInfo=pageInfoMap[page]!!
     }
-    fun makePageInfoMap(fileDatas:List<FileData>){
-        if(fileDatas.isEmpty()){
-            return
-        }
-        println("makePageInfo")
-        for(data in fileDatas){
-            val pageInfo=PageInfo(data.drawingInfo.pageNo)
-            pageInfo.setCustomPaths(data.drawingInfo.customPaths)
-            pageInfo.changePathColor(data.drawingInfo.penColor!!)
-            pageInfoMap[data.drawingInfo.pageNo]=pageInfo
-            println(pageInfo)
-        }
-    }
+//    fun makePageInfoMap(fileDatas:List<FileData>){
+//        if(fileDatas.isEmpty()){
+//            return
+//        }
+//        for(data in fileDatas){
+//            val pageInfo=PageInfo(data.drawingInfo.pageNo)
+//            pageInfo.setCustomPaths(data.drawingInfo.customPaths)
+//            pageInfo.changePathColor(data.drawingInfo.penColor!!)
+//            pageInfoMap[data.drawingInfo.pageNo]=pageInfo
+//        }
+//    }
 
     fun changePageInfo(pageInfo: PageInfo){ // 현재 page에 맞는 pageInfo 세팅
         this.pageInfo = pageInfo

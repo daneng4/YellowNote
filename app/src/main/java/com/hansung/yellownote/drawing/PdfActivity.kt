@@ -4,16 +4,15 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.pdf.PdfDocument
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
-import com.hansung.notedatabase.FileData
-import com.hansung.notedatabase.MyDAO
-import com.hansung.notedatabase.MyDatabase
-import com.hansung.notedatabase.NoteData
+import com.google.gson.Gson
+import com.hansung.notedatabase.*
 import com.hansung.yellownote.R
 import com.hansung.yellownote.database.Converters
 import com.hansung.yellownote.databinding.ActivityPdfBinding
@@ -76,7 +75,6 @@ class PdfActivity() : AppCompatActivity(){
         myDao = MyDatabase.getDatabase(this).getMyDao()
 //        getPenDataTable()
         viewPager = binding.viewPager
-
         viewPager.adapter = PageAdaptor()
         filePath = intent.getStringExtra("filePath")!!
         val noteName=intent.getStringExtra("noteName")?:""
@@ -88,7 +86,7 @@ class PdfActivity() : AppCompatActivity(){
         viewPager.currentItem=lastPage
         pdfReader = PdfReader(targetFile, filePath, viewPager).apply {
             println("makePageInfoMap")
-            this.makePageInfoMap(afterPageInfo)
+//            this.makePageInfoMap(afterPageInfo)
             this.setPageNumberToPageInfo(lastPage)
             (viewPager.adapter as PageAdaptor).setupPdfRenderer(this)
             pageNo = lastPage
@@ -105,8 +103,6 @@ class PdfActivity() : AppCompatActivity(){
                     println("새로운 pageInfo 생성")
                     pdfReader!!.pageInfoMap[page] = PageInfo(page) // 새로운 pageInfo 생성
                 }
-
-                pdfReader!!.pageInfoMap[page]?.let { pdfReader!!.changePageInfo(it) } // 변경된 page의 pageInfo 세팅
                 println("page : $page")
                 println("pageInfo : ${pdfReader!!.pageInfoMap[page]?.customPaths}")
                 pdfReader!!.pageInfoMap[page]?.let {
@@ -291,8 +287,9 @@ class PdfActivity() : AppCompatActivity(){
                 if(drawingInfo.customPaths.isNotEmpty()) {
 //                    val stream = MemoryStream(arrByte)
                     runBlocking {
-                        myDao.insertFileData(FileData(noteName, drawingInfo))
+                        myDao.insertFileData(FileData(noteName ,drawingInfo))
                     }
+
                 }
             }
         }
