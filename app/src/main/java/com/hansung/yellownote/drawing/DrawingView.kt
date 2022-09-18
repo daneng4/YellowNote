@@ -17,7 +17,11 @@ import com.skydoves.colorpickerview.ColorEnvelope
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
 import kotlinx.coroutines.CoroutineScope
-import java.util.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.collections.ArrayList
+import kotlin.math.pow
 
 
 class DrawingView @JvmOverloads constructor(
@@ -74,8 +78,10 @@ class DrawingView @JvmOverloads constructor(
     var eraserPaint:Paint
     var erasedPaths:ArrayList<CustomPath> = ArrayList<CustomPath>()
     var eraserPath:Path = Path()
+    lateinit var eraserPoints:CustomPath
     var eraserPointX = 0f
     var eraserPointY = 0f
+    val deletePoints=ArrayList<PointF>()
 
     var pageInfo: PageInfo? = null
 
@@ -124,8 +130,8 @@ class DrawingView @JvmOverloads constructor(
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
             strokeWidth = penInfo.getPenWidth()
-            this.color = Color.BLACK
-//            setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))
+            this.color = Color.WHITE
+            setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))
         }
 //        mScaleGestureDetector= ScaleGestureDetector(getContext(),ScaleListener())
     }
@@ -219,8 +225,8 @@ class DrawingView @JvmOverloads constructor(
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
             strokeWidth = penInfo.getPenWidth()
-            this.color = Color.BLACK
-//            setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))
+            this.color = Color.WHITE
+            setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))
         }
     }
 
@@ -255,6 +261,7 @@ class DrawingView @JvmOverloads constructor(
                     }
                 }
                 ERASER -> {
+                    canvas.drawCircle(eraserPointX, eraserPointY, 10f, drawingPaint)
                 }
             }
         }
@@ -644,16 +651,19 @@ class DrawingView @JvmOverloads constructor(
 
                                     eraserPath = Path()
                                     eraserPath.addCircle(x,y,15f,Path.Direction.CCW)
+                                    eraserPoints= CustomPath(PointF(eraserPointX,eraserPointY))
+                                    eraserPoints.points.add(PointF(eraserPointX,eraserPointY))
                                     canvas.drawPath(eraserPath,eraserPaint)
                                 }
                                 MotionEvent.ACTION_MOVE -> {
                                     eraserPath.addCircle(x,y,15f,Path.Direction.CCW)
+                                    eraserPoints.points.add(PointF(eraserPointX,eraserPointY))
                                     canvas.drawPath(eraserPath,eraserPaint)
                                 }
                                 MotionEvent.ACTION_UP -> {
-
+                                    eraserPoints.points.add(PointF(eraserPointX,eraserPointY))
+                                    checkErasePath()
                                     erasedPaths.clear()
-
                                     eraserPath.reset()
                                 }
                             }
@@ -665,11 +675,60 @@ class DrawingView @JvmOverloads constructor(
             true
         }
     }
-
+    fun removeDeletePath(){
+        scope= CoroutineScope(Dispatchers.Default).apply {
+            launch {
+                var isDelete=false
+                if (pageInfo?.customPaths != null) {
+                    println("customPaths not null")
+                    println("pageInfo?.customPaths!!.size : ${pageInfo?.customPaths!!.size}")
+                    for (i in pageInfo?.customPaths!!.size-1 downTo 0) {
+                        println("i = $i")
+                        val line=pageInfo?.customPaths!![i]
+                        isDelete=false
+                        println("customPaths size = ${line.points.size}")
+                        for (p in deletePoints) {
+                            for (point in line.points) {
+                                if(p.x==point.x&&p.y==point.y){
+                                    println("delete point")
+                                    pageInfo?.customPaths!!.remove(line)
+                                    isDelete=true
+                                    break
+                                }
+                                if(isDelete)
+                                    break
+                            }
+                            if(isDelete)
+                                break
+                        }
+                    }
+                }
+                deletePoints.clear()
+                withContext(Dispatchers.Main){
+                    redrawPath(false)
+                }
+            }
+        }
+    }
     private fun checkErasePath(){
-        for(i in 0..pageInfo!!.customPaths.size-1){
-            var points = pageInfo!!.customPaths[i].points
-
+        scope= CoroutineScope(Dispatchers.Default).apply {
+            launch {
+                if (pageInfo?.customPaths != null) {
+                    for (line in pageInfo?.customPaths!!) {
+                        for (point in line.points) {
+                            for (p in eraserPoints.points) {
+                                if (15.0.pow(2.0) >=
+                                    ((p.x - point.x ).toDouble().pow(2.0) +
+                                            (p.y - point.y).toDouble().pow(2.0))) {
+                                    deletePoints.add(PointF(point.x, point.y))
+                                }
+                            }
+                        }
+                    }
+                }
+                println("find point size = ${deletePoints.size}")
+                removeDeletePath()
+            }
         }
     }
 

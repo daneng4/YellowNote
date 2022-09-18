@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.setDisplayShowTitleEnabled(false) // toolbar 제목 표시 유무
         linearLayout=binding.linearLayout
         myDao = MyDatabase.getDatabase(this).getMyDao()
-//        val allStudents = myDao.getAllPenData()
+        //val allStudents = myDao.getAllPenData()
         setMyDatabase()
 
         // 펜 정보 담고 있는 뷰모델 생성

@@ -11,10 +11,8 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
-import com.hansung.notedatabase.FileData
-import com.hansung.notedatabase.MyDAO
-import com.hansung.notedatabase.MyDatabase
-import com.hansung.notedatabase.NoteData
+import com.google.gson.Gson
+import com.hansung.notedatabase.*
 import com.hansung.yellownote.R
 import com.hansung.yellownote.database.Converters
 import com.hansung.yellownote.databinding.ActivityPdfBinding
@@ -84,7 +82,6 @@ class PdfActivity() : AppCompatActivity(){
         myDao = MyDatabase.getDatabase(this).getMyDao()
 //        getPenDataTable()
         viewPager = binding.viewPager
-
         viewPager.adapter = PageAdaptor()
         filePath = intent.getStringExtra("filePath")!!
         val noteName=intent.getStringExtra("noteName")?:""
@@ -113,8 +110,6 @@ class PdfActivity() : AppCompatActivity(){
                     println("새로운 pageInfo 생성")
                     pdfReader!!.pageInfoMap[page] = PageInfo(page) // 새로운 pageInfo 생성
                 }
-
-                pdfReader!!.pageInfoMap[page]?.let { pdfReader!!.changePageInfo(it) } // 변경된 page의 pageInfo 세팅
                 println("page : $page")
                 println("pageInfo : ${pdfReader!!.pageInfoMap[page]?.customPaths}")
                 pdfReader!!.pageInfoMap[page]?.let {
@@ -350,11 +345,9 @@ class PdfActivity() : AppCompatActivity(){
             if(drawingInfo!=null) {
                 if(drawingInfo.customPaths.isNotEmpty()) {
                     runBlocking {
-                        for(i in 0..drawingInfo.customPaths.size-1){
-                            System.out.println("drawingInfo.customPaths[${i}].path.isEmpty = ${drawingInfo.customPaths[i].path.isEmpty}")
-                        }
-                        myDao.insertFileData(FileData(noteName, drawingInfo))
+                        myDao.insertFileData(FileData(noteName ,drawingInfo))
                     }
+
                 }
             }
         }

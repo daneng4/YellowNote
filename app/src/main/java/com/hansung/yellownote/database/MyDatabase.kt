@@ -17,17 +17,11 @@ abstract class MyDatabase : RoomDatabase() {
 
     companion object {
         private var INSTANCE: MyDatabase? = null
-        private val MIGRATION_1_2 = object : Migration(2, 3) {
-            override fun migrate(database: SupportSQLiteDatabase) {
-//                database.execSQL("ALTER TABLE note_data_table ADD COLUMN last_update TEXT")
-            }
-        }
 
         fun getDatabase(context: Context) : MyDatabase {
             if (INSTANCE == null) {
                 INSTANCE = Room.databaseBuilder(
                     context, MyDatabase::class.java, "yellow_note_database")
-                    .addMigrations(MIGRATION_1_2)
                     .allowMainThreadQueries()
                     .addTypeConverter(Converters())
                     .build()
