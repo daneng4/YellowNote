@@ -1,7 +1,6 @@
 package com.hansung.notedatabase
 
 import android.content.Context
-import android.graphics.Color
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -9,12 +8,8 @@ import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.hansung.yellownote.database.Converters
-import kotlinx.coroutines.runBlocking
-import java.util.concurrent.Executors
-import kotlin.concurrent.thread
-import kotlin.math.E
 
-@Database(entities = [PenData::class, NoteData::class, FileData::class, WordAudio::class, Playground::class],
+@Database(entities = [PenData::class, NoteData::class, FileData::class, ColorData::class, WordAudio::class, Playground::class],
     exportSchema = false, version = 1)
 @TypeConverters(Converters::class)
 abstract class MyDatabase : RoomDatabase() {

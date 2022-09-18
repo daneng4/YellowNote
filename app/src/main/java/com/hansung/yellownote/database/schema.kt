@@ -35,6 +35,12 @@ data class FileData (
 
 )
 
+@Entity(tableName = "color_table")
+data class ColorData (
+    @PrimaryKey @ColumnInfo(name="ButtonName")val buttonName:String,
+    val color:Int
+)
+
 @Entity(tableName = "word_audio_table")
 data class WordAudio (
     @PrimaryKey @ColumnInfo(name="WordName")val wordName:String,
