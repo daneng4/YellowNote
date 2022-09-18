@@ -2,6 +2,7 @@ package com.hansung.notedatabase
 
 import androidx.room.*
 import androidx.room.ForeignKey.CASCADE
+import com.hansung.yellownote.drawing.CustomPath
 import com.hansung.yellownote.drawing.PageInfo
 
 
@@ -27,13 +28,12 @@ data class NoteData (
         parentColumns = ["NoteName"], childColumns = ["fileName"])
     ]
 )
-
 data class FileData (
     val fileName:String,
     @Embedded
     val drawingInfo:PageInfo
-
 )
+
 
 @Entity(tableName = "word_audio_table")
 data class WordAudio (

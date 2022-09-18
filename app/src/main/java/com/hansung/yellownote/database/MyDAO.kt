@@ -5,15 +5,6 @@ import androidx.room.*
 import java.util.concurrent.Flow
 import com.hansung.yellownote.drawing.*
 
-data class NoteWithFiles( //1:N
-    @Embedded val note:NoteData,
-    @Relation(
-        parentColumn = "NoteName",
-        entityColumn = "fileName"
-    )
-    val fileDatas:List<FileData>
-)
-
 @Dao
 interface MyDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)  // INSERT, key 충돌이 나면 새 데이터로 교체
@@ -46,8 +37,6 @@ interface MyDAO {
     @Query("SELECT * FROM file_data_table WHERE fileName=:sfile")
     fun getFileDataByFileName(sfile:String):List<FileData>
 
-    @Query("SELECT * FROM note_data_table WHERE noteName = :snote")   // 메소드 인자를 SQL문에서 :을 붙여 사용
-    suspend fun getNoteDataByNoteName(snote: String): List<NoteData>
 
     @Query("UPDATE pen_data_table SET width = :width, color= :color ,isActive= :isActive WHERE PenMode =:mode")
     fun updatePenData(mode:String, width: Float?, color: Int?, isActive: Boolean?)
