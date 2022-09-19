@@ -40,6 +40,23 @@
         <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1915" />
         <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.1915" />
         <entry key="..\:/2022_Summer/EngineeringContest/YellowNote/YellowNote/app/src/main/res/xml/custome_view_pager.xml" value="0.359375" />
+        <entry key="..\:/YellowNoteProject/YellowNote/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.161" />
+        <entry key="..\:/YellowNoteProject/YellowNote/app/src/main/res/drawable/ic_baseline_add_circle_outline_24.xml" value="0.161" />
+        <entry key="..\:/YellowNoteProject/YellowNote/app/src/main/res/drawable/ic_baseline_blue_40.xml" value="0.1325" />
+        <entry key="..\:/YellowNoteProject/YellowNote/app/src/main/res/drawable/ic_baseline_check_circle_outline_24.xml" value="0.161" />
+        <entry key="..\:/YellowNoteProject/YellowNote/app/src/main/res/drawable/ic_baseline_folder_24.xml" value="0.161" />
+        <entry key="..\:/YellowNoteProject/YellowNote/app/src/main/res/drawable/ic_baseline_rounded_corner_24.xml" value="0.161" />
+        <entry key="..\:/YellowNoteProject/YellowNote/app/src/main/res/drawable/ic_baseline_sticky_note_2_24.xml" value="0.161" />
+        <entry key="..\:/YellowNoteProject/YellowNote/app/src/main/res/drawable/ic_launcher_background.xml" value="0.161" />
+        <entry key="..\:/YellowNoteProject/YellowNote/app/src/main/res/layout/activity_main.xml" value="0.1640625" />
+        <entry key="..\:/YellowNoteProject/YellowNote/app/src/main/res/layout/activity_pdf.xml" value="0.22" />
+        <entry key="..\:/YellowNoteProject/YellowNote/app/src/main/res/layout/clipping_color_popup.xml" value="0.321875" />
+        <entry key="..\:/YellowNoteProject/YellowNote/app/src/main/res/layout/clipping_handtotext_pop.xml" value="0.321875" />
+        <entry key="..\:/YellowNoteProject/YellowNote/app/src/main/res/layout/clipping_popup.xml" value="0.1640625" />
+        <entry key="..\:/YellowNoteProject/YellowNote/app/src/main/res/layout/edit_text_area.xml" value="0.1359375" />
+        <entry key="..\:/YellowNoteProject/YellowNote/app/src/main/res/layout/item_page.xml" value="0.1640625" />
+        <entry key="..\:/YellowNoteProject/YellowNote/app/src/main/res/menu/intro_toolbar.xml" value="0.1515625" />
+        <entry key="..\:/YellowNoteProject/YellowNote/app/src/main/res/menu/popup_menu.xml" value="0.1515625" />
       </map>
     </option>
   </component>

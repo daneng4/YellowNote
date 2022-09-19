@@ -178,7 +178,6 @@ class MainActivity : AppCompatActivity() {
 
             noteView.background= resources.getDrawable(R.drawable.ic_note)
             val noteParam= RelativeLayout.LayoutParams(230, 230)
-//            noteParam.leftMargin=Math.round(20*getResources().getDisplayMetrics().density)
             noteView.layoutParams=noteParam
             noteView.setOnLongClickListener{
                 println("long click")

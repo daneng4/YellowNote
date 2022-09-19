@@ -198,6 +198,12 @@
           android:layout_width="wrap_content"
           android:layout_height="match_parent"
           android:layout_weight="1"
+          android:orientation="horizontal"
+          android:paddingLeft="10dp"
+          android:paddingTop="10dp"
+          android:paddingEnd="10dp"
+          android:paddingRight="10dp"
+          android:paddingBottom="10dp"
           android:showDividers="middle">
 
          <Button
@@ -254,7 +260,6 @@
              android:layout_marginEnd="35dp"
              android:background="@drawable/circle_button"
              android:minWidth="30dp"
-             android:minHeight="30dp"
              app:layout_constraintBottom_toBottomOf="@+id/ColorButton5"
              app:layout_constraintEnd_toStartOf="@+id/ColorButton5"
              app:layout_constraintStart_toEndOf="@+id/ColorButton3"
@@ -298,8 +303,10 @@
        android:layout_height="0dp"
        android:background="#919191"
        app:layout_constraintBottom_toBottomOf="parent"
+       app:layout_constraintHorizontal_bias="0.0"
        app:layout_constraintLeft_toLeftOf="parent"
        app:layout_constraintRight_toRightOf="parent"
-       app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+       app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+       app:layout_constraintVertical_bias="0.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
