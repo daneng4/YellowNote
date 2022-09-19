@@ -2,6 +2,7 @@ package com.hansung.yellownote.drawing
 
 import android.graphics.Color
 import androidx.room.Embedded
+import com.google.gson.Gson
 import java.io.Serializable
 import java.nio.file.Paths
 
@@ -23,7 +24,16 @@ class PageInfo(pageNo:Int) {
     }
     @JvmName("setCustomPaths1")
     fun setCustomPaths(paths: ArrayList<CustomPath>){
+        var gson = Gson()
         customPaths=paths
     }
+
+    fun pathsToBytes(){
+        for(i in 0..customPaths.size-1){
+            customPaths[i].changeToByte()
+        }
+    }
+
+
 
 }

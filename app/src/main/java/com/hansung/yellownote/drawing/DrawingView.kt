@@ -54,7 +54,7 @@ class DrawingView @JvmOverloads constructor(
     val mMaxZoom = 3.0f
 
     lateinit var pdfReader: PdfReader
-    lateinit var path: Path
+    lateinit var path: SerializablePath
     lateinit var backgroundPaint: Paint
     var drawingPaint: Paint = Paint()
     var highlighterPaint: Paint = Paint()
@@ -80,11 +80,12 @@ class DrawingView @JvmOverloads constructor(
 //    var clickChangeColorBtn = false
 
     var eraserPaint:Paint
+    var eraserCirclePaint:Paint
     var erasedPaths:ArrayList<CustomPath> = ArrayList<CustomPath>()
     var eraserPath:Path = Path()
     lateinit var eraserPoints:CustomPath
-    var eraserPointX = 0f
-    var eraserPointY = 0f
+    var eraserPointX = -10f
+    var eraserPointY = -10f
     val deletePoints=ArrayList<PointF>()
 
     var textPointX = 0f
@@ -140,6 +141,14 @@ class DrawingView @JvmOverloads constructor(
             this.color = Color.WHITE
             setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))
         }
+
+        eraserCirclePaint = Paint().apply{
+            style = Paint.Style.STROKE
+            strokeJoin = Paint.Join.ROUND
+            strokeCap = Paint.Cap.ROUND
+            strokeWidth = 5F
+            this.color = Color.BLACK
+        }
 //        mScaleGestureDetector= ScaleGestureDetector(getContext(),ScaleListener())
     }
 
@@ -162,7 +171,7 @@ class DrawingView @JvmOverloads constructor(
 
     fun setupDrawing(){
         canvas = Canvas(drawingBitmap)
-        path = Path()
+        path = SerializablePath()
         backgroundPaint = Paint(Paint.DITHER_FLAG)
         setPenStyle()
         drawingPaint.setAntiAlias(true) // 가장자리 표면 매끄럽게
@@ -246,6 +255,7 @@ class DrawingView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
+        System.out.println("Drawing View OnDraw*******************")
         if (canvas != null) {
             canvas.drawBitmap(backgroundBitmap,EditImagematrix,backgroundPaint) // backgroundBitmap 그리기
             canvas.drawBitmap(drawingBitmap,EditImagematrix,backgroundPaint) // drawingBitmap 그리기
@@ -268,7 +278,7 @@ class DrawingView @JvmOverloads constructor(
                     }
                 }
                 ERASER -> {
-                    canvas.drawCircle(eraserPointX, eraserPointY, 10f, drawingPaint)
+                    canvas.drawCircle(eraserPointX, eraserPointY, 10f, eraserCirclePaint)
                 }
             }
         }
@@ -563,14 +573,16 @@ class DrawingView @JvmOverloads constructor(
                                         invalidate()
                                     }
                                     else{
-                                        checkContainSelectedPath()
-                                        if(selectedPaths.size==0) {
-                                            clippingEndPoint = clippingStartPoint
-                                            invalidate()
-                                        }
-                                        else {
-                                            System.out.println("showMenu")
-                                            showClippingPopup()
+                                        if(pageInfo!= null){
+                                            checkContainSelectedPath()
+                                            if(selectedPaths.size==0) {
+                                                clippingEndPoint = clippingStartPoint
+                                                invalidate()
+                                            }
+                                            else {
+                                                System.out.println("showMenu")
+                                                showClippingPopup()
+                                            }
                                         }
                                         PageMode = NONE
 
@@ -589,7 +601,7 @@ class DrawingView @JvmOverloads constructor(
                                     PageMode = DRAWING // mode 변경
 
 //                                    path.reset()
-                                    path = Path()
+                                    path = SerializablePath()
                                     path.moveTo(x, y)
                                     customPath = CustomPath(PointF(x,y)) // path 시작점 저장
                                     canvas.drawPath(path,drawingPaint)
@@ -605,6 +617,7 @@ class DrawingView @JvmOverloads constructor(
                                     customPath.path = path
                                     customPath.drawingPaint = drawingPaint
                                     pageInfo?.customPaths?.add(customPath) // pageInfo에 customPath 저장
+//                                    customPath.changeToByte()
                                     canvas.drawPath(path, drawingPaint)
 //                                    System.out.println("path 개수 = ${pageInfo?.customPaths?.size}")
                                 }
@@ -622,7 +635,7 @@ class DrawingView @JvmOverloads constructor(
                                     PageMode = DRAWING // mode 변경
 
 //                                    path.reset()
-                                    path = Path()
+                                    path = SerializablePath()
                                     path.moveTo(x, y)
                                     customPath = CustomPath(PointF(x,y)) // path 시작점 저장
                                     canvas.drawPath(path,highlighterPaint)
