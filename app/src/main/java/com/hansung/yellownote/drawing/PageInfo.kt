@@ -24,16 +24,6 @@ class PageInfo(pageNo:Int) {
     }
     @JvmName("setCustomPaths1")
     fun setCustomPaths(paths: ArrayList<CustomPath>){
-        var gson = Gson()
         customPaths=paths
     }
-
-    fun pathsToBytes(){
-        for(i in 0..customPaths.size-1){
-            customPaths[i].changeToByte()
-        }
-    }
-
-
-
 }
