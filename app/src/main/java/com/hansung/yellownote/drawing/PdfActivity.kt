@@ -400,7 +400,6 @@ class PdfActivity() : AppCompatActivity(){
             if(drawingInfo!=null) {
                 if(drawingInfo.customPaths.isNotEmpty()) {
                     runBlocking {
-                        drawingInfo.pathsToBytes()
                         myDao.insertFileData(FileData(noteName, drawingInfo))
                     }
                 }

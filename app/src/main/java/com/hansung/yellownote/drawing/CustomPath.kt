@@ -41,29 +41,4 @@ class CustomPath(startPoint: PointF){
     fun setPoints(point: PointF){
         points.add(point)
     }
-
-    fun changeToByte(){
-        CoroutineScope(Dispatchers.Default).apply {
-            launch {
-                System.out.println("11111111111111111111111111111111")
-                var baos = ByteArrayOutputStream()
-                var objectOutput = ObjectOutputStream(baos)
-                objectOutput.writeObject(path)
-                pathToByte = baos.toByteArray()
-                System.out.println("aaaa = ${pathToByte.toString()}")
-            }
-        }
-    }
-
-    fun ByteToPath(){
-        CoroutineScope(Dispatchers.Default).apply {
-            launch {
-                System.out.println("2222222222222222222222222222222")
-                var obis = ObjectInputStream(ByteArrayInputStream(pathToByte))
-                path = obis.readObject() as SerializablePath
-
-                System.out.println("path.isEmpty = ${path.isEmpty}")
-            }
-        }
-    }
 }

@@ -67,7 +67,7 @@ class DrawingView @JvmOverloads constructor(
 
     // 선택 영역(사각형)의
     var drawClippingBox = true
-    var clippingPaint : Paint
+    var clippingPaint : Paint = Paint()
     var clippingStartPoint: PointF? = null // 사용자 선택 시작점
     var clippingEndPoint: PointF? = null // 사용자 선택 끝점
     var pathOldX = 0f // path 위치 이동 시 이용
@@ -79,8 +79,8 @@ class DrawingView @JvmOverloads constructor(
     var popup:View? = null
 //    var clickChangeColorBtn = false
 
-    var eraserPaint:Paint
-    var eraserCirclePaint:Paint
+    var eraserPaint:Paint = Paint()
+    var eraserCirclePaint:Paint = Paint()
     var erasedPaths:ArrayList<CustomPath> = ArrayList<CustomPath>()
     var eraserPath:Path = Path()
     lateinit var eraserPoints:CustomPath
@@ -123,32 +123,25 @@ class DrawingView @JvmOverloads constructor(
             }
         }
 
-        clippingPaint = Paint().apply{
-            this.color = Color.GRAY
-            style = Paint.Style.STROKE
-            pathEffect = dashPath
-            strokeJoin = Paint.Join.ROUND
-            strokeCap = Paint.Cap.ROUND
-            strokeWidth = 5F
-        }
-
-        eraserPaint = Paint().apply{
-            style = Paint.Style.STROKE
+//        clippingPaint = Paint().apply{
+//            this.color = Color.GRAY
+//            style = Paint.Style.STROKE
 //            pathEffect = dashPath
-            strokeJoin = Paint.Join.ROUND
-            strokeCap = Paint.Cap.ROUND
-            strokeWidth = penInfo.getPenWidth()
-            this.color = Color.WHITE
-            setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))
-        }
+//            strokeJoin = Paint.Join.ROUND
+//            strokeCap = Paint.Cap.ROUND
+//            strokeWidth = 5F
+//        }
+        setClippingPen()
+        setEraser()
 
-        eraserCirclePaint = Paint().apply{
-            style = Paint.Style.STROKE
-            strokeJoin = Paint.Join.ROUND
-            strokeCap = Paint.Cap.ROUND
-            strokeWidth = 5F
-            this.color = Color.BLACK
-        }
+//        eraserPaint = Paint().apply{
+//            style = Paint.Style.STROKE
+//            strokeJoin = Paint.Join.ROUND
+//            strokeCap = Paint.Cap.ROUND
+//            strokeWidth = penInfo.getPenWidth()
+//            this.color = Color.WHITE
+//            setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))
+//        }
 //        mScaleGestureDetector= ScaleGestureDetector(getContext(),ScaleListener())
     }
 
@@ -198,7 +191,7 @@ class DrawingView @JvmOverloads constructor(
     // 일반펜 설정
     fun setDrawingPen(){
         drawingPaint = Paint().apply{
-            this.color = penInfo.getPenColor()!!
+            color = penInfo.getPenColor()!!
             style = Paint.Style.STROKE
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
@@ -210,7 +203,7 @@ class DrawingView @JvmOverloads constructor(
     // 형광펜 설정
     fun setHighlighter(){
         highlighterPaint = Paint().apply{
-            this.color = penInfo.getPenColor()!!
+            color = penInfo.getPenColor()!!
             style = Paint.Style.STROKE
             var paintAlpha = Math.round( 10f / 100 * 255)
             alpha = paintAlpha
@@ -224,7 +217,7 @@ class DrawingView @JvmOverloads constructor(
     // 클리핑 펜 설정
     fun setClippingPen(){
         clippingPaint = Paint().apply{
-            this.color = penInfo.getPenColor()!!
+            color = Color.GRAY
             style = Paint.Style.STROKE
             pathEffect = dashPath
             strokeJoin = Paint.Join.ROUND
@@ -237,12 +230,19 @@ class DrawingView @JvmOverloads constructor(
     fun setEraser(){
         eraserPaint = Paint().apply{
             style = Paint.Style.STROKE
-//            pathEffect = dashPath
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
             strokeWidth = penInfo.getPenWidth()
-            this.color = Color.WHITE
+            color = Color.WHITE
             setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))
+        }
+
+        eraserCirclePaint = Paint().apply{
+            style = Paint.Style.STROKE
+            strokeJoin = Paint.Join.ROUND
+            strokeCap = Paint.Cap.ROUND
+            strokeWidth = 5F
+            color = Color.BLACK
         }
     }
 
@@ -258,6 +258,7 @@ class DrawingView @JvmOverloads constructor(
         System.out.println("Drawing View OnDraw*******************")
         if (canvas != null) {
             canvas.drawBitmap(backgroundBitmap,EditImagematrix,backgroundPaint) // backgroundBitmap 그리기
+            canvas.drawBitmap(drawingBitmap,EditImagematrix,backgroundPaint) // drawingBitmap 그리기
             canvas.drawBitmap(drawingBitmap,EditImagematrix,backgroundPaint) // drawingBitmap 그리기
 
             when(penInfo.getPenMode()){

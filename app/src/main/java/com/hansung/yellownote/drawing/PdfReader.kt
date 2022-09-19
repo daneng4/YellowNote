@@ -5,6 +5,9 @@ import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import androidx.viewpager2.widget.ViewPager2
 import com.hansung.notedatabase.FileData
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 import java.util.*
 import kotlin.collections.ArrayList
@@ -55,6 +58,13 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
 
             if(pageInfoMap[page]!=null){
                 drawingView.pageInfo = pageInfoMap[page]
+                CoroutineScope(Dispatchers.Main).launch{
+                    for(i in 0..drawingView.pageInfo!!.customPaths.size-1){
+                        var customPath = pageInfo.customPaths[i]
+                        drawingView.canvas.drawPath(customPath.path, customPath.drawingPaint)
+                    }
+                    drawingView.invalidate()
+                }
             }
 
             // view_pager에 맞춰서 배경될 pdf 크기 변경
