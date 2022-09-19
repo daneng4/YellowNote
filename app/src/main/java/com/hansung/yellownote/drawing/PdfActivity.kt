@@ -11,6 +11,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
+import com.google.gson.Gson
 import com.hansung.notedatabase.*
 import com.hansung.yellownote.R
 import com.hansung.yellownote.database.Converters
@@ -42,9 +43,6 @@ class PdfActivity() : AppCompatActivity(){
     lateinit var ColorButton1:Button
     lateinit var ColorButton2:Button
     lateinit var ColorButton3:Button
-    lateinit var ColorButton4:Button
-    lateinit var ColorButton5:Button
-    lateinit var ColorButton6:Button
 
     var color1:Int = Color.BLACK
     var color2:Int = Color.BLACK
@@ -64,7 +62,6 @@ class PdfActivity() : AppCompatActivity(){
 
     private var penSettingPopup:PenSettingDialog? = null
     private var highlighterSettingPopup:HighlighterSettingDialog? = null
-    private var eraserSettingPopup:PenSettingDialog? = null
 //    val client=MqttAdapter()
 
     // DrawingView.kt에서 정의된 mode와 같아야함
@@ -96,10 +93,7 @@ class PdfActivity() : AppCompatActivity(){
         viewPager.currentItem=lastPage
         pdfReader = PdfReader(targetFile, filePath, viewPager).apply {
 //            println("makePageInfoMap")
-            this.makePageInfoMap(afterPageInfo)
-            if(pageInfoMap[lastPage] != null){
-                pageInfo = pageInfoMap[lastPage]!!
-            }
+//            this.makePageInfoMap(afterPageInfo)
             this.setPageNumberToPageInfo(lastPage)
             (viewPager.adapter as PageAdaptor).setupPdfRenderer(this)
             pageNo = lastPage
@@ -133,9 +127,6 @@ class PdfActivity() : AppCompatActivity(){
         ColorButton1 = binding.ColorButton1
         ColorButton2 = binding.ColorButton2
         ColorButton3 = binding.ColorButton3
-        ColorButton4 = binding.ColorButton4
-        ColorButton5 = binding.ColorButton5
-        ColorButton6 = binding.ColorButton6
 
         color1 = intent.getIntExtra("ColorButton1", Color.BLACK)
         color2 = intent.getIntExtra("ColorButton2", Color.BLACK)
@@ -143,6 +134,14 @@ class PdfActivity() : AppCompatActivity(){
         color4 = intent.getIntExtra("ColorButton4", Color.BLACK)
         color5 = intent.getIntExtra("ColorButton5", Color.BLACK)
         color6 = intent.getIntExtra("ColorButton6", Color.BLACK)
+
+        System.out.println("color1 = ${color1}")
+        System.out.println("color2 = ${color2}")
+        System.out.println("color3 = ${color3}")
+        System.out.println("color4 = ${color4}")
+        System.out.println("color5 = ${color5}")
+        System.out.println("color6 = ${color6}")
+
         settingColorButton()
 
         ColorButton1.setOnClickListener {
@@ -154,29 +153,23 @@ class PdfActivity() : AppCompatActivity(){
         ColorButton3.setOnClickListener {
             setColorBtn(ColorButton3)
         }
-        ColorButton4.setOnClickListener {
-            setColorBtn(ColorButton4)
-        }
-        ColorButton5.setOnClickListener {
-            setColorBtn(ColorButton5)
-        }
-        ColorButton6.setOnClickListener {
-            setColorBtn(ColorButton6)
-        }
 
         penBtn.setOnClickListener{
+            System.out.println("click")
             if (penBtn.tag == R.drawable.ic_pen_clicked) {
+                System.out.println("penBtn.tag == R.drawable.ic_pen_clicked")
 
                 if(penSettingPopup == null){
                     System.out.println("penSettingPopup == null")
                     var location = IntArray(2)
                     penBtn.getLocationOnScreen(location)
                     penSettingPopup = PenSettingDialog(this)
-                    penSettingPopup!!.show(myDao,penInfo,location[0],location[1])
+                    penSettingPopup!!.show(penInfo,location[0],location[1])
                 }
                 else{
                     if(penSettingPopup!!.isDialogShowing()){
                         System.out.println("${penSettingPopup!!.isDialogShowing()}")
+                        System.out.println("penSettingPopup != null")
                         penSettingPopup!!.dismiss()
                         penSettingPopup = null
                     }
@@ -184,7 +177,7 @@ class PdfActivity() : AppCompatActivity(){
                         var location = IntArray(2)
                         penBtn.getLocationOnScreen(location)
                         penSettingPopup = PenSettingDialog(this)
-                        penSettingPopup!!.show(myDao, penInfo, location[0], location[1])
+                        penSettingPopup!!.show(penInfo,location[0],location[1])
                     }
                 }
             } else {
@@ -211,34 +204,6 @@ class PdfActivity() : AppCompatActivity(){
         eraserBtn.setOnClickListener {
             changeBtnImage(ERASER)
         }
-        eraserBtn.setOnClickListener{
-            if (eraserBtn.tag == R.drawable.ic_eraser_clicked) {
-
-                if(eraserSettingPopup == null){
-                    var location = IntArray(2)
-                    eraserBtn.getLocationOnScreen(location)
-                    eraserSettingPopup = PenSettingDialog(this)
-                    eraserSettingPopup!!.show(myDao,penInfo,location[0],location[1])
-                    eraserSettingPopup!!.changeText()
-                }
-                else{
-                    if(eraserSettingPopup!!.isDialogShowing()){
-                        System.out.println("${eraserSettingPopup!!.isDialogShowing()}")
-                        eraserSettingPopup!!.dismiss()
-                        eraserSettingPopup = null
-                    }
-                    else{
-                        var location = IntArray(2)
-                        penBtn.getLocationOnScreen(location)
-                        eraserSettingPopup = PenSettingDialog(this)
-                        eraserSettingPopup!!.show(myDao, penInfo, location[0], location[1])
-                        eraserSettingPopup!!.changeText()
-                    }
-                }
-            } else {
-                changeBtnImage(ERASER)
-            }
-        }
         clippingBtn.setOnClickListener {
             changeBtnImage(CLIPPING)
         }
@@ -251,8 +216,6 @@ class PdfActivity() : AppCompatActivity(){
         penInfo.setPenWidth(intent.getFloatExtra("penWidth",10F))
         penInfo.setPenMode(intent.getIntExtra("penMode",PEN))
         changeBtnImage(penInfo.getPenMode())
-
-        System.out.println("penInfo.getPenColor = ${penInfo.getPenColor()}")
 
 
         println("onCreate끝")
@@ -273,15 +236,9 @@ class PdfActivity() : AppCompatActivity(){
     private fun setColorBtn(button:Button){
         if (System.currentTimeMillis() > btnClickTime + 1000) {
             btnClickTime = System.currentTimeMillis()
-            when(button){
-                ColorButton1 -> penInfo.setPenColor(color1)
-                ColorButton2 -> penInfo.setPenColor(color2)
-                ColorButton3 -> penInfo.setPenColor(color3)
-                ColorButton4 -> penInfo.setPenColor(color4)
-                ColorButton5 -> penInfo.setPenColor(color5)
-                ColorButton6 -> penInfo.setPenColor(color6)
-            }
-            myDao.updatePenData(PenModes[penInfo.getPenMode()],penInfo.getPenWidth(),penInfo.getPenColor(),true)
+            penInfo.setPenColor(button.backgroundTintList.hashCode())
+            System.out.println("button.backgroundTintList.hashCode() = ${button.backgroundTintList.hashCode()}")
+//            button.backgroundTintList.getColorForState()
         }
         else{
             ColorPickerDialog.Builder(this,android.app.AlertDialog.THEME_DEVICE_DEFAULT_LIGHT).apply{
@@ -290,14 +247,6 @@ class PdfActivity() : AppCompatActivity(){
                 setPositiveButton("SELECT",ColorEnvelopeListener(){ colorEnvelope: ColorEnvelope, b: Boolean ->
                     button.setBackgroundTintList(ColorStateList.valueOf(colorEnvelope.color))
                     penInfo.setPenColor(colorEnvelope.color)
-                    when(button){
-                        ColorButton1 -> color1 = colorEnvelope.color
-                        ColorButton2 -> color2 = colorEnvelope.color
-                        ColorButton3 -> color3 = colorEnvelope.color
-                        ColorButton4 -> color4 = colorEnvelope.color
-                        ColorButton5 -> color5 = colorEnvelope.color
-                        ColorButton6 -> color6 = colorEnvelope.color
-                    }
                     myDao.updateColorData(resources.getResourceEntryName(button.id), colorEnvelope.color)
                 })
                 setNegativeButton("CANCEL", DialogInterface.OnClickListener(){
@@ -319,10 +268,7 @@ class PdfActivity() : AppCompatActivity(){
                     penBtn.setImageResource(R.drawable.ic_pen)
                 }
                 HIGHLIGHTER -> highlighterBtn.setImageResource(R.drawable.ic_highlighter)
-                ERASER -> {
-                    eraserBtn.tag = R.drawable.ic_eraser
-                    eraserBtn.setImageResource(R.drawable.ic_eraser)
-                }
+                ERASER -> eraserBtn.setImageResource(R.drawable.ic_eraser)
                 CLIPPING -> clippingBtn.setImageResource(R.drawable.ic_lasso)
                 TEXT -> textBtn.setImageResource(R.drawable.ic_text)
             }
@@ -332,7 +278,7 @@ class PdfActivity() : AppCompatActivity(){
             PEN->{
                 penBtn.tag = R.drawable.ic_pen_clicked
                 penBtn.setImageResource(R.drawable.ic_pen_clicked)
-                setPenData(myDao.getAllPenData()[PEN].color, myDao.getAllPenData()[PEN].width, PEN)
+                setPenData(Color.BLACK, penWidth, PEN)
             }
             HIGHLIGHTER->{
                 highlighterBtn.tag = R.drawable.ic_highlighter_clicked
@@ -340,9 +286,8 @@ class PdfActivity() : AppCompatActivity(){
                 setPenData(Color.BLACK, penWidth, HIGHLIGHTER)
             }
             ERASER->{
-                eraserBtn.tag = R.drawable.ic_eraser_clicked
                 eraserBtn.setImageResource(R.drawable.ic_eraser_clicked)
-                setPenData(null, myDao.getAllPenData()[ERASER].width, ERASER)
+                setPenData(null, penWidth, ERASER)
             }
             CLIPPING->{
                 clippingBtn.setImageResource(R.drawable.ic_lasso_clicked)
@@ -400,14 +345,14 @@ class PdfActivity() : AppCompatActivity(){
             if(drawingInfo!=null) {
                 if(drawingInfo.customPaths.isNotEmpty()) {
                     runBlocking {
-                        drawingInfo.pathsToBytes()
-                        myDao.insertFileData(FileData(noteName, drawingInfo))
+                        myDao.insertFileData(FileData(noteName ,drawingInfo))
                     }
+
                 }
             }
         }
-    }
 
+    }
     override fun onDestroy() {
         super.onDestroy()
 
@@ -423,4 +368,5 @@ class PdfActivity() : AppCompatActivity(){
 
         pdfReader?.close()
     }
+
 }

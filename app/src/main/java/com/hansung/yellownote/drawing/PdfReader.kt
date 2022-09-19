@@ -40,7 +40,6 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
     var drawingMode = PEN
 
     fun openPage(page: Int, drawingView: DrawingView) {
-        System.out.println("OpenPage")
         if (page >= pageCount) return
         this.drawingView = drawingView
         drawingView.pdfReader = this
@@ -52,10 +51,6 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
             var pageRatio = width/(height).toDouble()
             System.out.println("view_pager : ${view_pager.width}x${view_pager.height}")
             System.out.println("currentPage : ${width}x${height}")
-
-            if(pageInfoMap[page]!=null){
-                drawingView.pageInfo = pageInfoMap[page]
-            }
 
             // view_pager에 맞춰서 배경될 pdf 크기 변경
             var backgroundWidth = view_pager.width
@@ -86,20 +81,17 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
         if(pageInfoMap[page]!=null)
             pageInfo=pageInfoMap[page]!!
     }
-
-    fun makePageInfoMap(fileDatas:List<FileData>){
-        if(fileDatas.isEmpty()){
-            return
-        }
-        for(data in fileDatas){
-            val pageInfo=PageInfo(data.drawingInfo.pageNo)
-            pageInfo.setCustomPaths(data.drawingInfo.customPaths)
-            pageInfo.changePathColor(data.drawingInfo.penColor!!)
-            pageInfoMap[data.drawingInfo.pageNo]=pageInfo
-            System.out.println("pageInfo.pageNo = ${pageInfo.pageNo} / pageInfo.customPaths = ${pageInfo.customPaths}")
-        }
-        System.out.println("PageInfoMap = ${pageInfoMap.keys}")
-    }
+//    fun makePageInfoMap(fileDatas:List<FileData>){
+//        if(fileDatas.isEmpty()){
+//            return
+//        }
+//        for(data in fileDatas){
+//            val pageInfo=PageInfo(data.drawingInfo.pageNo)
+//            pageInfo.setCustomPaths(data.drawingInfo.customPaths)
+//            pageInfo.changePathColor(data.drawingInfo.penColor!!)
+//            pageInfoMap[data.drawingInfo.pageNo]=pageInfo
+//        }
+//    }
 
     fun changePageInfo(pageInfo: PageInfo){ // 현재 page에 맞는 pageInfo 세팅
         this.pageInfo = pageInfo
