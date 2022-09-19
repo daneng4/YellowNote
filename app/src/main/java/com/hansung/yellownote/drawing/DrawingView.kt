@@ -2,15 +2,19 @@ package com.hansung.yellownote.drawing
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Context.WINDOW_SERVICE
 import android.content.DialogInterface
 import android.graphics.*
+import android.graphics.drawable.BitmapDrawable
 import android.util.AttributeSet
 import android.view.*
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.PopupWindow
 import androidx.appcompat.widget.AppCompatImageView
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.viewpager2.widget.ViewPager2
 import com.hansung.yellownote.R
 import com.skydoves.colorpickerview.ColorEnvelope
@@ -83,6 +87,9 @@ class DrawingView @JvmOverloads constructor(
     var eraserPointX = 0f
     var eraserPointY = 0f
     val deletePoints=ArrayList<PointF>()
+
+    var textPointX = 0f
+    var textPointY = 0f
 
     var pageInfo: PageInfo? = null
 
@@ -667,6 +674,16 @@ class DrawingView @JvmOverloads constructor(
                                     checkErasePath()
                                     erasedPaths.clear()
                                     eraserPath.reset()
+                                }
+                            }
+                            invalidate()
+                        }
+                        TEXT->{ //텍스트 모드
+                            textPointX=x
+                            textPointY=y
+                            when (motionEvent.action) {
+                                MotionEvent.ACTION_DOWN -> {
+
                                 }
                             }
                             invalidate()

@@ -96,12 +96,12 @@
        android:id="@+id/linearLayout"
        android:layout_width="0dp"
        android:layout_height="55dp"
+       android:divider="?android:dividerHorizontal"
        android:orientation="horizontal"
        android:paddingTop="5dp"
        android:paddingEnd="5dp"
        android:paddingRight="5dp"
        android:paddingBottom="5dp"
-       android:divider="?android:dividerHorizontal"
        android:showDividers="middle"
        app:layout_constraintEnd_toEndOf="parent"
        app:layout_constraintStart_toStartOf="parent"
@@ -159,12 +159,12 @@
           android:layout_height="match_parent"
           android:layout_weight="1"
           android:orientation="horizontal"
-          android:showDividers="middle"
+          android:paddingLeft="10dp"
           android:paddingTop="10dp"
           android:paddingEnd="10dp"
           android:paddingRight="10dp"
           android:paddingBottom="10dp"
-          android:paddingLeft="10dp">
+          android:showDividers="middle">
 
          <Button
              android:id="@+id/color1Btn"
@@ -206,12 +206,12 @@
              android:id="@+id/button5"
              android:layout_width="wrap_content"
              android:layout_height="wrap_content"
-             android:layout_weight="1"
-             android:minWidth="0dp"
-             android:minHeight="0dp"
-             android:background="@drawable/circle_button"
              android:layout_gravity="center"
-             android:layout_marginRight="10dp"/>
+             android:layout_marginRight="10dp"
+             android:layout_weight="1"
+             android:background="@drawable/circle_button"
+             android:minWidth="0dp"
+             android:minHeight="0dp" />
 
          <Button
              android:id="@+id/button8"
@@ -228,11 +228,11 @@
              android:id="@+id/button6"
              android:layout_width="wrap_content"
              android:layout_height="wrap_content"
+             android:layout_gravity="center"
              android:layout_weight="1"
-             android:minWidth="0dp"
-             android:minHeight="0dp"
              android:background="@drawable/circle_button"
-             android:layout_gravity="center"/>
+             android:minWidth="0dp"
+             android:minHeight="0dp" />
       </LinearLayout>
 
    </LinearLayout>
@@ -243,8 +243,10 @@
        android:layout_height="0dp"
        android:background="#919191"
        app:layout_constraintBottom_toBottomOf="parent"
+       app:layout_constraintHorizontal_bias="0.0"
        app:layout_constraintLeft_toLeftOf="parent"
        app:layout_constraintRight_toRightOf="parent"
-       app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+       app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+       app:layout_constraintVertical_bias="0.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

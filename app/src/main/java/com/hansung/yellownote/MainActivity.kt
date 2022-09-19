@@ -128,10 +128,6 @@ class MainActivity : AppCompatActivity() {
         }
         makeNoteList()
 
-//        val editText=EditText(this)
-//        editText.hint="여기에 입력하세요"
-//        linearLayout.addView(editText)
-
     }
     fun makeNoteList(){
         noteList=myDao.getAllNoteData()
@@ -188,7 +184,6 @@ class MainActivity : AppCompatActivity() {
 
             noteView.background= resources.getDrawable(R.drawable.ic_note)
             val noteParam= RelativeLayout.LayoutParams(230, 230)
-//            noteParam.leftMargin=Math.round(20*getResources().getDisplayMetrics().density)
             noteView.layoutParams=noteParam
             noteView.setOnLongClickListener{
                 println("long click")

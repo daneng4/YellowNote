@@ -179,7 +179,6 @@ class PdfActivity() : AppCompatActivity(){
         }
         textBtn.setOnClickListener {
             changeBtnImage(TEXT)
-//            pdfReader!!.setMode("text")
         }
         println("onCreate끝")
     }
