@@ -34,6 +34,11 @@ data class FileData (
     val drawingInfo:PageInfo
 )
 
+@Entity(tableName = "color_table")
+data class ColorData (
+    @PrimaryKey @ColumnInfo(name="ButtonName")val buttonName:String,
+    val color:Int
+)
 
 @Entity(tableName = "word_audio_table")
 data class WordAudio (

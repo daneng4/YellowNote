@@ -24,10 +24,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
-import com.hansung.notedatabase.MyDAO
-import com.hansung.notedatabase.MyDatabase
-import com.hansung.notedatabase.NoteData
-import com.hansung.notedatabase.PenData
+import com.hansung.notedatabase.*
 import com.hansung.yellownote.databinding.ActivityMainBinding
 import com.hansung.yellownote.drawing.PenInfo
 import com.hansung.yellownote.drawing.PdfActivity
@@ -39,6 +36,7 @@ import org.w3c.dom.Text
 import java.io.File
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 
 class MainActivity : AppCompatActivity() {
@@ -48,11 +46,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var linearLayout:LinearLayout
     lateinit var myDao : MyDAO // 데이터 베이스
     lateinit var penInfo: PenInfo // 펜 정보 담고 있는 뷰모델
-    val PenModes = ArrayList<String>(Arrays.asList("PEN","ERASER","TEXT","CLIPPING","SHAPE"))
+    val PenModes = ArrayList<String>(Arrays.asList("PEN","HIGHLIGHTER","ERASER","TEXT","CLIPPING","SHAPE"))
     lateinit var noteList:List<NoteData>
     val deleteButtons=ArrayList<CheckBox>()
     var isLongButtonClick=false
     var trashBin: MenuItem?=null
+
+    lateinit var buttonColorList:List<ColorData>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.Theme_YellowNote)
         super.onCreate(savedInstanceState)
@@ -85,18 +86,28 @@ class MainActivity : AppCompatActivity() {
             else{
                 getActivePenData()
             }
+
+            if(myDao.getColorDataCount()==0){
+                myDao.insertColorData(ColorData("ColorButton1",-16777216))
+                myDao.insertColorData(ColorData("ColorButton2",-65536))
+                myDao.insertColorData(ColorData("ColorButton3",-256))
+                myDao.insertColorData(ColorData("ColorButton4",-16711936))
+                myDao.insertColorData(ColorData("ColorButton5", -16776961))
+                myDao.insertColorData(ColorData("ColorButton6",-7829368))
+            }
+            buttonColorList = myDao.getColorData()
         }
     }
 
     fun getActivePenData(){
         var activePenData = myDao.getActivePenData()
+        System.out.println("${activePenData[0]}")
 
         if(activePenData[0].color!=null){
             penInfo.setPenColor(activePenData[0].color!!)
         }
         penInfo.setPenWidth(activePenData[0].width!!)
         penInfo.setPenMode(PenModes.indexOf(activePenData[0].mode))
-        System.out.println("${penInfo.getPenColor()}, ${penInfo.getPenWidth()}, ${PenModes[penInfo.getPenMode()]}")
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
@@ -109,25 +120,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-        when(penInfo.getPenColor()){
-            Color.RED -> {
-                System.out.println("PEN COLOR IS RED")
-            }
-            Color.GREEN -> {
-                System.out.println("PEN COLOR IS GREEN")
-            }
-            Color.YELLOW -> {
-                System.out.println("PEN COLOR IS YELLOW")
-            }
-            Color.BLUE -> {
-                System.out.println("PEN COLOR IS BLUE")
-            }
-            Color.BLACK -> {
-                System.out.println("PEN COLOR IS BLACK")
-            }
-        }
-        makeNoteList()
 
+        buttonColorList = myDao.getColorData()
+        makeNoteList()
     }
     fun makeNoteList(){
         noteList=myDao.getAllNoteData()
@@ -141,7 +136,6 @@ class MainActivity : AppCompatActivity() {
 
         var innerLayout:LinearLayout?=null
         for((i, noteInfo) in noteList.withIndex()) {
-
                 if (i % divValue == 0) {
                     innerLayout = LinearLayout(this)
                     val param = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -205,6 +199,13 @@ class MainActivity : AppCompatActivity() {
                                     .putExtra("penColor", penInfo.getPenColor()) // penInfo 정보 보내기
                                     .putExtra("penWidth", penInfo.getPenWidth())
                                     .putExtra("penMode", penInfo.getPenMode())
+                                    .putExtra("ColorButton1", buttonColorList[0].color)
+                                    .putExtra("ColorButton2", buttonColorList[1].color)
+                                    .putExtra("ColorButton3", buttonColorList[2].color)
+                                    .putExtra("ColorButton4", buttonColorList[3].color)
+                                    .putExtra("ColorButton5", buttonColorList[4].color)
+                                    .putExtra("ColorButton6", buttonColorList[5].color)
+
                             )
                         }
                     }
@@ -344,6 +345,12 @@ class MainActivity : AppCompatActivity() {
                                         .putExtra("penColor",penInfo.getPenColor()) // penInfo 정보 보내기
                                         .putExtra("penWidth",penInfo.getPenWidth())
                                         .putExtra("penMode",penInfo.getPenMode())
+                                        .putExtra("ColorButton1", buttonColorList[0].color)
+                                        .putExtra("ColorButton2", buttonColorList[1].color)
+                                        .putExtra("ColorButton3", buttonColorList[2].color)
+                                        .putExtra("ColorButton4", buttonColorList[3].color)
+                                        .putExtra("ColorButton5", buttonColorList[4].color)
+                                        .putExtra("ColorButton6", buttonColorList[5].color)
                                 )
                             }
                         }

@@ -24,7 +24,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.pow
 
@@ -270,7 +269,6 @@ class DrawingView @JvmOverloads constructor(
                 }
                 ERASER -> {
                     canvas.drawCircle(eraserPointX, eraserPointY, 10f, drawingPaint)
-                    //eraserPath.addCircle(eraserPointX, eraserPointY, 10f, Path.Direction.CCW)
                 }
             }
         }

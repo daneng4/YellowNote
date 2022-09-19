@@ -26,13 +26,6 @@ class PenInfo : ViewModel() {
     }
 
     fun setPenColor(color:Int?){
-//        when(this.color.value){
-//            Color.BLACK -> System.out.println("BLACK")
-//            Color.RED -> System.out.println("RED")
-//            Color.YELLOW -> System.out.println("YELLOW")
-//            Color.GREEN -> System.out.println("GREEN")
-//            Color.BLUE -> System.out.println("BLUE")
-//        }
         this.color.value = color
     }
 

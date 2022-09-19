@@ -2,8 +2,6 @@ package com.hansung.notedatabase
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
-import java.util.concurrent.Flow
-import com.hansung.yellownote.drawing.*
 
 @Dao
 interface MyDAO {
@@ -12,6 +10,9 @@ interface MyDAO {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNoteData(note: NoteData)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertColorData(color: ColorData)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertWordAudio(wordAudio:WordAudio)
@@ -31,6 +32,12 @@ interface MyDAO {
     @Query("SELECT count(*) FROM pen_data_table")
     fun getPenDataCount() : Int
 
+    @Query("SELECT * FROM color_table")
+    fun getColorData() : List<ColorData>
+
+    @Query("SELECT count(*) FROM color_table")
+    fun getColorDataCount() : Int
+
     @Query("SELECT * FROM note_data_table")
     fun getAllNoteData(): List<NoteData>
 
@@ -41,10 +48,13 @@ interface MyDAO {
     @Query("UPDATE pen_data_table SET width = :width, color= :color ,isActive= :isActive WHERE PenMode =:mode")
     fun updatePenData(mode:String, width: Float?, color: Int?, isActive: Boolean?)
 
+    @Query("UPDATE color_table SET color= :color WHERE ButtonName =:buttonName")
+    fun updateColorData(buttonName:String, color: Int)
+
     @Delete
     suspend fun deleteNoteData(noteData: NoteData) // primary key is used to find the student
 
-//
+
 //    @Transaction
 //    @Query("SELECT * FROM student_table WHERE student_id = :id")
 //    suspend fun getStudentsWithEnrollment(id: Int): List<StudentWithEnrollments>

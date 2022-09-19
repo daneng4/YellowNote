@@ -94,9 +94,10 @@
 
    <LinearLayout
        android:id="@+id/linearLayout"
-       android:layout_width="0dp"
-       android:layout_height="55dp"
+       android:layout_width="wrap_content"
+       android:layout_height="65dp"
        android:divider="?android:dividerHorizontal"
+       android:gravity="center"
        android:orientation="horizontal"
        android:paddingTop="5dp"
        android:paddingEnd="5dp"
@@ -104,11 +105,13 @@
        android:paddingBottom="5dp"
        android:showDividers="middle"
        app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintHorizontal_bias="0.5"
        app:layout_constraintStart_toStartOf="parent"
        app:layout_constraintTop_toBottomOf="@+id/tabLayout">
 
-      <LinearLayout
-          android:layout_width="match_parent"
+      <androidx.constraintlayout.widget.ConstraintLayout
+          android:id="@+id/linearLayout3"
+          android:layout_width="wrap_content"
           android:layout_height="match_parent"
           android:layout_weight="1"
           android:orientation="horizontal">
@@ -116,46 +119,83 @@
          <ImageButton
              android:id="@+id/PenBtn"
              android:layout_width="wrap_content"
-             android:layout_height="match_parent"
-             android:layout_weight="1"
+             android:layout_height="wrap_content"
+             android:layout_marginEnd="35dp"
              android:background="@null"
-             app:srcCompat="@drawable/ic_pen" />
+             app:layout_constraintBottom_toBottomOf="parent"
+             app:layout_constraintEnd_toStartOf="@+id/HighlighterBtn"
+             app:layout_constraintHorizontal_bias="0.5"
+             app:layout_constraintHorizontal_chainStyle="packed"
+             app:layout_constraintStart_toStartOf="parent"
+             app:layout_constraintTop_toTopOf="parent"
+             app:srcCompat="@drawable/ic_pen"
+             tools:layout_conversion_absoluteHeight="55dp"
+             tools:layout_conversion_absoluteWidth="21dp" />
 
          <ImageButton
              android:id="@+id/HighlighterBtn"
              android:layout_width="wrap_content"
-             android:layout_height="match_parent"
-             android:layout_weight="1"
+             android:layout_height="wrap_content"
+             android:layout_marginEnd="35dp"
              android:background="@null"
-             app:srcCompat="@drawable/ic_highlighter" />
+             app:layout_constraintBottom_toBottomOf="parent"
+             app:layout_constraintEnd_toStartOf="@+id/EraserBtn"
+             app:layout_constraintHorizontal_bias="0.5"
+             app:layout_constraintStart_toEndOf="@+id/PenBtn"
+             app:layout_constraintTop_toTopOf="parent"
+             app:srcCompat="@drawable/ic_highlighter"
+             tools:layout_conversion_absoluteHeight="55dp"
+             tools:layout_conversion_absoluteWidth="21dp" />
 
          <ImageButton
              android:id="@+id/EraserBtn"
              android:layout_width="wrap_content"
-             android:layout_height="match_parent"
-             android:layout_weight="1"
+             android:layout_height="wrap_content"
+             android:layout_marginEnd="35dp"
              android:background="@null"
-             app:srcCompat="@drawable/ic_eraser" />
+             app:layout_constraintBottom_toBottomOf="parent"
+             app:layout_constraintEnd_toStartOf="@+id/ClippingBtn"
+             app:layout_constraintHorizontal_bias="0.5"
+             app:layout_constraintStart_toEndOf="@+id/HighlighterBtn"
+             app:layout_constraintTop_toTopOf="parent"
+             app:srcCompat="@drawable/ic_eraser"
+             tools:layout_conversion_absoluteHeight="55dp"
+             tools:layout_conversion_absoluteWidth="21dp" />
 
          <ImageButton
              android:id="@+id/ClippingBtn"
              android:layout_width="wrap_content"
-             android:layout_height="match_parent"
-             android:layout_weight="1"
+             android:layout_height="wrap_content"
+             android:layout_marginEnd="35dp"
              android:background="@null"
-             app:srcCompat="@drawable/ic_lasso" />
+             app:layout_constraintBottom_toBottomOf="parent"
+             app:layout_constraintEnd_toStartOf="@+id/TextBtn"
+             app:layout_constraintHorizontal_bias="0.5"
+             app:layout_constraintStart_toEndOf="@+id/EraserBtn"
+             app:layout_constraintTop_toTopOf="parent"
+             app:srcCompat="@drawable/ic_lasso"
+             tools:layout_conversion_absoluteHeight="55dp"
+             tools:layout_conversion_absoluteWidth="21dp" />
 
          <ImageButton
              android:id="@+id/TextBtn"
              android:layout_width="wrap_content"
-             android:layout_height="match_parent"
-             android:layout_weight="1"
+             android:layout_height="wrap_content"
+             android:layout_marginEnd="35dp"
              android:background="@null"
-             app:srcCompat="@drawable/ic_text" />
-      </LinearLayout>
+             app:layout_constraintBottom_toBottomOf="parent"
+             app:layout_constraintEnd_toEndOf="parent"
+             app:layout_constraintHorizontal_bias="0.5"
+             app:layout_constraintStart_toEndOf="@+id/ClippingBtn"
+             app:layout_constraintTop_toTopOf="parent"
+             app:srcCompat="@drawable/ic_text"
+             tools:layout_conversion_absoluteHeight="55dp"
+             tools:layout_conversion_absoluteWidth="33dp" />
+      </androidx.constraintlayout.widget.ConstraintLayout>
 
-      <LinearLayout
-          android:layout_width="match_parent"
+      <androidx.constraintlayout.widget.ConstraintLayout
+          android:id="@+id/linearLayout2"
+          android:layout_width="wrap_content"
           android:layout_height="match_parent"
           android:layout_weight="1"
           android:orientation="horizontal"
@@ -167,74 +207,94 @@
           android:showDividers="middle">
 
          <Button
-             android:id="@+id/color1Btn"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_gravity="center"
-             android:layout_marginRight="10dp"
-             android:layout_weight="1"
+             android:id="@+id/ColorButton1"
+             android:layout_width="25dp"
+             android:layout_height="25dp"
+             android:layout_marginStart="35dp"
+             android:layout_marginEnd="35dp"
              android:background="@drawable/circle_button"
-             android:minWidth="0dp"
-             android:minHeight="0dp"
-             app:backgroundTint="#FF0000" />
+             android:minWidth="30dp"
+             android:minHeight="30dp"
+             app:backgroundTint="#FF0000"
+             app:layout_constraintBottom_toBottomOf="@+id/ColorButton2"
+             app:layout_constraintEnd_toStartOf="@+id/ColorButton2"
+             app:layout_constraintHorizontal_chainStyle="packed"
+             app:layout_constraintStart_toStartOf="parent"
+             app:layout_constraintTop_toTopOf="@+id/ColorButton2"
+             app:layout_constraintVertical_bias="1.0" />
 
          <Button
-             android:id="@+id/color2Btn"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_gravity="center"
-             android:layout_marginRight="10dp"
-             android:layout_weight="1"
+             android:id="@+id/ColorButton2"
+             android:layout_width="25dp"
+             android:layout_height="25dp"
+             android:layout_marginEnd="35dp"
              android:background="@drawable/circle_button"
-             android:minWidth="0dp"
-             android:minHeight="0dp"
-             app:backgroundTint="#0000FF" />
+             android:minWidth="30dp"
+             android:minHeight="30dp"
+             app:backgroundTint="#0000FF"
+             app:layout_constraintBottom_toBottomOf="@+id/ColorButton3"
+             app:layout_constraintEnd_toStartOf="@+id/ColorButton3"
+             app:layout_constraintStart_toEndOf="@+id/ColorButton1"
+             app:layout_constraintTop_toTopOf="@+id/ColorButton3"
+             app:layout_constraintVertical_bias="1.0" />
 
          <Button
-             android:id="@+id/color3Btn"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_gravity="center"
-             android:layout_marginRight="10dp"
-             android:layout_weight="1"
+             android:id="@+id/ColorButton3"
+             android:layout_width="25dp"
+             android:layout_height="25dp"
+             android:layout_marginEnd="35dp"
              android:background="@drawable/circle_button"
-             android:minWidth="0dp"
-             android:minHeight="0dp"
-             app:backgroundTint="#000000" />
+             android:minWidth="30dp"
+             android:minHeight="30dp"
+             app:backgroundTint="#000000"
+             app:layout_constraintBottom_toBottomOf="@+id/ColorButton4"
+             app:layout_constraintEnd_toStartOf="@+id/ColorButton4"
+             app:layout_constraintStart_toEndOf="@+id/ColorButton2"
+             app:layout_constraintTop_toTopOf="@+id/ColorButton4"
+             app:layout_constraintVertical_bias="1.0" />
 
          <Button
-             android:id="@+id/button5"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_gravity="center"
-             android:layout_marginRight="10dp"
-             android:layout_weight="1"
+             android:id="@+id/ColorButton4"
+             android:layout_width="25dp"
+             android:layout_height="25dp"
+             android:layout_marginEnd="35dp"
              android:background="@drawable/circle_button"
-             android:minWidth="0dp"
-             android:minHeight="0dp" />
+             android:minWidth="30dp"
+             app:layout_constraintBottom_toBottomOf="@+id/ColorButton5"
+             app:layout_constraintEnd_toStartOf="@+id/ColorButton5"
+             app:layout_constraintStart_toEndOf="@+id/ColorButton3"
+             app:layout_constraintTop_toTopOf="@+id/ColorButton5"
+             app:layout_constraintVertical_bias="1.0" />
 
          <Button
-             android:id="@+id/button8"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_gravity="center"
-             android:layout_marginRight="10dp"
-             android:layout_weight="1"
+             android:id="@+id/ColorButton5"
+             android:layout_width="25dp"
+             android:layout_height="25dp"
+             android:layout_marginEnd="35dp"
              android:background="@drawable/circle_button"
-             android:minWidth="0dp"
-             android:minHeight="0dp" />
+             android:minWidth="30dp"
+             android:minHeight="30dp"
+             app:layout_constraintBottom_toBottomOf="@+id/ColorButton6"
+             app:layout_constraintEnd_toStartOf="@+id/ColorButton6"
+             app:layout_constraintStart_toEndOf="@+id/ColorButton4"
+             app:layout_constraintTop_toTopOf="@+id/ColorButton6"
+             app:layout_constraintVertical_bias="1.0" />
 
          <Button
-             android:id="@+id/button6"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_gravity="center"
-             android:layout_weight="1"
+             android:id="@+id/ColorButton6"
+             android:layout_width="25dp"
+             android:layout_height="25dp"
+             android:layout_marginEnd="10dp"
              android:background="@drawable/circle_button"
-             android:minWidth="0dp"
-             android:minHeight="0dp" />
-      </LinearLayout>
+             android:minWidth="30dp"
+             android:minHeight="30dp"
+             app:layout_constraintBottom_toBottomOf="parent"
+             app:layout_constraintEnd_toEndOf="parent"
+             app:layout_constraintHorizontal_bias="0.5"
+             app:layout_constraintStart_toEndOf="@+id/ColorButton5"
+             app:layout_constraintTop_toTopOf="parent" />
 
+      </androidx.constraintlayout.widget.ConstraintLayout>
    </LinearLayout>
 
    <androidx.viewpager2.widget.ViewPager2

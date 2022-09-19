@@ -7,4 +7,7 @@
     <string name="addMethodTemplate">노트</string>
     <string name="no_permission">접근 권한이 필요합니다.</string>
     <string name="req_permission_reason">접근 권한이 필요합니다.</string>
+    <string name="width">펜 굵기</string>
+    <string name="transparency">잉크 투명도</string>
+
 </resources>
