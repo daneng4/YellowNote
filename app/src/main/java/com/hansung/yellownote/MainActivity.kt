@@ -102,9 +102,9 @@ class MainActivity : AppCompatActivity() {
     fun getActivePenData(){
         var activePenData = myDao.getActivePenData()
         System.out.println("${activePenData[0]}")
-
         if(activePenData[0].color!=null){
             penInfo.setPenColor(activePenData[0].color!!)
+            System.out.println("${penInfo.getPenColor()}")
         }
         penInfo.setPenWidth(activePenData[0].width!!)
         penInfo.setPenMode(PenModes.indexOf(activePenData[0].mode))
@@ -192,6 +192,7 @@ class MainActivity : AppCompatActivity() {
                 if (!isLongButtonClick) {
                     if (File(noteInfo.recordFileLocation).isFile) {
                         if (File(noteInfo.recordFileLocation).canRead()) {
+                            System.out.println("${penInfo.getPenColor()}")
                             startActivity(
                                 Intent(this, PdfActivity()::class.java)
                                     .putExtra("filePath", noteInfo.recordFileLocation)
