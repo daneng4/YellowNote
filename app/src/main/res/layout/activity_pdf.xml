@@ -18,6 +18,18 @@
        app:layout_constraintStart_toStartOf="parent"
        app:layout_constraintTop_toTopOf="parent" />
 
+<!--   <TextView-->
+<!--       android:id="@+id/noteTitle"-->
+<!--       android:layout_width="wrap_content"-->
+<!--       android:layout_height="wrap_content"-->
+<!--       android:layout_marginStart="8dp"-->
+<!--       android:text="TextView"-->
+<!--       android:textAppearance="@style/TextAppearance.AppCompat.Medium"-->
+<!--       app:layout_constraintBottom_toTopOf="@+id/linearLayout"-->
+<!--       app:layout_constraintStart_toStartOf="@+id/toolbar"-->
+<!--       app:layout_constraintTop_toTopOf="parent"-->
+<!--       android:textColor="#ffffff"/>-->
+
    <ImageButton
        android:id="@+id/imageButton"
        android:layout_width="48dp"
@@ -27,7 +39,7 @@
        android:layout_marginBottom="4dp"
        android:background="@null"
        android:scaleType="fitXY"
-       app:layout_constraintBottom_toTopOf="@+id/tabLayout"
+       app:layout_constraintBottom_toTopOf="@+id/linearLayout"
        app:layout_constraintEnd_toEndOf="parent"
        app:layout_constraintTop_toTopOf="parent"
        app:srcCompat="@drawable/ic_start_record" />
@@ -41,7 +53,7 @@
        android:layout_marginBottom="8dp"
        android:background="@null"
        android:scaleType="fitXY"
-       app:layout_constraintBottom_toTopOf="@+id/tabLayout"
+       app:layout_constraintBottom_toTopOf="@+id/linearLayout"
        app:layout_constraintEnd_toStartOf="@+id/imageButton"
        app:layout_constraintTop_toTopOf="parent"
        app:srcCompat="@drawable/ic_redo" />
@@ -55,42 +67,10 @@
        android:layout_marginBottom="8dp"
        android:background="@null"
        android:scaleType="fitXY"
-       app:layout_constraintBottom_toTopOf="@+id/tabLayout"
+       app:layout_constraintBottom_toTopOf="@+id/linearLayout"
        app:layout_constraintEnd_toStartOf="@+id/imageButton4"
        app:layout_constraintTop_toTopOf="parent"
        app:srcCompat="@drawable/ic_undo" />
-
-   <com.google.android.material.tabs.TabLayout
-       android:id="@+id/tabLayout"
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content"
-       app:layout_constraintEnd_toEndOf="parent"
-       app:layout_constraintStart_toStartOf="parent"
-       app:layout_constraintTop_toBottomOf="@+id/toolbar"
-       app:tabGravity="fill"
-       app:tabIconTint="@color/logoYellow"
-       app:tabIndicatorColor="@color/logoYellow"
-       app:tabMaxWidth="0dp"
-       app:tabMode="fixed"
-       app:tabSelectedTextColor="@color/logoYellow"
-       app:tabTextAppearance="@style/NoteTabItemText"
-       app:tabTextColor="#535353">
-
-      <com.google.android.material.tabs.TabItem
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:text="Note1" />
-
-      <com.google.android.material.tabs.TabItem
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:text="note2" />
-
-      <com.google.android.material.tabs.TabItem
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:text="노트" />
-   </com.google.android.material.tabs.TabLayout>
 
    <LinearLayout
        android:id="@+id/linearLayout"
@@ -107,7 +87,7 @@
        app:layout_constraintEnd_toEndOf="parent"
        app:layout_constraintHorizontal_bias="0.5"
        app:layout_constraintStart_toStartOf="parent"
-       app:layout_constraintTop_toBottomOf="@+id/tabLayout">
+       app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
       <androidx.constraintlayout.widget.ConstraintLayout
           android:id="@+id/linearLayout3"
@@ -123,27 +103,12 @@
              android:layout_marginEnd="35dp"
              android:background="@null"
              app:layout_constraintBottom_toBottomOf="parent"
-             app:layout_constraintEnd_toStartOf="@+id/HighlighterBtn"
+             app:layout_constraintEnd_toStartOf="@+id/EraserBtn"
              app:layout_constraintHorizontal_bias="0.5"
              app:layout_constraintHorizontal_chainStyle="packed"
              app:layout_constraintStart_toStartOf="parent"
              app:layout_constraintTop_toTopOf="parent"
              app:srcCompat="@drawable/ic_pen"
-             tools:layout_conversion_absoluteHeight="55dp"
-             tools:layout_conversion_absoluteWidth="21dp" />
-
-         <ImageButton
-             android:id="@+id/HighlighterBtn"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_marginEnd="35dp"
-             android:background="@null"
-             app:layout_constraintBottom_toBottomOf="parent"
-             app:layout_constraintEnd_toStartOf="@+id/EraserBtn"
-             app:layout_constraintHorizontal_bias="0.5"
-             app:layout_constraintStart_toEndOf="@+id/PenBtn"
-             app:layout_constraintTop_toTopOf="parent"
-             app:srcCompat="@drawable/ic_highlighter"
              tools:layout_conversion_absoluteHeight="55dp"
              tools:layout_conversion_absoluteWidth="21dp" />
 
@@ -156,7 +121,7 @@
              app:layout_constraintBottom_toBottomOf="parent"
              app:layout_constraintEnd_toStartOf="@+id/ClippingBtn"
              app:layout_constraintHorizontal_bias="0.5"
-             app:layout_constraintStart_toEndOf="@+id/HighlighterBtn"
+             app:layout_constraintStart_toEndOf="@+id/PenBtn"
              app:layout_constraintTop_toTopOf="parent"
              app:srcCompat="@drawable/ic_eraser"
              tools:layout_conversion_absoluteHeight="55dp"
