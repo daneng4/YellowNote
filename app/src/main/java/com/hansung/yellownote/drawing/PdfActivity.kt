@@ -3,6 +3,7 @@ package com.hansung.yellownote.drawing
 import android.content.DialogInterface
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.PointF
 import android.os.Build
 import android.os.Bundle
 import android.widget.Button
@@ -12,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
 import com.hansung.notedatabase.*
+import com.hansung.yellownote.MqttAdapter
 import com.hansung.yellownote.R
 import com.hansung.yellownote.database.Converters
 import com.hansung.yellownote.databinding.ActivityPdfBinding
@@ -33,10 +35,11 @@ class PdfActivity() : AppCompatActivity(){
     lateinit var viewPager:ViewPager2
     private lateinit var filePath : String
     lateinit var penBtn:ImageButton
-    lateinit var highlighterBtn:ImageButton
     lateinit var eraserBtn:ImageButton
     lateinit var clippingBtn:ImageButton
     lateinit var textBtn:ImageButton
+
+    lateinit var drawingView:DrawingView
 
     private var btnClickTime:Long = 0
     lateinit var ColorButton1:Button
@@ -59,26 +62,25 @@ class PdfActivity() : AppCompatActivity(){
     val typeConverter=Converters()
     lateinit var myDao : MyDAO // 데이터 베이스
     lateinit var penInfo: PenInfo
-    var penWidth = 10F
     var clippingPenWidth = 5F
 
     private var penSettingPopup:PenSettingDialog? = null
-    private var highlighterSettingPopup:HighlighterSettingDialog? = null
     private var eraserSettingPopup:PenSettingDialog? = null
-//    val client=MqttAdapter()
+    lateinit var client:MqttAdapter
 
     // DrawingView.kt에서 정의된 mode와 같아야함
-    val PenModes = ArrayList<String>(Arrays.asList("PEN","HIGHLIGHTER","ERASER","TEXT","CLIPPING"))
+    val PenModes = ArrayList<String>(Arrays.asList("PEN","ERASER","TEXT","CLIPPING"))
     val PEN = 0
-    val HIGHLIGHTER = 1
-    val ERASER = 2
-    val TEXT = 3
-    val CLIPPING = 4
+    val ERASER = 1
+    val TEXT = 2
+    val CLIPPING = 3
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        System.out.println("onCreate")
+        System.out.println("================= onCreate ===================")
+        client = MqttAdapter()
+
         binding = ActivityPdfBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -86,6 +88,7 @@ class PdfActivity() : AppCompatActivity(){
 //        getPenDataTable()
         viewPager = binding.viewPager
         viewPager.adapter = PageAdaptor()
+        viewPager.offsetLeftAndRight(1)
         filePath = intent.getStringExtra("filePath")!!
         val noteName=intent.getStringExtra("noteName")?:""
 
@@ -95,10 +98,13 @@ class PdfActivity() : AppCompatActivity(){
 
         viewPager.currentItem=lastPage
         pdfReader = PdfReader(targetFile, filePath, viewPager).apply {
-//            println("makePageInfoMap")
+            System.out.println("================= makePageInfoMap ===================")
             this.makePageInfoMap(afterPageInfo)
+
             if(pageInfoMap[lastPage] != null){
-                pageInfo = pageInfoMap[lastPage]!!
+                this.pageInfo = pageInfoMap[lastPage]!!
+                pageInfo = this.pageInfo
+                System.out.println("${pageInfoMap[lastPage] != null }")
             }
             this.setPageNumberToPageInfo(lastPage)
             (viewPager.adapter as PageAdaptor).setupPdfRenderer(this)
@@ -125,8 +131,6 @@ class PdfActivity() : AppCompatActivity(){
         })
 
         penBtn = binding.PenBtn
-        highlighterBtn = binding.HighlighterBtn
-
         clippingBtn = binding.ClippingBtn
         eraserBtn = binding.EraserBtn
         textBtn = binding.TextBtn
@@ -165,8 +169,10 @@ class PdfActivity() : AppCompatActivity(){
         }
 
         penBtn.setOnClickListener{
-            if (penBtn.tag == R.drawable.ic_pen_clicked) {
+            // clipping 네모 표시 있으면 없애기
+            checkResetClipping()
 
+            if (penBtn.tag == R.drawable.ic_pen_clicked) {
                 if(penSettingPopup == null){
                     System.out.println("penSettingPopup == null")
                     var location = IntArray(2)
@@ -192,28 +198,18 @@ class PdfActivity() : AppCompatActivity(){
                 changeBtnImage(PEN)
             }
         }
-        highlighterBtn.setOnClickListener {
-            if (highlighterBtn.tag == R.drawable.ic_highlighter_clicked) {
-                if(highlighterSettingPopup == null){
-                    var location = IntArray(2)
-                    highlighterBtn.getLocationOnScreen(location)
-                    highlighterSettingPopup = HighlighterSettingDialog(this)
-                    highlighterSettingPopup!!.show(penInfo, 30, location[0],location[1])
-                }
-                else{
-                    highlighterSettingPopup!!.dismiss()
-                    highlighterSettingPopup = null
-                }
-            } else {
-                changeBtnImage(HIGHLIGHTER)
-            }
-        }
-        eraserBtn.setOnClickListener {
-            changeBtnImage(ERASER)
-        }
-        eraserBtn.setOnClickListener{
-            if (eraserBtn.tag == R.drawable.ic_eraser_clicked) {
+//        eraserBtn.setOnClickListener {
+//            // clipping 네모 표시 있으면 없애기
+//            checkResetClipping()
+//
+//            changeBtnImage(ERASER)
+//        }
 
+        eraserBtn.setOnClickListener{
+            // clipping 네모 표시 있으면 없애기
+            checkResetClipping()
+
+            if (eraserBtn.tag == R.drawable.ic_eraser_clicked) {
                 if(eraserSettingPopup == null){
                     var location = IntArray(2)
                     eraserBtn.getLocationOnScreen(location)
@@ -258,6 +254,17 @@ class PdfActivity() : AppCompatActivity(){
         println("onCreate끝")
 
 
+    }
+
+    private fun checkResetClipping(){
+        if(drawingView.selectedPaths.size>0){
+            drawingView.selectedPaths.clear()
+            if(drawingView.popupWindow!=null)
+                drawingView.popupWindow.dismiss()
+            drawingView.clippingStartPoint = PointF(-1f,-1f)
+            drawingView.clippingEndPoint = PointF(-1f,-1f)
+            drawingView.invalidate()
+        }
     }
 
     // 펜 색상 선택 버튼 색깔 변경
@@ -318,7 +325,6 @@ class PdfActivity() : AppCompatActivity(){
                     penBtn.tag = R.drawable.ic_pen
                     penBtn.setImageResource(R.drawable.ic_pen)
                 }
-                HIGHLIGHTER -> highlighterBtn.setImageResource(R.drawable.ic_highlighter)
                 ERASER -> {
                     eraserBtn.tag = R.drawable.ic_eraser
                     eraserBtn.setImageResource(R.drawable.ic_eraser)
@@ -333,11 +339,6 @@ class PdfActivity() : AppCompatActivity(){
                 penBtn.tag = R.drawable.ic_pen_clicked
                 penBtn.setImageResource(R.drawable.ic_pen_clicked)
                 setPenData(myDao.getAllPenData()[PEN].color, myDao.getAllPenData()[PEN].width, PEN)
-            }
-            HIGHLIGHTER->{
-                highlighterBtn.tag = R.drawable.ic_highlighter_clicked
-                highlighterBtn.setImageResource(R.drawable.ic_highlighter_clicked)
-                setPenData(Color.BLACK, penWidth, HIGHLIGHTER)
             }
             ERASER->{
                 eraserBtn.tag = R.drawable.ic_eraser_clicked
@@ -409,15 +410,12 @@ class PdfActivity() : AppCompatActivity(){
 
     override fun onDestroy() {
         super.onDestroy()
+        System.out.println("PdfActivity Destroy************************")
 
         //다이얼로그가 띄워져 있는 상태(showing)인 경우 dismiss() 호출
         if (penSettingPopup != null) {
             penSettingPopup!!.dismiss()
             penSettingPopup = null
-        }
-        else if (highlighterSettingPopup != null) {
-            highlighterSettingPopup!!.dismiss()
-            highlighterSettingPopup = null
         }
 
         pdfReader?.close()

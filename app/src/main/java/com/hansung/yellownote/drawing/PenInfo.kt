@@ -13,10 +13,9 @@ class PenInfo : ViewModel() {
 
     val NONE = -1
     val PEN = 0
-    val HIGHLIGHTER = 1
-    val ERASER = 2
-    val TEXT = 3
-    val CLIPPING = 4
+    val ERASER = 1
+    val TEXT = 2
+    val CLIPPING = 3
     var MovingClipping = false
 
     init{

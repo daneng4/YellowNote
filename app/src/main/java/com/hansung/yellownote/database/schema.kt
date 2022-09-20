@@ -11,7 +11,6 @@ data class PenData (
     @PrimaryKey @ColumnInfo(name="PenMode")val mode: String,
     val width:Float,
     val color:Int?,
-    val Transparency:Int?,
     val isActive:Boolean
 )
 

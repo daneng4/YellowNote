@@ -70,15 +70,14 @@ class Converters {
         val tmp=Gson().fromJson(json,Array<CustomPath>::class.java).toList()
         val customPath= java.util.ArrayList<CustomPath>()
         CoroutineScope(Dispatchers.Main).launch {
+            var redrawPath = SerializablePath()
             for(path in tmp){
-                System.out.println("편집 전) path.path.isEmpty = ${path.path.isEmpty}")
-                var redrawPath = SerializablePath()
+                redrawPath = SerializablePath()
                 redrawPath.moveTo(path.startPoint.x,path.startPoint.y)
                 for(i in 0..path.points.size-1)
                     redrawPath.lineTo(path.points[i].x,path.points[i].y)
                 redrawPath.lineTo(path.endPoint.x, path.endPoint.y)
                 path.path = redrawPath
-                System.out.println("편집 후) path.path.isEmpty = ${path.path.isEmpty}")
                 customPath.add(path)
             }
         }
