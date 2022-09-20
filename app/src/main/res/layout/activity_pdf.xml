@@ -63,7 +63,7 @@
    <com.google.android.material.tabs.TabLayout
        android:id="@+id/tabLayout"
        android:layout_width="match_parent"
-       android:layout_height="wrap_content"
+       android:layout_height="1dp"
        app:layout_constraintEnd_toEndOf="parent"
        app:layout_constraintStart_toStartOf="parent"
        app:layout_constraintTop_toBottomOf="@+id/toolbar"
@@ -123,27 +123,12 @@
              android:layout_marginEnd="35dp"
              android:background="@null"
              app:layout_constraintBottom_toBottomOf="parent"
-             app:layout_constraintEnd_toStartOf="@+id/HighlighterBtn"
+             app:layout_constraintEnd_toStartOf="@+id/EraserBtn"
              app:layout_constraintHorizontal_bias="0.5"
              app:layout_constraintHorizontal_chainStyle="packed"
              app:layout_constraintStart_toStartOf="parent"
              app:layout_constraintTop_toTopOf="parent"
              app:srcCompat="@drawable/ic_pen"
-             tools:layout_conversion_absoluteHeight="55dp"
-             tools:layout_conversion_absoluteWidth="21dp" />
-
-         <ImageButton
-             android:id="@+id/HighlighterBtn"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_marginEnd="35dp"
-             android:background="@null"
-             app:layout_constraintBottom_toBottomOf="parent"
-             app:layout_constraintEnd_toStartOf="@+id/EraserBtn"
-             app:layout_constraintHorizontal_bias="0.5"
-             app:layout_constraintStart_toEndOf="@+id/PenBtn"
-             app:layout_constraintTop_toTopOf="parent"
-             app:srcCompat="@drawable/ic_highlighter"
              tools:layout_conversion_absoluteHeight="55dp"
              tools:layout_conversion_absoluteWidth="21dp" />
 
@@ -156,7 +141,7 @@
              app:layout_constraintBottom_toBottomOf="parent"
              app:layout_constraintEnd_toStartOf="@+id/ClippingBtn"
              app:layout_constraintHorizontal_bias="0.5"
-             app:layout_constraintStart_toEndOf="@+id/HighlighterBtn"
+             app:layout_constraintStart_toEndOf="@+id/PenBtn"
              app:layout_constraintTop_toTopOf="parent"
              app:srcCompat="@drawable/ic_eraser"
              tools:layout_conversion_absoluteHeight="55dp"
@@ -296,6 +281,28 @@
 
       </androidx.constraintlayout.widget.ConstraintLayout>
    </LinearLayout>
+
+   <androidx.constraintlayout.widget.ConstraintLayout
+       android:id="@+id/textLayout"
+       android:layout_width="0dp"
+       android:layout_height="0dp"
+       app:layout_constraintBottom_toBottomOf="parent"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+
+      <EditText
+          android:id="@+id/editTextTextPersonName"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:ems="10"
+          android:inputType="textPersonName"
+          android:text="Name"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toTopOf="parent" />
+   </androidx.constraintlayout.widget.ConstraintLayout>
 
    <androidx.viewpager2.widget.ViewPager2
        android:id="@+id/view_pager"

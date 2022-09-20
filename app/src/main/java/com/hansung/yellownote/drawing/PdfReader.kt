@@ -59,6 +59,7 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
             if(pageInfoMap[page]!=null){
                 drawingView.pageInfo = pageInfoMap[page]
                 CoroutineScope(Dispatchers.Main).launch{
+                    System.out.println("drawingView.pageInfo!! = ${drawingView.pageInfo!!}")
                     for(i in 0..drawingView.pageInfo!!.customPaths.size-1){
                         var customPath = pageInfo.customPaths[i]
                         drawingView.canvas.drawPath(customPath.path, customPath.drawingPaint)

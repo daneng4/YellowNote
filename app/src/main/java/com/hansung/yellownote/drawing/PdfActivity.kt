@@ -33,7 +33,7 @@ class PdfActivity() : AppCompatActivity(){
     lateinit var viewPager:ViewPager2
     private lateinit var filePath : String
     lateinit var penBtn:ImageButton
-    lateinit var highlighterBtn:ImageButton
+//    lateinit var highlighterBtn:ImageButton
     lateinit var eraserBtn:ImageButton
     lateinit var clippingBtn:ImageButton
     lateinit var textBtn:ImageButton
@@ -125,7 +125,7 @@ class PdfActivity() : AppCompatActivity(){
         })
 
         penBtn = binding.PenBtn
-        highlighterBtn = binding.HighlighterBtn
+//        highlighterBtn = binding.HighlighterBtn
 
         clippingBtn = binding.ClippingBtn
         eraserBtn = binding.EraserBtn
@@ -192,22 +192,22 @@ class PdfActivity() : AppCompatActivity(){
                 changeBtnImage(PEN)
             }
         }
-        highlighterBtn.setOnClickListener {
-            if (highlighterBtn.tag == R.drawable.ic_highlighter_clicked) {
-                if(highlighterSettingPopup == null){
-                    var location = IntArray(2)
-                    highlighterBtn.getLocationOnScreen(location)
-                    highlighterSettingPopup = HighlighterSettingDialog(this)
-                    highlighterSettingPopup!!.show(penInfo, 30, location[0],location[1])
-                }
-                else{
-                    highlighterSettingPopup!!.dismiss()
-                    highlighterSettingPopup = null
-                }
-            } else {
-                changeBtnImage(HIGHLIGHTER)
-            }
-        }
+//        highlighterBtn.setOnClickListener {
+//            if (highlighterBtn.tag == R.drawable.ic_highlighter_clicked) {
+//                if(highlighterSettingPopup == null){
+//                    var location = IntArray(2)
+//                    highlighterBtn.getLocationOnScreen(location)
+//                    highlighterSettingPopup = HighlighterSettingDialog(this)
+//                    highlighterSettingPopup!!.show(penInfo, 30, location[0],location[1])
+//                }
+//                else{
+//                    highlighterSettingPopup!!.dismiss()
+//                    highlighterSettingPopup = null
+//                }
+//            } else {
+//                changeBtnImage(HIGHLIGHTER)
+//            }
+//        }
         eraserBtn.setOnClickListener {
             changeBtnImage(ERASER)
         }
@@ -318,7 +318,7 @@ class PdfActivity() : AppCompatActivity(){
                     penBtn.tag = R.drawable.ic_pen
                     penBtn.setImageResource(R.drawable.ic_pen)
                 }
-                HIGHLIGHTER -> highlighterBtn.setImageResource(R.drawable.ic_highlighter)
+//                HIGHLIGHTER -> highlighterBtn.setImageResource(R.drawable.ic_highlighter)
                 ERASER -> {
                     eraserBtn.tag = R.drawable.ic_eraser
                     eraserBtn.setImageResource(R.drawable.ic_eraser)
@@ -334,11 +334,11 @@ class PdfActivity() : AppCompatActivity(){
                 penBtn.setImageResource(R.drawable.ic_pen_clicked)
                 setPenData(myDao.getAllPenData()[PEN].color, myDao.getAllPenData()[PEN].width, PEN)
             }
-            HIGHLIGHTER->{
-                highlighterBtn.tag = R.drawable.ic_highlighter_clicked
-                highlighterBtn.setImageResource(R.drawable.ic_highlighter_clicked)
-                setPenData(Color.BLACK, penWidth, HIGHLIGHTER)
-            }
+//            HIGHLIGHTER->{
+//                highlighterBtn.tag = R.drawable.ic_highlighter_clicked
+//                highlighterBtn.setImageResource(R.drawable.ic_highlighter_clicked)
+//                setPenData(Color.BLACK, penWidth, HIGHLIGHTER)
+//            }
             ERASER->{
                 eraserBtn.tag = R.drawable.ic_eraser_clicked
                 eraserBtn.setImageResource(R.drawable.ic_eraser_clicked)
