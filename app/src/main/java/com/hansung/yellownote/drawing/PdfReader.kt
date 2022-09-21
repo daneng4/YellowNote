@@ -43,6 +43,7 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
 
     fun openPage(page: Int, drawingView: DrawingView) {
         if (page >= pageCount) return
+
         this.drawingView = drawingView
         drawingView.pdfReader = this
         drawingView.viewPager2 = view_pager
@@ -56,7 +57,7 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
 
             if(pageInfoMap[page]!=null){
                 drawingView.pageInfo = pageInfoMap[page]
-//                drawingView.setTextLayout()
+                drawingView.setTextLayout()
 //                CoroutineScope(Dispatchers.Main).launch{
 //                    for(i in 0..drawingView.pageInfo!!.customPaths.size-1){
 //                        var customPath = pageInfo.customPaths[i]
@@ -89,7 +90,11 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
             drawingView.createDrawingBitmap(backgroundBitmap) // 그림 그릴 bitmap 생성
             //setDrawingViewPageInfo(pageInfoMap[page]!!
         }
-        println("pdfReader openpdf end")
+        for(text in this.drawingView.editTexts){
+            this.drawingView.textLayout.removeView(text)
+        }
+        this.drawingView.rootLayout.removeView(this.drawingView.textLayout)
+        this.drawingView.setTextLayout()
     }
     fun setPageNumberToPageInfo(page:Int){
         println("setPageNumberToPageInfo")
@@ -114,13 +119,13 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
     fun changePageInfo(pageInfo: PageInfo){ // 현재 page에 맞는 pageInfo 세팅
         this.pageInfo = pageInfo
         println(this.pageInfo)
-        for(text in drawingView.editTexts){
-            drawingView.textLayout.removeView(text)
-        }
-        drawingView.rootLayout.removeView(drawingView.textLayout)
+//        for(text in drawingView.editTexts){
+//            drawingView.textLayout.removeView(text)
+//        }
+//        drawingView.rootLayout.removeView(drawingView.textLayout)
         drawingView.changePageInfo(pageInfo)
 //        drawingView.changePageInfo(pageInfo)
-        drawingView.setTextLayout()
+        //drawingView.setTextLayout()
     }
 
     fun close() {
