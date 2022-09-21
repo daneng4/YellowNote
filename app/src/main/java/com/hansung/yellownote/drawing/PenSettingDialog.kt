@@ -54,12 +54,16 @@ class PenSettingDialog(context:Context) {
         }
 
         widthTextKor = dialog.findViewById<TextView>(R.id.widthKor)
-        widthText = dialog.findViewById<TextView>(R.id.widthTextView)
+        widthText =
+            dialog.findViewById<TextView>(R.id.widthTextView)
         widthSeekBar = dialog.findViewById<SeekBar>(R.id.penWidthSeekbar)
 
         widthSeekBar.min = 5
         widthSeekBar.max = 30
-        widthSeekBar.progress = myDAO.getAllPenData()[0].width.toInt()
+        if(penInfo.getPenColor()!=null)
+            widthSeekBar.progress = myDAO.getAllPenData()[0].width.toInt()
+        else
+            widthSeekBar.progress = myDAO.getAllPenData()[1].width.toInt()
         widthText.text = "${ widthSeekBar.progress }px"
 
         widthSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
@@ -79,6 +83,7 @@ class PenSettingDialog(context:Context) {
                     myDAO.updatePenData("PEN",penInfo.getPenWidth(),penInfo.getPenColor(),true)
                 else // 지우개인 경우
                     myDAO.updatePenData("ERASER",penInfo.getPenWidth(),null,true)
+                System.out.println("OnStopTrackingTouch = ${penInfo.getPenWidth()}")
             }
         })
     }

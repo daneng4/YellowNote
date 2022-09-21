@@ -11,10 +11,7 @@ import android.text.SpannableStringBuilder
 import android.util.AttributeSet
 import android.view.*
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.PopupWindow
+import android.widget.*
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -63,7 +60,6 @@ class DrawingView @JvmOverloads constructor(
     lateinit var path: SerializablePath
     lateinit var backgroundPaint: Paint
     var drawingPaint: Paint = Paint()
-    var highlighterPaint: Paint = Paint()
     lateinit var drawingBitmap: Bitmap
     lateinit var backgroundBitmap: Bitmap
     lateinit var canvas: Canvas
@@ -88,6 +84,7 @@ class DrawingView @JvmOverloads constructor(
 
     var eraserPaint:Paint = Paint()
     var eraserCirclePaint:Paint = Paint()
+    var eraserCircleRadius = 0f
     var erasedPaths:ArrayList<CustomPath> = ArrayList<CustomPath>()
     var eraserPath:Path = Path()
     lateinit var eraserPoints:CustomPath
@@ -101,10 +98,9 @@ class DrawingView @JvmOverloads constructor(
     var pageInfo: PageInfo? = null
     var textButton=false
     val PEN = 0
-    val HIGHLIGHTER = 1
-    val ERASER = 2
-    val TEXT = 3
-    val CLIPPING = 4
+    val ERASER = 1
+    val TEXT = 2
+    val CLIPPING = 3
     var oldDrawingMode = NONE
 
     lateinit var penInfo : PenInfo
@@ -113,6 +109,7 @@ class DrawingView @JvmOverloads constructor(
         pdfActivity = this.context as PdfActivity
         binding=pdfActivity.binding
         rootLayout=binding.root
+
         PageMode = DRAWING
         textLayout=ConstraintLayout(context!!)
         penInfo = pdfActivity.penInfo
@@ -287,15 +284,17 @@ class DrawingView @JvmOverloads constructor(
         this.setImageBitmap(drawingBitmap)
         setupDrawingView()
         /////////////////////////회전해서 다시 그리기 되려나?
-//        if(pageInfo!!.customPaths.size>0)
-//            redrawPath(false)
+        if(pageInfo!=null){
+            if(pageInfo!!.customPaths.size>0)
+                redrawPath(false)
+        }
+
 //        this.setImageBitmap(backgroundBitmap)
     }
 
     fun setPenStyle(){
         when(penInfo.getPenMode()){
             PEN -> setDrawingPen()
-            HIGHLIGHTER -> setHighlighter()
         }
     }
 
@@ -308,20 +307,6 @@ class DrawingView @JvmOverloads constructor(
             strokeCap = Paint.Cap.ROUND
             strokeWidth = penInfo.getPenWidth()
             System.out.println("drawingview pen 색 설정 ${this.color}")
-        }
-    }
-
-    // 형광펜 설정
-    fun setHighlighter(){
-        highlighterPaint = Paint().apply{
-            color = penInfo.getPenColor()!!
-            style = Paint.Style.STROKE
-            var paintAlpha = Math.round( 10f / 100 * 255)
-            alpha = paintAlpha
-            strokeJoin = Paint.Join.ROUND
-            strokeCap = Paint.Cap.ROUND
-            strokeWidth = penInfo.getPenWidth()
-            System.out.println("highlighterPaint 색 설정 ${this.color}")
         }
     }
 
@@ -341,10 +326,10 @@ class DrawingView @JvmOverloads constructor(
     fun setEraser(){
         eraserPaint = Paint().apply{
             style = Paint.Style.STROKE
-            strokeJoin = Paint.Join.ROUND
-            strokeCap = Paint.Cap.ROUND
+//            strokeJoin = Paint.Join.ROUND
+//            strokeCap = Paint.Cap.ROUND
             strokeWidth = penInfo.getPenWidth()
-            color = Color.WHITE
+            color = Color.RED
             setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))
         }
 
@@ -352,7 +337,7 @@ class DrawingView @JvmOverloads constructor(
             style = Paint.Style.STROKE
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
-            strokeWidth = 5F
+            strokeWidth = 5f
             color = Color.BLACK
         }
     }
@@ -369,7 +354,6 @@ class DrawingView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
 
-        System.out.println("Drawing View OnDraw*******************")
         if (canvas != null) {
             canvas.drawBitmap(backgroundBitmap,EditImagematrix,backgroundPaint) // backgroundBitmap 그리기
             canvas.drawBitmap(drawingBitmap,EditImagematrix,backgroundPaint) // drawingBitmap 그리기
@@ -393,7 +377,7 @@ class DrawingView @JvmOverloads constructor(
                     }
                 }
                 ERASER -> {
-                    canvas.drawCircle(eraserPointX, eraserPointY, 10f, eraserCirclePaint)
+                    canvas.drawCircle(eraserPointX, eraserPointY, eraserCircleRadius, eraserCirclePaint)
                 }
             }
         }
@@ -480,6 +464,7 @@ class DrawingView @JvmOverloads constructor(
             var numberBtn = popup!!.findViewById<Button>(R.id.numberBtn)
 
             englishBtn.setOnClickListener {
+                Toast.makeText(pdfActivity, "영어 손글씨 변환 시도", Toast.LENGTH_LONG).show()
                 saveCanvas("English")
                 popupWindow.dismiss()
                 popup=null
@@ -487,6 +472,7 @@ class DrawingView @JvmOverloads constructor(
                 redrawPath(false)
             }
             hangulBtn.setOnClickListener {
+                Toast.makeText(pdfActivity, "한글 손글씨 변환 시도", Toast.LENGTH_LONG).show()
                 saveCanvas("Hangul")
                 popupWindow.dismiss()
                 popup=null
@@ -494,6 +480,7 @@ class DrawingView @JvmOverloads constructor(
                 redrawPath(false)
             }
             numberBtn.setOnClickListener {
+                Toast.makeText(pdfActivity, "숫자 손글씨 변환 시도", Toast.LENGTH_LONG).show()
                 saveCanvas("Number")
                 popupWindow.dismiss()
                 popup=null
@@ -740,59 +727,27 @@ class DrawingView @JvmOverloads constructor(
                             }
                             invalidate()
                         }
-                        HIGHLIGHTER -> {// 형광펜 모드
-                            when (motionEvent.action) {
-                                MotionEvent.ACTION_DOWN -> {
-                                    if(selectedPaths.size!=0)
-                                        selectedPaths.clear()
-                                    setDrawingPen()
-//                                    System.out.println("현재 drawingView ==> ${this}")
-                                    viewPager2.isUserInputEnabled = false // 페이지 넘기기 비활성화
-                                    PageMode = DRAWING // mode 변경
-
-//                                    path.reset()
-                                    path = SerializablePath()
-                                    path.moveTo(x, y)
-                                    customPath = CustomPath(PointF(x,y)) // path 시작점 저장
-                                    canvas.drawPath(path,highlighterPaint)
-                                }
-                                MotionEvent.ACTION_MOVE -> {
-                                    path.lineTo(x, y)
-                                    customPath.addPoint(PointF(x,y))
-                                    canvas.drawPath(path,highlighterPaint)
-                                }
-                                MotionEvent.ACTION_UP -> {
-                                    path.lineTo(x, y)
-                                    customPath.endPoint = PointF(x,y) // path 끝점 저장
-                                    customPath.path = path
-                                    customPath.drawingPaint = highlighterPaint
-                                    pageInfo?.customPaths?.add(customPath) // pageInfo에 customPath 저장
-                                    canvas.drawPath(path, highlighterPaint)
-//                                    System.out.println("path 개수 = ${pageInfo?.customPaths?.size}")
-                                }
-                            }
-                            invalidate()
-                        }
-
                         ERASER -> { // 지우개 모드
                             eraserPointX = x
                             eraserPointY = y
+                            eraserCircleRadius = penInfo.getPenWidth()/2
                             when (motionEvent.action) {
                                 MotionEvent.ACTION_DOWN -> {
-                                    if(selectedPaths.size!=0)
-                                        selectedPaths.clear()
                                     setEraser()
                                     viewPager2.isUserInputEnabled = false // 페이지 넘기기 비활성화
                                     PageMode = DRAWING // mode 변경
 
+
                                     eraserPath = Path()
-                                    eraserPath.addCircle(x,y,15f,Path.Direction.CCW)
+//                                    eraserPath.addCircle(x,y,eraserCircleRadius,Path.Direction.CCW)
+                                    eraserPath.moveTo(x,y)
                                     eraserPoints= CustomPath(PointF(eraserPointX,eraserPointY))
                                     eraserPoints.points.add(PointF(eraserPointX,eraserPointY))
                                     canvas.drawPath(eraserPath,eraserPaint)
                                 }
                                 MotionEvent.ACTION_MOVE -> {
-                                    eraserPath.addCircle(x,y,15f,Path.Direction.CCW)
+//                                    eraserPath.addCircle(x,y,eraserCircleRadius,Path.Direction.CCW)
+                                    eraserPath.lineTo(x,y)
                                     eraserPoints.points.add(PointF(eraserPointX,eraserPointY))
                                     canvas.drawPath(eraserPath,eraserPaint)
                                 }
@@ -854,7 +809,7 @@ class DrawingView @JvmOverloads constructor(
                     for (line in pageInfo?.customPaths!!) {
                         for (point in line.points) {
                             for (p in eraserPoints.points) {
-                                if (15.0.pow(2.0) >=
+                                if (penInfo.getPenWidth().toDouble().pow(2.0) >=
                                     ((p.x - point.x ).toDouble().pow(2.0) +
                                             (p.y - point.y).toDouble().pow(2.0))) {
                                     deletePoints.add(PointF(point.x, point.y))
@@ -929,8 +884,16 @@ class DrawingView @JvmOverloads constructor(
         selectedCanvas.setBitmap(sendBitmap)
         selectedCanvas.drawColor(Color.WHITE)
 
+        var copiedPaint =  Paint().apply{
+            color = Color.BLACK
+            style = Paint.Style.STROKE
+            strokeJoin = Paint.Join.ROUND
+            strokeCap = Paint.Cap.ROUND
+        }
+
         for(i in 0..selectedPaths.size-1) {
-            selectedCanvas.drawPath(selectedPaths[i].path, selectedPaths[i].drawingPaint.apply { this.color = Color.BLACK })
+            copiedPaint.strokeWidth = selectedPaths[i].drawingPaint.strokeWidth
+            selectedCanvas.drawPath(selectedPaths[i].path, copiedPaint)
         }
 
         val drawings = IntArray(backgroundBitmap.width * backgroundBitmap.height)
@@ -944,11 +907,12 @@ class DrawingView @JvmOverloads constructor(
             if(b!=0)b=255
             returnPixels[i]=(b/255).toByte()
         }
-
+        pdfActivity.client.sendImageSizeMessage(backgroundBitmap.width)
         when(textType){
-//            "English" -> pdfActivity.client.sendEnglishPixelMessage(returnPixels)
-//            "Hangul" -> pdfActivity.client.sendHangulPixelMessage(returnPixels)
-//            "Number" -> pdfActivity.client.sendNumberPixelMessage(returnPixels)
+
+            "English" -> pdfActivity.client.sendEnglishPixelMessage(returnPixels)
+            "Hangul" -> pdfActivity.client.sendHangulPixelMessage(returnPixels)
+            "Number" -> pdfActivity.client.sendNumberPixelMessage(returnPixels)
         }
     }
 

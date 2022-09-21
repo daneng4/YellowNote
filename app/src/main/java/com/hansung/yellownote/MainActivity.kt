@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var linearLayout:LinearLayout
     lateinit var myDao : MyDAO // 데이터 베이스
     lateinit var penInfo: PenInfo // 펜 정보 담고 있는 뷰모델
-    val PenModes = ArrayList<String>(Arrays.asList("PEN","HIGHLIGHTER","ERASER","TEXT","CLIPPING","SHAPE"))
+    val PenModes = ArrayList<String>(Arrays.asList("PEN","ERASER","TEXT","CLIPPING","SHAPE"))
     lateinit var noteList:List<NoteData>
     val deleteButtons=ArrayList<CheckBox>()
     var isLongButtonClick=false
@@ -79,11 +79,10 @@ class MainActivity : AppCompatActivity() {
     fun setMyDatabase(){
         CoroutineScope(Dispatchers.Main).launch {
             if(myDao.getPenDataCount()==0){
-                myDao.insertPenData(PenData("PEN",10f,Color.BLACK,100,true))
-                myDao.insertPenData(PenData("HIGHLIGHTER",20f,Color.RED,50,false))
-                myDao.insertPenData(PenData("ERASER",10f, null,100,false))
-                myDao.insertPenData(PenData("TEXT",10f,Color.BLACK,100,false))
-                myDao.insertPenData(PenData("CLIPPING",5f,Color.GRAY,100,false))
+                myDao.insertPenData(PenData("PEN",10f,Color.BLACK,true))
+                myDao.insertPenData(PenData("ERASER",10f, null,false))
+                myDao.insertPenData(PenData("TEXT",10f,Color.BLACK,false))
+                myDao.insertPenData(PenData("CLIPPING",5f,Color.GRAY,false))
 //                myDao.insertPenData(PenData("SHAPE",10f, Color.BLACK,100,false))
             }
             else{
@@ -209,7 +208,6 @@ class MainActivity : AppCompatActivity() {
                                     .putExtra("ColorButton4", buttonColorList[3].color)
                                     .putExtra("ColorButton5", buttonColorList[4].color)
                                     .putExtra("ColorButton6", buttonColorList[5].color)
-
                             )
                         }
                     }
@@ -336,7 +334,6 @@ class MainActivity : AppCompatActivity() {
         if(result.resultCode== AppCompatActivity.RESULT_OK){ // 파일 선택 완료 시
             val data: Intent? = result.data
             if (data != null) {
-                System.out.println("data = "+data)
                 val uri = data.data
                 if (uri != null) {
                     System.out.println("Uri from onActivityResult: $uri")

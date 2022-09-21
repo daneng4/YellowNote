@@ -35,15 +35,14 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
     // DrawingView.kt에서 정의된 mode와 같아야함
     val NONE = -1
     val PEN = 0
-    val HIGHLIGHTER = 1
-    val ERASER = 2
-    val TEXT = 3
-    val CLIPPING = 4
-    val MOVING = 5
+    val ERASER = 1
+    val TEXT = 2
+    val CLIPPING = 3
+    val MOVING = 4
     var drawingMode = PEN
 
     fun openPage(page: Int, drawingView: DrawingView) {
-        System.out.println("OpenPage")
+        System.out.println("================= PdfReader.OpenPage ===================")
         if (page >= pageCount) return
 
         this.drawingView = drawingView
@@ -57,10 +56,10 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
             System.out.println("view_pager : ${view_pager.width}x${view_pager.height}")
             System.out.println("currentPage : ${width}x${height}")
             if(pageInfoMap[page]!=null){
+                System.out.println("******************** PdfReader) drawingView.pageInfo = pageInfoMap[page] ********************")
                 drawingView.pageInfo = pageInfoMap[page]
                 CoroutineScope(Dispatchers.Main).launch{
-                    System.out.println("drawingView.pageInfo!! = ${drawingView.pageInfo!!}")
-                    for(i in 0..drawingView.pageInfo!!.customPaths.size-1){
+                    for(i in 0..pageInfo!!.customPaths.size-1){
                         var customPath = pageInfo.customPaths[i]
                         drawingView.canvas.drawPath(customPath.path, customPath.drawingPaint)
                     }
@@ -81,6 +80,7 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
             backgroundBitmap = Bitmap.createBitmap(
                 backgroundWidth,backgroundHeight, Bitmap.Config.ARGB_8888
             )
+            backgroundBitmap.eraseColor(Color.WHITE)
 
             render(backgroundBitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
             drawingView.setImageBitmap(backgroundBitmap)
@@ -107,7 +107,7 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
             pageInfo.changePathColor(data.drawingInfo.penColor!!)
             pageInfo.setCustomEditText(data.drawingInfo.customEditText)
             pageInfoMap[data.drawingInfo.pageNo]=pageInfo
-            System.out.println("pageInfo.pageNo = ${pageInfo.pageNo} / pageInfo.customPaths = ${pageInfo.customPaths}")
+            System.out.println("pageInfo.pageNo = ${pageInfo.pageNo} / pageInfo.customPaths.size = ${pageInfo.customPaths.size}")
         }
         System.out.println("PageInfoMap = ${pageInfoMap.keys}")
     }

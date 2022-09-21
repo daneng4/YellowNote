@@ -8,7 +8,7 @@ import java.io.Serializable
 class MqttAdapter() {
     private lateinit var client: MqttClient
     private lateinit var scope: CoroutineScope
-    private lateinit var world:String
+    private lateinit var word:String
     init {
         connectClient()
     }
@@ -16,8 +16,9 @@ class MqttAdapter() {
         scope= CoroutineScope(Dispatchers.IO).apply {
             launch {
                 try {
+                    System.out.println("client 연결 시도")
                     client =
-                        MqttClient("tcp://223.194.131.47:1883", MqttClient.generateClientId(), null)
+                        MqttClient("tcp://223.194.134.124:1883", MqttClient.generateClientId(), null)
                     if (!client.isConnected) {
                         println("연결")
                         withContext(Dispatchers.Main) {
@@ -33,8 +34,8 @@ class MqttAdapter() {
                         override fun messageArrived(topic: String?, message: MqttMessage?) {
                             if (topic == "result") {
                                 val msg=message
-                                world=msg.toString()
-                                println(world)
+                                word=msg.toString()
+                                println(word)
                             }
                         }
 
@@ -94,7 +95,7 @@ class MqttAdapter() {
                         }
                     }
 
-                    client.publish("easyocr/english", MqttMessage(drawings))
+                    client.publish("easyocr/number", MqttMessage(drawings))
 
                 } catch (e: MqttException) {
                     e.printStackTrace()
