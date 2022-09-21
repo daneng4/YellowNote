@@ -20,7 +20,6 @@ import com.hansung.yellownote.databinding.ActivityPdfBinding
 import com.skydoves.colorpickerview.ColorEnvelope
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
-import kotlinx.android.synthetic.main.activity_pdf.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -122,7 +121,9 @@ class PdfActivity() : AppCompatActivity(){
                 println("page : $page")
                 println("pageInfo : ${pdfReader!!.pageInfoMap[page]?.customPaths}")
                 pdfReader!!.pageInfoMap[page]?.let {
-                    pdfReader!!.changePageInfo(it) } // 변경된 page의 pageInfo 세팅
+                    pdfReader!!.changePageInfo(it)
+                    pdfReader!!.drawingView.setTextLayout()
+                } // 변경된 page의 pageInfo 세팅
 //                System.out.println("Page$position path개수 = ${pdfReader!!.pageInfoMap[position]?.customPaths?.size}")
             }
         })
@@ -363,9 +364,7 @@ class PdfActivity() : AppCompatActivity(){
     }
 
     private fun getPenDataTable(){
-        CoroutineScope(Dispatchers.Main).launch {
-            myDao.getAllPenData()
-        }
+        myDao.getAllPenData()
     }
 
     private fun updatePenDatatable(){
