@@ -3,6 +3,7 @@ package com.hansung.yellownote.drawing
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.DialogInterface
+import android.content.res.ColorStateList
 import android.graphics.*
 import android.text.SpannableStringBuilder
 import android.util.AttributeSet
@@ -81,7 +82,9 @@ class DrawingView @JvmOverloads constructor(
     lateinit var popupWindow:PopupWindow
     var popup:View? = null
     //    var clickChangeColorBtn = false
+
     var textButton=false
+
     var eraserPaint:Paint = Paint()
     var eraserCirclePaint:Paint = Paint()
     var eraserCircleRadius = 0f
@@ -111,6 +114,7 @@ class DrawingView @JvmOverloads constructor(
         rootLayout=binding.root
         penInfo = pdfActivity.penInfo
         textLayout= ConstraintLayout(this.context)
+
         println("DrawingView PageInfo: ${pageInfo}")
         penInfo.PenMode.observe(pdfActivity){
             System.out.println("${penInfo.getPenMode()}, ${penInfo.getMovingClipping()}")
@@ -131,142 +135,146 @@ class DrawingView @JvmOverloads constructor(
     }
     @SuppressLint("ClickableViewAccessibility")
     fun setTextLayout(){
-        //textLayout= ConstraintLayout(context)
-        rootLayout.dispatchWindowFocusChanged(true)
-        textLayout.dispatchWindowFocusChanged(true)
-        val sample=binding.sampleLayout
-        System.out.println("textLayout = ${textLayout}")
-        System.out.println("rootLayout = ${rootLayout}")
-//        textLayout.layoutParams = sample.layoutParams
-        textLayout.layoutParams = ViewGroup.LayoutParams(100,100)
-        System.out.println("${textLayout.layoutParams.width}, ${textLayout.layoutParams.height}")
+        textLayout= ConstraintLayout(context)
+        textLayout.id=View.generateViewId()
+        var sample=binding.sampleLayout
+        textLayout.layoutParams=sample.layoutParams
         rootLayout.addView(textLayout)
-//        var constraintSet= ConstraintSet()
-//        constraintSet.clone(textLayout)
-//        constraintSet.connect(textLayout!!.id,ConstraintSet.LEFT,
-//            ConstraintSet.PARENT_ID, ConstraintSet.LEFT, 0)
-//        constraintSet.connect(textLayout!!.id,ConstraintSet.TOP,
-//            ConstraintSet.PARENT_ID, ConstraintSet.TOP,0)
-//        constraintSet.connect(textLayout!!.id,ConstraintSet.RIGHT,
-//            ConstraintSet.PARENT_ID, ConstraintSet.RIGHT,0)
-//        constraintSet.connect(textLayout!!.id,ConstraintSet.BOTTOM,
-//            ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM,0)
-        //constraintSet.applyTo(textLayout)
-        //editTexts.clear()
+        var constraintSet= ConstraintSet()
+        constraintSet.clone(textLayout)
+        constraintSet.connect(textLayout.id,ConstraintSet.LEFT,
+            ConstraintSet.PARENT_ID, ConstraintSet.LEFT, 0)
+        constraintSet.connect(textLayout.id,ConstraintSet.TOP,
+            ConstraintSet.PARENT_ID, ConstraintSet.TOP,0)
+        constraintSet.connect(textLayout.id,ConstraintSet.RIGHT,
+            ConstraintSet.PARENT_ID, ConstraintSet.RIGHT,0)
+        constraintSet.connect(textLayout.id,ConstraintSet.BOTTOM,
+            ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM,0)
+        constraintSet.applyTo(textLayout)
+        editTexts.clear()
+        if(pageInfo?.customEditText!=null) {
+            if (pageInfo!!.customEditText.size != 0) {
+                val customEditText=pageInfo!!.customEditText
+                println("editText empty = ${customEditText.isEmpty()}")
+                for (i in 0..customEditText.size-1) {
+                    if(customEditText[i].text=="")continue
+                    constraintSet= ConstraintSet()
 
-//        if (pageInfo!!.customEditText.size != 0) {
-//                val customEditText=pageInfo!!.customEditText
-//                println("editText empty = ${customEditText.isEmpty()}")
-//                for (i in 0..customEditText.size-1) {
-//                    if(customEditText[i].text=="")continue
-//                    constraintSet= ConstraintSet()
-//
-//                    val text = SpannableStringBuilder(customEditText[i].text)
-//                    val point=customEditText[i].textPoint
-//                    val editText=EditText(context)
-//                    editText.text=text
-//                    editText.id=customEditText[i].textId
-//                    textLayout!!.addView(editText)
-//                    editTexts.add(editText)
-//                    constraintSet.clone(textLayout)
-//                    constraintSet.connect(editText.id, ConstraintSet.LEFT,
-//                        textLayout!!.id, ConstraintSet.LEFT, point.x.toInt())
-//                    constraintSet.connect(editText.id, ConstraintSet.TOP,
-//                        textLayout!!.id, ConstraintSet.TOP, point.y.toInt())
-//
-//                    println("text = ${text}, pointx = ${point.x}, pointy = ${point.y}, id = ${editText.id}")
-//
-//                    constraintSet.applyTo(textLayout)
-////                    editText.setOnFocusChangeListener{_,hasFocus->
-////                        if(!hasFocus){
-////                            for(k in 0.. pageInfo!!.customEditText.size-1){
-////                                if(editTexts[k]==editText){
-////                                    editTexts[k].text=editText.text
-////                                    pageInfo!!.customEditText[k].text=editText.text.toString()
-////                                }
-////                            }
-////                        }
-////
-////                    }
-//                }
-//
-//        }
+                    val text = SpannableStringBuilder(customEditText[i].text)
+                    val point=customEditText[i].textPoint
+                    val editText=EditText(context)
+                    editText.setBackgroundTintList(ColorStateList.valueOf(Color.TRANSPARENT))
+                    editText.text=text
+                    editText.id=customEditText[i].textId
+                    textLayout.addView(editText)
+                    editTexts.add(editText)
+                    constraintSet.clone(textLayout)
+                    constraintSet.connect(editText.id, ConstraintSet.LEFT,
+                        textLayout.id, ConstraintSet.LEFT, point.x.toInt())
+                    constraintSet.connect(editText.id, ConstraintSet.TOP,
+                        textLayout.id, ConstraintSet.TOP, point.y.toInt())
+
+                    println("text = ${text}, pointx = ${point.x}, pointy = ${point.y}, id = ${editText.id}")
+
+                    constraintSet.applyTo(textLayout)
+                    editText.setOnFocusChangeListener{_,hasFocus->
+                        if(!hasFocus){
+                            for(k in 0.. pageInfo!!.customEditText.size-1){
+                                if(editTexts[k]==editText){
+                                    editTexts[k].text=editText.text
+                                    pageInfo!!.customEditText[k].text=editText.text.toString()
+                                }
+                            }
+                            editText.setBackgroundTintList(ColorStateList.valueOf(Color.TRANSPARENT))
+                        }
+                        else{
+                            editText.setBackgroundTintList(ColorStateList.valueOf(Color.BLACK))
+                        }
+
+                    }
+                }
+            }
+        }
 //
         println("edit Text 초기 설정 완료")
-//        textLayout!!.setOnTouchListener{_, motionEvent ->
-//            println("${motionEvent.x},${motionEvent.y}")
-//            val toolType=motionEvent?.getToolType(0)
-//            textButton=false
-//            when(toolType) {
-//                MotionEvent.TOOL_TYPE_STYLUS-> { // 필기 모드 (S펜 사용 시)
-//                    val x = motionEvent.x
-//                    val y = motionEvent.y
-//                    when(penInfo.getPenMode()){
-//                        TEXT->{ //텍스트 모드
-        textButton=true
-//                            textPointX=x
-//                            textPointY=y
-//                            when (motionEvent.action) {
-//                                MotionEvent.ACTION_UP -> {
-//                                    println("$x, $y")
-//                                    for(text in editTexts){
-//                                        text.clearFocus()
-//                                    }
-//                                    val customEditText=CustomEditText()
-//                                    val editText=EditText(context)
-//                                    customEditText.textPoint=(PointF(textPointX,textPointY))
-//                                    editTexts.add(editText)
-////                                    pageInfo!!.textPaths.add(PointF(textPointX,textPointY))
-//                                    editText.id=View.generateViewId()
-//                                    customEditText.textId=editText.id
-//                                    textLayout!!.addView(editText)
-//                                    constraintSet=ConstraintSet()
-//                                    constraintSet.clone(textLayout)
-//                                    constraintSet.connect(editText.id,ConstraintSet.LEFT,
-//                                        textLayout!!.id, ConstraintSet.LEFT, textPointX.toInt())
-//                                    constraintSet.connect(editText.id,ConstraintSet.TOP,
-//                                        textLayout!!.id, ConstraintSet.TOP,textPointY.toInt())
-//
-//                                    constraintSet.applyTo(textLayout)
-//
-////                                    editText.setOnFocusChangeListener{_,hasFocus->
-////                                        if(!hasFocus){
-////                                            for(k in 0.. pageInfo!!.customEditText.size-1){
-////                                                if(editTexts[k]==editText){
-////                                                    editTexts[k].text=editText.text
-////                                                    pageInfo!!.customEditText[k].text=editText.text.toString()
-////                                                }
-////                                            }
-////                                        }
-////
-////                                    }
-////                                    editText.setOnLongClickListener{view->
-////                                        editTexts.remove(editText)
-////                                        for(k in 0.. pageInfo!!.customEditText.size-1){
-////                                            if(pageInfo!!.customEditText[k].textId==editText.id) {
-////                                                pageInfo!!.customEditText.removeAt(k)
-////                                                break
-////                                            }
-////                                        }
-////                                        textLayout!!.removeView(editText)
-////                                        true
-////                                    }
-//                                }
-//                            }
-//                        }
-////                        else->{
-////                            for(text in editTexts){
-////                                text.clearFocus()
-////                            }
-////                        }
-//                    }
-//                }
-//
-//            }
-//            textButton
-//        }
+        textLayout.setOnTouchListener{_, motionEvent ->
+            val toolType=motionEvent?.getToolType(0)
+            textButton=false
+            when(toolType) {
+                MotionEvent.TOOL_TYPE_STYLUS-> { // 필기 모드 (S펜 사용 시)
+                    val x = motionEvent.x
+                    val y = motionEvent.y
+                    println(pageInfo)
+                    when(penInfo.getPenMode()){
+                        TEXT->{ //텍스트 모드
+                            textButton=true
+                            textPointX=x
+                            textPointY=y
+                            when (motionEvent.action) {
+                                MotionEvent.ACTION_UP -> {
+                                    for(text in editTexts){
+                                        text.clearFocus()
+                                    }
+                                    val customEditText=CustomEditText()
+                                    val editText=EditText(context)
+                                    customEditText.textPoint=(PointF(textPointX,textPointY))
+                                    editTexts.add(editText)
+//                                    pageInfo!!.textPaths.add(PointF(textPointX,textPointY))
+                                    editText.id=View.generateViewId()
+                                    customEditText.textId=editText.id
+                                    textLayout.addView(editText)
+                                    constraintSet=ConstraintSet()
+                                    constraintSet.clone(textLayout)
+                                    constraintSet.connect(editText.id,ConstraintSet.LEFT,
+                                        textLayout.id, ConstraintSet.LEFT, textPointX.toInt())
+                                    constraintSet.connect(editText.id,ConstraintSet.TOP,
+                                        textLayout.id, ConstraintSet.TOP,textPointY.toInt())
+
+                                    constraintSet.applyTo(textLayout)
+                                    pageInfo!!.customEditText.add(customEditText)
+                                    editText.setOnFocusChangeListener{_,hasFocus->
+                                        if(!hasFocus){
+                                            for(k in 0.. pageInfo!!.customEditText.size-1){
+                                                if(editTexts[k]==editText){
+                                                    editTexts[k].text=editText.text
+                                                    pageInfo!!.customEditText[k].text=editText.text.toString()
+                                                }
+                                            }
+                                            editText.setBackgroundTintList(ColorStateList.valueOf(Color.TRANSPARENT))
+                                        }
+                                        else{
+                                            editText.setBackgroundTintList(ColorStateList.valueOf(Color.BLACK))
+                                        }
+
+                                    }
+                                    editText.setOnLongClickListener{view->
+                                        editTexts.remove(editText)
+                                        for(k in 0.. pageInfo!!.customEditText.size-1){
+                                            if(pageInfo!!.customEditText[k].textId==editText.id) {
+                                                pageInfo!!.customEditText.removeAt(k)
+                                                break
+                                            }
+                                        }
+                                        textLayout.removeView(editText)
+                                        true
+                                    }
+                                }
+                            }
+                        }
+                        else->{
+                            for(text in editTexts){
+                                text.clearFocus()
+                            }
+                        }
+                    }
+                }
+
+            }
+            textButton
+        }
 
     }
+
     @SuppressLint("ClickableViewAccessibility")
     fun createDrawingBitmap(backgroundBitmap:Bitmap){
         this.backgroundBitmap = backgroundBitmap
