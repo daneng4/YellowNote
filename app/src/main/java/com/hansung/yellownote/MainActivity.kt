@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.database.Cursor
 import android.graphics.Color
 import android.graphics.Point
@@ -15,14 +16,8 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.text.TextUtils
-import android.view.Gravity
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
-import android.widget.CheckBox
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.view.*
+import android.widget.*
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -31,14 +26,17 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.hansung.notedatabase.*
 import com.hansung.yellownote.databinding.ActivityMainBinding
-import com.hansung.yellownote.drawing.PdfActivity
 import com.hansung.yellownote.drawing.PenInfo
+import com.hansung.yellownote.drawing.PdfActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.w3c.dom.Text
 import java.io.File
 import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 
 class MainActivity : AppCompatActivity() {
@@ -53,7 +51,6 @@ class MainActivity : AppCompatActivity() {
     val deleteButtons=ArrayList<CheckBox>()
     var isLongButtonClick=false
     var trashBin: MenuItem?=null
-    var isNote=false
 
     lateinit var buttonColorList:List<ColorData>
 
@@ -261,9 +258,6 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.addMethodTemplate-> { // 필기 추가>노트 메뉴 누른 경우
                 println("노트 클릭")
-                isNote=true
-                checkPermissions(permissions)
-                isNote=false
                 return true
             }
             else -> return super.onOptionsItemSelected(item)
@@ -279,7 +273,6 @@ class MainActivity : AppCompatActivity() {
             var permissionCheck = ContextCompat.checkSelfPermission(this, curPermission)
             if(permissionCheck == PackageManager.PERMISSION_GRANTED) { // 권한이 이미 부여된 경우
                 System.out.println("***** 저장소 권한 있음 *****")
-
                 fileChooser() // 파일 선택창 띄우기
                 return
             }
@@ -304,8 +297,7 @@ class MainActivity : AppCompatActivity() {
             101 -> { // 사용자 권한 수락했는지 여부 확인
                 if(grantResults.size>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED) {
                     System.out.println("***** 권한 승인 *****")
-
-                        fileChooser() // 파일 선택창 띄우기
+                    fileChooser() // 파일 선택창 띄우기
                 }
                 else
                     System.out.println("***** 권한 거부 *****")

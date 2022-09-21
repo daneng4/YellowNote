@@ -198,6 +198,12 @@ class PdfActivity() : AppCompatActivity(){
                 changeBtnImage(PEN)
             }
         }
+//        eraserBtn.setOnClickListener {
+//            // clipping 네모 표시 있으면 없애기
+//            checkResetClipping()
+//
+//            changeBtnImage(ERASER)
+//        }
 
         eraserBtn.setOnClickListener{
             // clipping 네모 표시 있으면 없애기
