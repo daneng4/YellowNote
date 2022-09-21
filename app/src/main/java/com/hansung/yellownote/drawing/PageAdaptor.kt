@@ -12,6 +12,7 @@ class PageAdaptor: RecyclerView.Adapter<PageHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PageHolder {
         println("onCreateViewHolder")
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_page, parent, false)
+
         return PageHolder(view)
     }
 

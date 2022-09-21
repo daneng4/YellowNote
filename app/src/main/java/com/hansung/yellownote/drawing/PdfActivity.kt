@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageButton
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -66,7 +67,6 @@ class PdfActivity() : AppCompatActivity(){
     private var highlighterSettingPopup:HighlighterSettingDialog? = null
     private var eraserSettingPopup:PenSettingDialog? = null
 //    val client=MqttAdapter()
-
     // DrawingView.kt에서 정의된 mode와 같아야함
     val PenModes = ArrayList<String>(Arrays.asList("PEN","HIGHLIGHTER","ERASER","TEXT","CLIPPING"))
     val PEN = 0
@@ -111,6 +111,7 @@ class PdfActivity() : AppCompatActivity(){
 
                 pageNo = page
                 println("viewPager callback 함수 ")
+
                 // position에 해당하는 pageInfo 가져오기
                 if(!pdfReader!!.pageInfoMap.containsKey(page)) { // page에 해당하는 pageInfo가 없는 경우
                     println("새로운 pageInfo 생성")
@@ -119,8 +120,12 @@ class PdfActivity() : AppCompatActivity(){
                 println("page : $page")
                 println("pageInfo : ${pdfReader!!.pageInfoMap[page]?.customPaths}")
                 pdfReader!!.pageInfoMap[page]?.let {
-                    pdfReader!!.changePageInfo(it) } // 변경된 page의 pageInfo 세팅
+                    pdfReader!!.changePageInfo(it)
+
+                } // 변경된 page의 pageInfo 세팅
+//                pdfReader!!.drawingView!!.setTextLayout()
 //                System.out.println("Page$position path개수 = ${pdfReader!!.pageInfoMap[position]?.customPaths?.size}")
+
             }
         })
 
@@ -398,7 +403,7 @@ class PdfActivity() : AppCompatActivity(){
             val drawingInfo=pdfReader!!.pageInfoMap[i]
 
             if(drawingInfo!=null) {
-                if(drawingInfo.customPaths.isNotEmpty()) {
+                if(drawingInfo.customPaths.isNotEmpty()||drawingInfo.customEditText.isNotEmpty()) {
                     runBlocking {
                         myDao.insertFileData(FileData(noteName, drawingInfo))
                     }

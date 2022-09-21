@@ -26,7 +26,7 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
 
     val pageCount = pdfRenderer.pageCount
     var firstOpen=true
-    lateinit var drawingView: DrawingView
+    var drawingView: DrawingView?=null
     var pageInfoMap = HashMap<Int,PageInfo>() // <page번호, PageInfo>
     lateinit var pageInfo:PageInfo // 현재 page의 PageInfo
 
@@ -45,6 +45,7 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
     fun openPage(page: Int, drawingView: DrawingView) {
         System.out.println("OpenPage")
         if (page >= pageCount) return
+
         this.drawingView = drawingView
         drawingView.pdfReader = this
         drawingView.viewPager2 = view_pager
@@ -55,7 +56,6 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
             var pageRatio = width/(height).toDouble()
             System.out.println("view_pager : ${view_pager.width}x${view_pager.height}")
             System.out.println("currentPage : ${width}x${height}")
-
             if(pageInfoMap[page]!=null){
                 drawingView.pageInfo = pageInfoMap[page]
                 CoroutineScope(Dispatchers.Main).launch{
@@ -67,7 +67,6 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
                     drawingView.invalidate()
                 }
             }
-
             // view_pager에 맞춰서 배경될 pdf 크기 변경
             var backgroundWidth = view_pager.width
             var backgroundHeight = (view_pager.width/pageRatio).toInt()
@@ -106,6 +105,7 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
             val pageInfo=PageInfo(data.drawingInfo.pageNo)
             pageInfo.setCustomPaths(data.drawingInfo.customPaths)
             pageInfo.changePathColor(data.drawingInfo.penColor!!)
+            pageInfo.setCustomEditText(data.drawingInfo.customEditText)
             pageInfoMap[data.drawingInfo.pageNo]=pageInfo
             System.out.println("pageInfo.pageNo = ${pageInfo.pageNo} / pageInfo.customPaths = ${pageInfo.customPaths}")
         }
@@ -113,9 +113,10 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
     }
 
     fun changePageInfo(pageInfo: PageInfo){ // 현재 page에 맞는 pageInfo 세팅
+        println("changePageInfo")
         this.pageInfo = pageInfo
         println(this.pageInfo)
-        drawingView.changePageInfo(pageInfo)
+        drawingView!!.changePageInfo(pageInfo)
     }
 
     fun close() {
