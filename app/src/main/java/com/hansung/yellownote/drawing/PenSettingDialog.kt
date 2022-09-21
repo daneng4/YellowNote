@@ -33,7 +33,7 @@ class PenSettingDialog(context:Context) {
                 window!!.attributes.x = -530
             else // 지우개인 경우
                 window!!.attributes.x = -350
-            window!!.attributes.y = -220
+            window!!.attributes.y = -300
 
             window!!.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
             setCanceledOnTouchOutside(true)
@@ -46,12 +46,17 @@ class PenSettingDialog(context:Context) {
         widthText = dialog.findViewById<TextView>(R.id.widthTextView)
         widthSeekBar = dialog.findViewById<SeekBar>(R.id.penWidthSeekbar)
 
-        widthSeekBar.min = 5
-        widthSeekBar.max = 30
-        if(penInfo.getPenColor()!=null)
+
+        if(penInfo.getPenColor()!=null) { // 펜인 경우
+            widthSeekBar.min = 5
+            widthSeekBar.max = 30
             widthSeekBar.progress = myDAO.getAllPenData()[0].width.toInt()
-        else
+        }
+        else { // 지우개인 경우
+            widthSeekBar.min = 15
+            widthSeekBar.max = 30
             widthSeekBar.progress = myDAO.getAllPenData()[1].width.toInt()
+        }
         widthText.text = "${ widthSeekBar.progress }px"
 
         widthSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{

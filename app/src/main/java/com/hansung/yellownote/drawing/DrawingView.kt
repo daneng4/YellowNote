@@ -23,8 +23,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.collections.ArrayList
 import kotlin.math.pow
+
 
 class DrawingView @JvmOverloads constructor(
     context: Context?,
@@ -33,6 +33,7 @@ class DrawingView @JvmOverloads constructor(
 ) : AppCompatImageView(
     context!!, attr, defStyle
 ) {
+    var isFirst = true
     lateinit var pdfActivity:PdfActivity
     lateinit var viewPager2 :ViewPager2
     var PageMode = -1 // page mode (그림,확대/축소,이동)
@@ -150,12 +151,13 @@ class DrawingView @JvmOverloads constructor(
             ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM,0)
         constraintSet.applyTo(textLayout)
         editTexts.clear()
+
         if(pageInfo?.customEditText!=null) {
             if (pageInfo!!.customEditText.size != 0) {
                 val customEditText=pageInfo!!.customEditText
                 //println("editText empty = ${customEditText.isEmpty()}")
                 for (i in 0..customEditText.size-1) {
-                    if(customEditText[i].text=="")continue
+                    if(customEditText[i].text=="") continue
                     constraintSet= ConstraintSet()
 
                     val text = SpannableStringBuilder(customEditText[i].text)
@@ -177,6 +179,7 @@ class DrawingView @JvmOverloads constructor(
                     println("text = ${text}, pointx = ${point.x}, pointy = ${point.y}, id = ${editText.id}")
 
                     constraintSet.applyTo(textLayout)
+                    System.out.println("editText.text = ${editText.text}")
                     editText.setOnFocusChangeListener{_,hasFocus->
                         if(!hasFocus){
                             for(k in 0.. pageInfo!!.customEditText.size-1){
@@ -296,6 +299,7 @@ class DrawingView @JvmOverloads constructor(
     }
 
     fun setupDrawing(){
+        System.out.println("setup drawing")
         canvas = Canvas(drawingBitmap)
         path = Path()
         backgroundPaint = Paint(Paint.DITHER_FLAG)
@@ -306,6 +310,7 @@ class DrawingView @JvmOverloads constructor(
         canvas.drawBitmap(backgroundBitmap, EditImagematrix, drawingPaint)
 
         this.setImageBitmap(drawingBitmap)
+
         setupDrawingView()
 
         /////////////////////////회전해서 다시 그리기 되려나?
@@ -380,6 +385,19 @@ class DrawingView @JvmOverloads constructor(
         if (canvas != null) {
             canvas.drawBitmap(backgroundBitmap,EditImagematrix,backgroundPaint) // backgroundBitmap 그리기
             canvas.drawBitmap(drawingBitmap,EditImagematrix,backgroundPaint) // drawingBitmap 그리기
+
+            //// 1번 외의 페이지에서 멈추고 다시 열었을때 그림 그려져있도록
+            if(isFirst){
+                isFirst = false
+                if(pdfReader.pageInfoMap[pdfActivity.pageNo]!=null)
+                    if(pdfReader.pageInfoMap[pdfActivity.pageNo]!!.customPaths.size>0){
+                        redrawPath(false)
+                    }
+                    else{
+                    System.out.println("기존 데이터 없어요,,,")
+                }
+            }
+            /////
 
 
             when(penInfo.getPenMode()){
@@ -508,6 +526,8 @@ class DrawingView @JvmOverloads constructor(
                 drawClippingBox = false
                 redrawPath(false)
             }
+
+            selectedPaths.clear()
         }
 
         // 색상 버튼 클릭 시 색상 선택 팝업창 뜸
@@ -566,6 +586,7 @@ class DrawingView @JvmOverloads constructor(
             var selectedPath = selectedPaths[i]
             var idx = pageInfo!!.customPaths.indexOf(selectedPath)
             selectedPath.drawingPaint.color = color
+            selectedPath.penColor = color
             pageInfo!!.customPaths[idx] = selectedPath
             canvas.drawPath(selectedPath.path, selectedPath.drawingPaint)
         }
@@ -920,12 +941,12 @@ class DrawingView @JvmOverloads constructor(
             if(b!=0)b=255
             returnPixels[i]=(b/255).toByte()
         }
-//        pdfActivity.client.sendImageSizeMessage(backgroundBitmap.width)
-//        when(textType){
-//            "English" -> pdfActivity.client.sendEnglishPixelMessage(returnPixels)
-//            "Hangul" -> pdfActivity.client.sendHangulPixelMessage(returnPixels)
-//            "Number" -> pdfActivity.client.sendNumberPixelMessage(returnPixels)
-//        }
+        pdfActivity.client.sendImageSizeMessage(backgroundBitmap.width)
+        when(textType){
+            "English" -> pdfActivity.client.sendEnglishPixelMessage(returnPixels)
+            "Hangul" -> pdfActivity.client.sendHangulPixelMessage(returnPixels)
+            "Number" -> pdfActivity.client.sendNumberPixelMessage(returnPixels)
+        }
     }
 
     fun changePageInfo(pageInfo: PageInfo){

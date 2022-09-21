@@ -18,7 +18,7 @@ class PlayGroundDialog(context : Context, mainActivity: MainActivity) {
     fun show(){
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)   //타이틀바 제거
         dialog.setContentView(R.layout.playground_file_chooser)     //다이얼로그에 사용할 xml 파일을 불러옴
-        dialog.setCancelable(false)    //다이얼로그의 바깥 화면을 눌렀을 때 다이얼로그가 닫히지 않도록
+        dialog.setCancelable(true)    //다이얼로그의 바깥 화면을 눌렀을 때 다이얼로그가 닫히지 않도록
 
         AngelImg = dialog.findViewById(R.id.AngelImg)
         VegetableImg = dialog.findViewById(R.id.VegetableImg)
@@ -28,8 +28,28 @@ class PlayGroundDialog(context : Context, mainActivity: MainActivity) {
         GirlsImg = dialog.findViewById(R.id.GirlsImg)
 
         AngelImg.setOnClickListener {
+            mainActivity.openPDF(mainActivity.applicationContext.externalCacheDir.toString()+"/angel.pdf")
             dialog.dismiss()
-            mainActivity.openPDF("")
+        }
+        VegetableImg.setOnClickListener {
+            mainActivity.openPDF(mainActivity.applicationContext.externalCacheDir.toString()+"/vegetables.pdf")
+            dialog.dismiss()
+        }
+        BabyImg.setOnClickListener {
+            mainActivity.openPDF(mainActivity.applicationContext.externalCacheDir.toString()+"/baby.pdf")
+            dialog.dismiss()
+        }
+        FairyImg.setOnClickListener {
+            mainActivity.openPDF(mainActivity.applicationContext.externalCacheDir.toString()+"/fairy.pdf")
+            dialog.dismiss()
+        }
+        RabbitImg.setOnClickListener {
+            mainActivity.openPDF(mainActivity.applicationContext.externalCacheDir.toString()+"/rabbit.pdf")
+            dialog.dismiss()
+        }
+        GirlsImg.setOnClickListener {
+            mainActivity.openPDF(mainActivity.applicationContext.externalCacheDir.toString()+"/girls.pdf")
+            dialog.dismiss()
         }
 
         dialog.show()

@@ -6,5 +6,4 @@ class CustomEditText {
     var text:String=""
     lateinit var textPoint:PointF
     var textId=0
-
 }

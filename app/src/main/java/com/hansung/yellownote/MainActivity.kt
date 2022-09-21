@@ -105,7 +105,7 @@ class MainActivity : AppCompatActivity() {
         CoroutineScope(Dispatchers.Main).launch {
             if(myDao.getPenDataCount()==0){
                 myDao.insertPenData(PenData("PEN",10f,Color.BLACK,true))
-                myDao.insertPenData(PenData("ERASER",10f, null,false))
+                myDao.insertPenData(PenData("ERASER",15f, null,false))
                 myDao.insertPenData(PenData("TEXT",10f,Color.BLACK,false))
                 myDao.insertPenData(PenData("CLIPPING",5f,Color.GRAY,false))
 //                myDao.insertPenData(PenData("SHAPE",10f, Color.BLACK,100,false))

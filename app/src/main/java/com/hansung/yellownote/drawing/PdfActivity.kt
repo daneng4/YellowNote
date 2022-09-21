@@ -135,7 +135,7 @@ class PdfActivity() : AppCompatActivity(){
 
     private var penSettingPopup:PenSettingDialog? = null
     private var eraserSettingPopup:PenSettingDialog? = null
-    lateinit var client:MqttAdapter
+    var client:MqttAdapter = MqttAdapter()
 
     // DrawingView.kt에서 정의된 mode와 같아야함
     val PenModes = ArrayList<String>(Arrays.asList("PEN","ERASER","TEXT","CLIPPING"))

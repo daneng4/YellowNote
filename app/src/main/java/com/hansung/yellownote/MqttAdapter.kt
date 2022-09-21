@@ -17,7 +17,7 @@ class MqttAdapter() {
             launch {
                 try {
                     client =
-                        MqttClient("tcp://223.194.131.47:1883", MqttClient.generateClientId(), null)
+                        MqttClient("tcp://223.194.134.124:1883", MqttClient.generateClientId(), null)
                     if (!client.isConnected) {
                         println("연결")
                         withContext(Dispatchers.Main) {
