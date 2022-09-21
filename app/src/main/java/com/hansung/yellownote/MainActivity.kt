@@ -35,7 +35,10 @@ import android.widget.*
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
@@ -103,7 +106,7 @@ class MainActivity : AppCompatActivity() {
         CoroutineScope(Dispatchers.Main).launch {
             if(myDao.getPenDataCount()==0){
                 myDao.insertPenData(PenData("PEN",10f,Color.BLACK,true))
-                myDao.insertPenData(PenData("ERASER",10f, null,false))
+                myDao.insertPenData(PenData("ERASER",15f, null,false))
                 myDao.insertPenData(PenData("TEXT",10f,Color.BLACK,false))
                 myDao.insertPenData(PenData("CLIPPING",5f,Color.GRAY,false))
 //                myDao.insertPenData(PenData("SHAPE",10f, Color.BLACK,100,false))
@@ -268,10 +271,10 @@ class MainActivity : AppCompatActivity() {
                 makeNoteList()
                 return true
             }
-            R.id.selectNote -> { // 필기 선택 메뉴 누른 경우
-                println("선택 메뉴 클릭")
-                return true
-            }
+//            R.id.selectNote -> { // 필기 선택 메뉴 누른 경우
+//                println("선택 메뉴 클릭")
+//                return true
+//            }
             R.id.addNote -> { // 필기 추가 메뉴 누른 경우
                 println("플러스 메뉴 클릭")
                 return true
@@ -284,7 +287,9 @@ class MainActivity : AppCompatActivity() {
             R.id.addMethodTemplate-> { // 필기 추가>노트 메뉴 누른 경우
                 println("노트 클릭")
                 isNote=true
-                checkPermissions(permissions)
+//                checkPermissions(permissions)
+                val dialog = PlayGroundDialog(this,this)
+                dialog.show()
                 isNote=false
 
                 return true
@@ -347,7 +352,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // 저장소 파일 선택창 띄우기
-    private fun fileChooser(){
+    fun fileChooser(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             isKitKat = true
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
@@ -471,6 +476,26 @@ class MainActivity : AppCompatActivity() {
         const val RECORDER_CHANNELS: Int = AudioFormat.CHANNEL_IN_MONO
         const val RECORDER_AUDIO_ENCODING: Int = AudioFormat.ENCODING_PCM_16BIT
         private const val REQUEST_RECORD_AUDIO_PERMISSION =201
+    }
+
+    fun openPDF(filePath:String){
+        if(File(filePath).isFile) {
+            if (File(filePath).canRead()){
+                startActivity(
+                    Intent(this, PdfActivity()::class.java)
+                        .putExtra("filePath", filePath)
+                        .putExtra("penColor",penInfo.getPenColor()) // penInfo 정보 보내기
+                        .putExtra("penWidth",penInfo.getPenWidth())
+                        .putExtra("penMode",penInfo.getPenMode())
+                        .putExtra("ColorButton1", buttonColorList[0].color)
+                        .putExtra("ColorButton2", buttonColorList[1].color)
+                        .putExtra("ColorButton3", buttonColorList[2].color)
+                        .putExtra("ColorButton4", buttonColorList[3].color)
+                        .putExtra("ColorButton5", buttonColorList[4].color)
+                        .putExtra("ColorButton6", buttonColorList[5].color)
+                )
+            }
+        }
     }
 }
 

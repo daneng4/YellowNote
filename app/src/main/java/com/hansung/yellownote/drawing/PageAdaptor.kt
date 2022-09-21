@@ -25,6 +25,7 @@ class PageAdaptor: RecyclerView.Adapter<PageHolder>() {
 
     override fun onBindViewHolder(holder: PageHolder, position: Int) {
         pdfReader?.let {
+
             holder.openPage(position, it)
         }
     }

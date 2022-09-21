@@ -3,8 +3,8 @@
     <string name="selectnote">selectNote</string>
     <string name="addnote">addNote</string>
     <string name="deletenote">deleteNote</string>
-    <string name="addMethodFile">파일</string>
-    <string name="addMethodTemplate">노트</string>
+    <string name="addMethodFile">FILES</string>
+    <string name="addMethodTemplate">PLAYGROUND</string>
     <string name="no_permission">접근 권한이 필요합니다.</string>
     <string name="req_permission_reason">접근 권한이 필요합니다.</string>
     <string name="width">펜 굵기</string>

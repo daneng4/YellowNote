@@ -14,12 +14,22 @@ import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+
 import android.view.KeyEvent
 import android.view.View
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+
+import android.widget.Button
+import android.widget.ImageButton
+import android.widget.LinearLayout
+
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isVisible
+import androidx.core.view.iterator
+
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -28,6 +38,11 @@ import com.google.gson.Gson
 import com.hansung.notedatabase.*
 import com.hansung.yellownote.AudioAdapter
 import com.hansung.yellownote.MainActivity
+
+import com.hansung.yellownote.AudioAdapter
+import com.hansung.yellownote.MainActivity
+
+import com.hansung.yellownote.MqttAdapter
 import com.hansung.yellownote.R
 import com.hansung.yellownote.SocketAdapter
 import com.hansung.yellownote.database.Converters
@@ -35,7 +50,6 @@ import com.hansung.yellownote.databinding.ActivityPdfBinding
 import com.skydoves.colorpickerview.ColorEnvelope
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
-import kotlinx.android.synthetic.main.activity_pdf.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -73,7 +87,7 @@ class PdfActivity() : AppCompatActivity(){
     private var audioList: ArrayList<Uri>? = null
 
     //***녹음 전역변수들***
-    var client: SocketAdapter = SocketAdapter()
+    var socketClient: SocketAdapter = SocketAdapter()
     var sendRawData:String? = null
     //private var connectbtn: Button? = null
     var globalfilepath: String? = null
@@ -101,6 +115,7 @@ class PdfActivity() : AppCompatActivity(){
     lateinit var ColorButton4:Button
     lateinit var ColorButton5:Button
     lateinit var ColorButton6:Button
+    lateinit var ColorButtonLayout:ConstraintLayout
 
     var color1:Int = Color.BLACK
     var color2:Int = Color.BLACK
@@ -120,7 +135,7 @@ class PdfActivity() : AppCompatActivity(){
 
     private var penSettingPopup:PenSettingDialog? = null
     private var eraserSettingPopup:PenSettingDialog? = null
-//    val client=MqttAdapter()
+    var client:MqttAdapter = MqttAdapter()
 
     // DrawingView.kt에서 정의된 mode와 같아야함
     val PenModes = ArrayList<String>(Arrays.asList("PEN","ERASER","TEXT","CLIPPING"))
@@ -135,8 +150,11 @@ class PdfActivity() : AppCompatActivity(){
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
         binding = ActivityPdfBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         init()
 //        client = MqttAdapter()
+
+
 
         myDao = MyDatabase.getDatabase(this).getMyDao()
 //        getPenDataTable()
@@ -176,7 +194,14 @@ class PdfActivity() : AppCompatActivity(){
                 println("page : $page")
                 println("pageInfo : ${pdfReader!!.pageInfoMap[page]?.customPaths}")
                 pdfReader!!.pageInfoMap[page]?.let {
-                    pdfReader!!.changePageInfo(it) } // 변경된 page의 pageInfo 세팅
+
+                    for(text in pdfReader!!.drawingView.textLayout){
+                        pdfReader!!.drawingView.textLayout.removeView(text)
+                    }
+                    pdfReader!!.drawingView.rootLayout.removeView(pdfReader!!.drawingView.textLayout)
+                    pdfReader!!.changePageInfo(it)
+                    pdfReader!!.drawingView.setTextLayout()
+                } // 변경된 page의 pageInfo 세팅
 //                System.out.println("Page$position path개수 = ${pdfReader!!.pageInfoMap[position]?.customPaths?.size}")
             }
         })
@@ -185,6 +210,8 @@ class PdfActivity() : AppCompatActivity(){
         clippingBtn = binding.ClippingBtn
         eraserBtn = binding.EraserBtn
         textBtn = binding.TextBtn
+
+        ColorButtonLayout = binding.ColorButtonLayout
         ColorButton1 = binding.ColorButton1
         ColorButton2 = binding.ColorButton2
         ColorButton3 = binding.ColorButton3
@@ -223,17 +250,14 @@ class PdfActivity() : AppCompatActivity(){
         }
 
         penBtn.setOnClickListener{
-            System.out.println("click")
-            if (penBtn.tag == R.drawable.ic_pen_clicked) {
-                // clipping 네모 표시 있으면 없애기
-                checkResetClipping()
+            // clipping 네모 표시 있으면 없애기
+            checkResetClipping()
 
-                if (penBtn.tag == R.drawable.ic_pen_clicked) {
-                    if (penSettingPopup == null) {
-                        System.out.println("penSettingPopup == null")
-                        penSettingPopup = PenSettingDialog(this)
-                        penSettingPopup!!.show(myDao, penInfo)
-                    }
+            if (penBtn.tag == R.drawable.ic_pen_clicked) {
+                if (penSettingPopup == null) {
+                    System.out.println("penSettingPopup == null")
+                    penSettingPopup = PenSettingDialog(this)
+                    penSettingPopup!!.show(myDao, penInfo)
                 }
                 else{
                     if(penSettingPopup!!.isDialogShowing()){
@@ -247,7 +271,6 @@ class PdfActivity() : AppCompatActivity(){
                     }
                 }
             } else {
-                System.out.println("penBtn.tag != R.drawable.ic_pen_clicked")
                 changeBtnImage(PEN)
             }
         }
@@ -258,8 +281,6 @@ class PdfActivity() : AppCompatActivity(){
 
             if (eraserBtn.tag == R.drawable.ic_eraser_clicked) {
                 if(eraserSettingPopup == null){
-                    var location = IntArray(2)
-                    eraserBtn.getLocationOnScreen(location)
                     eraserSettingPopup = PenSettingDialog(this)
                     eraserSettingPopup!!.show(myDao, penInfo)
                     eraserSettingPopup!!.changeText()
@@ -271,8 +292,6 @@ class PdfActivity() : AppCompatActivity(){
                         eraserSettingPopup = null
                     }
                     else{
-                        var location = IntArray(2)
-                        penBtn.getLocationOnScreen(location)
                         eraserSettingPopup = PenSettingDialog(this)
                         eraserSettingPopup!!.show(myDao, penInfo)
                         eraserSettingPopup!!.changeText()
@@ -446,7 +465,7 @@ class PdfActivity() : AppCompatActivity(){
                 if(sendRawData!=null) {
                     System.out.println("sendRawData 보내기")
                     //client.sendAudioFileMessage(sendRawData!!)
-                    client.connect(sendRawData!!)
+                    socketClient.connect(sendRawData!!)
                 }
             }
         }
@@ -751,9 +770,7 @@ class PdfActivity() : AppCompatActivity(){
     }
 
     private fun getPenDataTable(){
-        CoroutineScope(Dispatchers.Main).launch {
-            myDao.getAllPenData()
-        }
+        myDao.getAllPenData()
     }
 
     private fun updatePenDatatable(){
@@ -776,7 +793,7 @@ class PdfActivity() : AppCompatActivity(){
             val drawingInfo=pdfReader!!.pageInfoMap[i]
 
             if(drawingInfo!=null) {
-                if(drawingInfo.customPaths.isNotEmpty()) {
+                if(drawingInfo.customPaths.isNotEmpty()||drawingInfo.customEditText.isNotEmpty()) {
                     runBlocking {
                         myDao.insertFileData(FileData(noteName ,drawingInfo))
                     }
