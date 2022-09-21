@@ -56,7 +56,7 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
 
             if(pageInfoMap[page]!=null){
                 drawingView.pageInfo = pageInfoMap[page]
-                drawingView.setTextLayout()
+//                drawingView.setTextLayout()
 //                CoroutineScope(Dispatchers.Main).launch{
 //                    for(i in 0..drawingView.pageInfo!!.customPaths.size-1){
 //                        var customPath = pageInfo.customPaths[i]

@@ -129,7 +129,7 @@ class PdfActivity() : AppCompatActivity(){
                 println("pageInfo : ${pdfReader!!.pageInfoMap[page]?.customPaths}")
                 pdfReader!!.pageInfoMap[page]?.let {
                     pdfReader!!.changePageInfo(it)
-                    pdfReader!!.drawingView.setTextLayout()
+//                    pdfReader!!.drawingView.setTextLayout()
                 } // 변경된 page의 pageInfo 세팅
 //                System.out.println("Page$position path개수 = ${pdfReader!!.pageInfoMap[position]?.customPaths?.size}")
             }

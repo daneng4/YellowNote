@@ -5,9 +5,6 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.res.ColorStateList
 import android.graphics.*
-import android.graphics.Color.TRANSPARENT
-import android.graphics.drawable.Drawable
-import android.text.InputType
 import android.text.SpannableStringBuilder
 import android.util.AttributeSet
 import android.view.*
@@ -52,7 +49,7 @@ class DrawingView @JvmOverloads constructor(
     var mScaleGestureDetector:ScaleGestureDetector? = null
     var mScaleFactor = 1.0f
     val mMinZoom = 1.0f
-    val mMaxZoom = 3.0f
+    val mMaxZoom = 2.5f
 
     lateinit var pdfReader: PdfReader
     lateinit var path: Path
@@ -64,7 +61,10 @@ class DrawingView @JvmOverloads constructor(
     lateinit var EditImagematrix: Matrix
     var customPath:CustomPath = CustomPath(PointF(0f,0f))
     val dashPath = DashPathEffect(floatArrayOf(5f, 25f), 2F)
-
+    var binding:ActivityPdfBinding
+    var rootLayout:ConstraintLayout
+    lateinit var textLayout:ConstraintLayout
+    val editTexts=ArrayList<EditText>()
     // 선택 영역(사각형)의
     var drawClippingBox = true
     var clippingPaint : Paint = Paint()
@@ -74,17 +74,16 @@ class DrawingView @JvmOverloads constructor(
     var pathOldY = 0f // path 위치 이동 시 이용
     var offsetX = 0f
     var offsetY = 0f
+
+    var textPointX=0f
+    var textPointY=0f
+
     var selectedPaths:ArrayList<CustomPath> = ArrayList<CustomPath>()
     lateinit var popupWindow:PopupWindow
     var popup:View? = null
     //    var clickChangeColorBtn = false
-    val editTexts=ArrayList<EditText>()
-    var binding:ActivityPdfBinding
-    var rootLayout:ConstraintLayout
-    var textLayout:ConstraintLayout
+
     var textButton=false
-    var textPointX=0f
-    var textPointY=0f
 
     var eraserPaint:Paint = Paint()
     var eraserCirclePaint:Paint = Paint()
@@ -111,9 +110,9 @@ class DrawingView @JvmOverloads constructor(
         pdfActivity = this.context as PdfActivity
         pdfActivity.drawingView = this
         PageMode = DRAWING
-        penInfo = pdfActivity.penInfo
         binding=pdfActivity.binding
         rootLayout=binding.root
+        penInfo = pdfActivity.penInfo
         textLayout= ConstraintLayout(this.context)
 
         println("DrawingView PageInfo: ${pageInfo}")
@@ -138,7 +137,7 @@ class DrawingView @JvmOverloads constructor(
     fun setTextLayout(){
         textLayout= ConstraintLayout(context)
         textLayout.id=View.generateViewId()
-        val sample=binding.sampleLayout
+        var sample=binding.sampleLayout
         textLayout.layoutParams=sample.layoutParams
         rootLayout.addView(textLayout)
         var constraintSet= ConstraintSet()
@@ -364,7 +363,13 @@ class DrawingView @JvmOverloads constructor(
     // 다른 페이지로 이동 시 불림
     override fun refreshDrawableState() {
         super.refreshDrawableState()
+        if(textLayout!=null){
+            for(text in editTexts){
+                textLayout!!.removeView(text)
+            }
+            rootLayout.removeView(textLayout)
 
+        }
         pdfReader.drawingView = this // pdfReader의 drawingView 변경
     }
 
@@ -591,41 +596,6 @@ class DrawingView @JvmOverloads constructor(
             val toolType=motionEvent?.getToolType(0)
 
             when(toolType) { // 손가락(슬라이드, 확대.축소, 페이지 내 이동)
-//                MotionEvent.TOOL_TYPE_FINGER-> {
-//                    if(isZoomed == false) // 확대 안되어 있는 경우
-//                        viewPager2.isUserInputEnabled = true // 페이지 넘기기 활성화
-//                    mScaleGestureDetector?.onTouchEvent(motionEvent)
-//
-//                    when(motionEvent.action){
-//                        MotionEvent.ACTION_DOWN->{
-//                            if(isZoomed) {
-//                                PageMode = DRAG
-//                                viewPager2.isUserInputEnabled = false
-//                                oldY = motionEvent.y
-//                                oldX = motionEvent.x
-//                            }
-//                        }
-//                        MotionEvent.ACTION_MOVE->{
-//                            if(isZoomed && PageMode==DRAG){
-//                                // 확대된 상태인 경우 페이지 내에서 위치 이동
-//                                var newX = motionEvent.x
-//                                var newY = motionEvent.y
-//
-//                                this.x += newX - oldX
-//                                this.y += newY - oldY
-//
-//                                oldX = newX
-//                                oldY = newY
-//
-//                                invalidate()
-//                            }
-//                        }
-//                        MotionEvent.ACTION_POINTER_UP -> { // 손가락 2개
-//                            PageMode = NONE
-//                        }
-//                    }
-//                }
-//                else-> { // 필기 모드 (S펜 사용 시)
                 MotionEvent.TOOL_TYPE_STYLUS-> { // 필기 모드 (S펜 사용 시)
                     val x = motionEvent.x
                     val y = motionEvent.y
@@ -745,9 +715,8 @@ class DrawingView @JvmOverloads constructor(
                                     viewPager2.isUserInputEnabled = false // 페이지 넘기기 비활성화
                                     PageMode = DRAWING // mode 변경
 
-                                    eraserPath.reset()
                                     eraserPath = Path()
-                                    eraserPath.moveTo(x,y)
+                                    eraserPath.lineTo(x,y)
                                     eraserPoints= CustomPath(PointF(eraserPointX,eraserPointY))
                                     eraserPoints.points.add(PointF(eraserPointX,eraserPointY))
                                     canvas.drawPath(eraserPath,eraserPaint)
@@ -767,16 +736,7 @@ class DrawingView @JvmOverloads constructor(
                             }
                             invalidate()
                         }
-                        TEXT->{ //텍스트 모드
-//                            textPointX=x
-//                            textPointY=y
-                            when (motionEvent.action) {
-                                MotionEvent.ACTION_DOWN -> {
 
-                                }
-                            }
-                            invalidate()
-                        }
                     }
                 }
             }
@@ -818,7 +778,6 @@ class DrawingView @JvmOverloads constructor(
             }
         }
     }
-
     private fun checkErasePath(){
         scope= CoroutineScope(Dispatchers.Default).apply {
             launch {
@@ -826,8 +785,8 @@ class DrawingView @JvmOverloads constructor(
                     for (line in pageInfo?.customPaths!!) {
                         for (point in line.points) {
                             for (p in eraserPoints.points) {
-                                if ((penInfo.getPenWidth().toDouble()).pow(2.0) >=
-                                    ((p.x - point.x ).toDouble().pow(2.0) +
+                                if (15.0.pow(2.0) >=
+                                    (penInfo.getPenWidth().toDouble().pow(2.0) +
                                             (p.y - point.y).toDouble().pow(2.0))) {
                                     deletePoints.add(PointF(point.x, point.y))
                                 }
@@ -975,7 +934,7 @@ class DrawingView @JvmOverloads constructor(
                     isZoomed = (mScaleFactor != 1.0F)
                     if(mScaleFactor == 1.0F){
                         this@DrawingView.x = defaultX
-                        this@DrawingView.y = defaultY
+                        this@DrawingView.y = 0f
                     }
                 }
             }
