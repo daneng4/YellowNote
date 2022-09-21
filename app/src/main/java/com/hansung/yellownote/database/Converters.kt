@@ -4,6 +4,7 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.PointF
 import android.graphics.pdf.PdfDocument
+import android.widget.EditText
 import androidx.room.ProvidedTypeConverter
 import androidx.room.TypeConverter
 import com.google.gson.Gson
@@ -13,58 +14,33 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.*
 
-
 @ProvidedTypeConverter
 class Converters {
-    @TypeConverter
-    fun convertPageInfoToJson(pageInfo: PageInfo): String? {
-        return Gson().toJson(pageInfo)
-    }
     @TypeConverter
     fun convertCustomPathsToJson(customPaths: ArrayList<CustomPath>): String? {
         val list=customPaths.toList()
         return Gson().toJson(list)
     }
     @TypeConverter
-    fun convertPointToJson(pointF: PointF):String?{
-        return Gson().toJson(pointF)
+    fun convertCustomEditTextToJson(customEditText: CustomEditText):String?{
+        return Gson().toJson(customEditText)
     }
     @TypeConverter
-    fun convertCustomPathToJson(customPath: CustomPath):String?{
-        return Gson().toJson(customPath)
+    fun convertCustomEditTextArrayToJson(textArray:ArrayList<CustomEditText>):String?{
+        return Gson().toJson(textArray)
     }
     @TypeConverter
-    fun convertPointsToJson(points : ArrayList<PointF>):String?{
-        return Gson().toJson(points)
+    fun convertJsonToCustomEditText(json: String):CustomEditText{
+        return Gson().fromJson(json,CustomEditText::class.java)
     }
     @TypeConverter
-    fun convertDrawingPaintToJson(drawingPaint: Paint): String? {
-        return Gson().toJson(drawingPaint)
-    }
-    @TypeConverter
-    fun convertPathToJson(path: Path):String?{
-        return Gson().toJson(path)
-    }
-    @TypeConverter
-    fun convertJsonToPoints(json:String):ArrayList<PointF>{
-        val tmp=Gson().fromJson(json,Array<PointF>::class.java).toList()
-        val points=ArrayList<PointF>()
-        for(point in tmp){
-            points.add(point)
+    fun convertJsonToCustomEditTextArray(json:String):ArrayList<CustomEditText>{
+        val tmp=Gson().fromJson(json,Array<CustomEditText>::class.java).toList()
+        val texts=ArrayList<CustomEditText>()
+        for(text in tmp){
+            texts.add(text)
         }
-        return points
-    }
-    @TypeConverter
-    fun convertJsonToPoint(json:String):PointF{
-        return Gson().fromJson(json,PointF::class.java)
-    }
-    @TypeConverter
-    fun jsonToPageInfo(json:String): PageInfo {
-        return Gson().fromJson(json,PageInfo::class.java)
-    }
-    @TypeConverter
-    fun convertJsonToCustomPath(json:String):CustomPath{
-        return Gson().fromJson(json,CustomPath::class.java)
+        return texts
     }
     @TypeConverter
     fun jsonCustomPaths(json:String): ArrayList<CustomPath> {
@@ -72,7 +48,6 @@ class Converters {
         val customPaths= java.util.ArrayList<CustomPath>()
 
         var redrawPath = Path()
-        CoroutineScope(Dispatchers.Main).launch {
             for(customPath in tmp){
                 customPath.drawingPaint = Paint().apply{
                     color = customPath.penColor
@@ -89,15 +64,7 @@ class Converters {
                 customPath.path = redrawPath
                 customPaths.add(customPath)
             }
-        }
+
         return customPaths
-    }
-    @TypeConverter
-    fun jsonToDrawingPaint(json:String):Paint{
-        return Gson().fromJson(json,Paint::class.java)
-    }
-    @TypeConverter
-    fun jsonToPath(json:String):Path{
-        return Gson().fromJson(json,Path::class.java)
     }
 }

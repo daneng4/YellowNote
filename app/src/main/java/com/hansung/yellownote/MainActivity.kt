@@ -1,14 +1,17 @@
 package com.hansung.yellownote
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.database.Cursor
 import android.graphics.Color
 import android.graphics.Point
+import android.media.AudioFormat
+import android.media.AudioRecord
+import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -31,6 +34,7 @@ import android.view.*
 import android.widget.*
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -43,11 +47,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.w3c.dom.Text
-import java.io.File
+import java.io.*
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.sql.DriverManager
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 
 class MainActivity : AppCompatActivity() {
@@ -64,6 +70,8 @@ class MainActivity : AppCompatActivity() {
     var trashBin: MenuItem?=null
     var isNote=false
 
+      private val requiredPermissions = arrayOf(Manifest.permission.RECORD_AUDIO)
+
     lateinit var buttonColorList:List<ColorData>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,16 +82,21 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         println("onCreate")
         // toolbar 설정
-        var toolbar = binding.introToolbar
+        val toolbar = binding.introToolbar
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false) // toolbar 제목 표시 유무
         linearLayout=binding.linearLayout
         myDao = MyDatabase.getDatabase(this).getMyDao()
         //val allStudents = myDao.getAllPenData()
         setMyDatabase()
-
+        requestAudioPermission()
+        //setButtonHandlers()
         // 펜 정보 담고 있는 뷰모델 생성
         penInfo = ViewModelProvider(this)[PenInfo::class.java]
+    }
+
+    private fun requestAudioPermission() {
+        requestPermissions(requiredPermissions, REQUEST_RECORD_AUDIO_PERMISSION)
     }
 
     fun setMyDatabase(){
@@ -307,9 +320,21 @@ class MainActivity : AppCompatActivity() {
         ActivityCompat.requestPermissions(this, targets,101) // 위험 권한 부여 요청
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        val audioRequestPermissionGranted =
+            requestCode == REQUEST_RECORD_AUDIO_PERMISSION &&
+                    grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED
+        //권한이 부여되지않으면 어플 종료
+        if (!audioRequestPermissionGranted) {
+            finish()
+        }
         when(requestCode){ // 요청 코드 맞는지 확인
+
             101 -> { // 사용자 권한 수락했는지 여부 확인
                 if(grantResults.size>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED) {
                     System.out.println("***** 권한 승인 *****")
@@ -440,6 +465,12 @@ class MainActivity : AppCompatActivity() {
 
     fun isMediaDocument(uri: Uri): Boolean {
         return "com.android.providers.media.documents" == uri.getAuthority()
+    }
+    companion object {
+        const val RECORDER_SAMPLERATE = 44100
+        const val RECORDER_CHANNELS: Int = AudioFormat.CHANNEL_IN_MONO
+        const val RECORDER_AUDIO_ENCODING: Int = AudioFormat.ENCODING_PCM_16BIT
+        private const val REQUEST_RECORD_AUDIO_PERMISSION =201
     }
 }
 
