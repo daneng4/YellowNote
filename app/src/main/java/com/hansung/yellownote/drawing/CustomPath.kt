@@ -2,19 +2,17 @@ package com.hansung.yellownote.drawing
 
 import android.graphics.*
 import androidx.room.Embedded
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.io.*
 import java.util.ArrayList
 
 class CustomPath(startPoint: PointF){
-    lateinit var path : SerializablePath
+    lateinit var path : Path
     var points : ArrayList<PointF> // customPath가 지나는 point들
     lateinit var endPoint: PointF // 끝점
     var startPoint : PointF // 시작점
     lateinit var drawingPaint: Paint
-    lateinit var pathToByte :ByteArray
+    var penColor:Int = Color.BLACK
+    var penWidth:Float = 10f
+
 
     init{
         this.startPoint = startPoint
@@ -38,6 +36,13 @@ class CustomPath(startPoint: PointF){
             points[i].y += offsetY
         }
     }
+
+    fun savePaint(drawingPaint:Paint){
+        this.drawingPaint = drawingPaint
+        this.penColor = drawingPaint.color
+        this.penWidth = drawingPaint.strokeWidth
+    }
+
     fun setPoints(point: PointF){
         points.add(point)
     }

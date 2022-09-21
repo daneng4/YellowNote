@@ -4,7 +4,6 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.PointF
 import android.graphics.pdf.PdfDocument
-import android.widget.EditText
 import androidx.room.ProvidedTypeConverter
 import androidx.room.TypeConverter
 import com.google.gson.Gson
@@ -14,50 +13,91 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.*
 
+
 @ProvidedTypeConverter
 class Converters {
+    @TypeConverter
+    fun convertPageInfoToJson(pageInfo: PageInfo): String? {
+        return Gson().toJson(pageInfo)
+    }
     @TypeConverter
     fun convertCustomPathsToJson(customPaths: ArrayList<CustomPath>): String? {
         val list=customPaths.toList()
         return Gson().toJson(list)
     }
     @TypeConverter
-    fun convertCustomEditTextToJson(customEditText: CustomEditText):String?{
-        return Gson().toJson(customEditText)
+    fun convertPointToJson(pointF: PointF):String?{
+        return Gson().toJson(pointF)
     }
     @TypeConverter
-    fun convertCustomEditTextArrayToJson(textArray:ArrayList<CustomEditText>):String?{
-        return Gson().toJson(textArray)
+    fun convertCustomPathToJson(customPath: CustomPath):String?{
+        return Gson().toJson(customPath)
     }
     @TypeConverter
-    fun convertJsonToCustomEditText(json: String):CustomEditText{
-        return Gson().fromJson(json,CustomEditText::class.java)
+    fun convertPointsToJson(points : ArrayList<PointF>):String?{
+        return Gson().toJson(points)
     }
     @TypeConverter
-    fun convertJsonToCustomEditTextArray(json:String):ArrayList<CustomEditText>{
-        val tmp=Gson().fromJson(json,Array<CustomEditText>::class.java).toList()
-        val texts=ArrayList<CustomEditText>()
-        for(text in tmp){
-            texts.add(text)
+    fun convertDrawingPaintToJson(drawingPaint: Paint): String? {
+        return Gson().toJson(drawingPaint)
+    }
+    @TypeConverter
+    fun convertPathToJson(path: Path):String?{
+        return Gson().toJson(path)
+    }
+    @TypeConverter
+    fun convertJsonToPoints(json:String):ArrayList<PointF>{
+        val tmp=Gson().fromJson(json,Array<PointF>::class.java).toList()
+        val points=ArrayList<PointF>()
+        for(point in tmp){
+            points.add(point)
         }
-        return texts
+        return points
+    }
+    @TypeConverter
+    fun convertJsonToPoint(json:String):PointF{
+        return Gson().fromJson(json,PointF::class.java)
+    }
+    @TypeConverter
+    fun jsonToPageInfo(json:String): PageInfo {
+        return Gson().fromJson(json,PageInfo::class.java)
+    }
+    @TypeConverter
+    fun convertJsonToCustomPath(json:String):CustomPath{
+        return Gson().fromJson(json,CustomPath::class.java)
     }
     @TypeConverter
     fun jsonCustomPaths(json:String): ArrayList<CustomPath> {
         val tmp=Gson().fromJson(json,Array<CustomPath>::class.java).toList()
-        val customPath= java.util.ArrayList<CustomPath>()
+        val customPaths= java.util.ArrayList<CustomPath>()
+
+        var redrawPath = Path()
         CoroutineScope(Dispatchers.Main).launch {
-            var redrawPath = SerializablePath()
-            for(path in tmp){
-                redrawPath = SerializablePath()
-                redrawPath.moveTo(path.startPoint.x,path.startPoint.y)
-                for(i in 0..path.points.size-1)
-                    redrawPath.lineTo(path.points[i].x,path.points[i].y)
-                redrawPath.lineTo(path.endPoint.x, path.endPoint.y)
-                path.path = redrawPath
-                customPath.add(path)
+            for(customPath in tmp){
+                customPath.drawingPaint = Paint().apply{
+                    color = customPath.penColor
+                    style = Paint.Style.STROKE
+                    strokeJoin = Paint.Join.ROUND
+                    strokeCap = Paint.Cap.ROUND
+                    strokeWidth = customPath.penWidth
+                }
+                redrawPath = Path()
+                redrawPath.moveTo(customPath.startPoint.x,customPath.startPoint.y)
+                for(point in customPath.points)
+                    redrawPath.lineTo(point.x,point.y)
+                redrawPath.lineTo(customPath.endPoint.x, customPath.endPoint.y)
+                customPath.path = redrawPath
+                customPaths.add(customPath)
             }
         }
-        return customPath
+        return customPaths
+    }
+    @TypeConverter
+    fun jsonToDrawingPaint(json:String):Paint{
+        return Gson().fromJson(json,Paint::class.java)
+    }
+    @TypeConverter
+    fun jsonToPath(json:String):Path{
+        return Gson().fromJson(json,Path::class.java)
     }
 }

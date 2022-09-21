@@ -46,7 +46,7 @@ interface MyDAO {
 
 
     @Query("UPDATE pen_data_table SET width = :width, color= :color ,isActive= :isActive WHERE PenMode =:mode")
-    fun updatePenData(mode: String, width: Float?, color: Int?, isActive: Boolean?)
+    fun updatePenData(mode:String, width: Float?, color: Int?, isActive: Boolean?)
 
     @Query("UPDATE color_table SET color= :color WHERE ButtonName =:buttonName")
     fun updateColorData(buttonName:String, color: Int)

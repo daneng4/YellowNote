@@ -1,10 +1,7 @@
 package com.hansung.yellownote.drawing
 
 import android.graphics.Color
-import android.graphics.PointF
-import android.widget.EditText
 import androidx.room.Embedded
-import com.google.gson.Gson
 import java.io.Serializable
 import java.nio.file.Paths
 
@@ -12,7 +9,6 @@ import java.nio.file.Paths
 class PageInfo(pageNo:Int) {
     var pageNo = pageNo
     var customPaths = ArrayList<CustomPath>()
-    var customEditText=ArrayList<CustomEditText>()
     var penColor:Int? = Color.BLACK
 
     fun changePathColor(penColor:Int){
@@ -29,10 +25,5 @@ class PageInfo(pageNo:Int) {
     fun setCustomPaths(paths: ArrayList<CustomPath>){
         customPaths=paths
     }
-    @JvmName("setCustomEditText1")
-    fun setCustomEditText(editText: ArrayList<CustomEditText>){
-        customEditText=editText
-        println("customEditText size = ${customEditText.size}")
-        println("customEditText isEmpty = ${customEditText.isEmpty()}")
-    }
+
 }

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.database.Cursor
 import android.graphics.Color
 import android.graphics.Point
@@ -15,6 +16,7 @@ import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.text.TextUtils
+
 import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
@@ -23,6 +25,9 @@ import android.widget.CheckBox
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+
+import android.view.*
+import android.widget.*
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -31,14 +36,17 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.hansung.notedatabase.*
 import com.hansung.yellownote.databinding.ActivityMainBinding
-import com.hansung.yellownote.drawing.PdfActivity
 import com.hansung.yellownote.drawing.PenInfo
+import com.hansung.yellownote.drawing.PdfActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.w3c.dom.Text
 import java.io.File
 import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 
 class MainActivity : AppCompatActivity() {
@@ -74,7 +82,7 @@ class MainActivity : AppCompatActivity() {
 
         // 펜 정보 담고 있는 뷰모델 생성
         penInfo = ViewModelProvider(this)[PenInfo::class.java]
-   }
+    }
 
     fun setMyDatabase(){
         CoroutineScope(Dispatchers.Main).launch {
@@ -104,9 +112,9 @@ class MainActivity : AppCompatActivity() {
     fun getActivePenData(){
         var activePenData = myDao.getActivePenData()
         System.out.println("${activePenData[0]}")
+
         if(activePenData[0].color!=null){
             penInfo.setPenColor(activePenData[0].color!!)
-            System.out.println("${penInfo.getPenColor()}")
         }
         penInfo.setPenWidth(activePenData[0].width!!)
         penInfo.setPenMode(PenModes.indexOf(activePenData[0].mode))
@@ -138,14 +146,14 @@ class MainActivity : AppCompatActivity() {
 
         var innerLayout:LinearLayout?=null
         for((i, noteInfo) in noteList.withIndex()) {
-                if (i % divValue == 0) {
-                    innerLayout = LinearLayout(this)
-                    val param = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT)
-                    innerLayout.layoutParams = param
-                    innerLayout.orientation=LinearLayout.HORIZONTAL
-                    linearLayout.addView(innerLayout)
-                }
+            if (i % divValue == 0) {
+                innerLayout = LinearLayout(this)
+                val param = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT)
+                innerLayout.layoutParams = param
+                innerLayout.orientation=LinearLayout.HORIZONTAL
+                linearLayout.addView(innerLayout)
+            }
 
             val noteLayout=LinearLayout(this)
             val noteParams= LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -193,7 +201,6 @@ class MainActivity : AppCompatActivity() {
                 if (!isLongButtonClick) {
                     if (File(noteInfo.recordFileLocation).isFile) {
                         if (File(noteInfo.recordFileLocation).canRead()) {
-                            System.out.println("${penInfo.getPenColor()}")
                             startActivity(
                                 Intent(this, PdfActivity()::class.java)
                                     .putExtra("filePath", noteInfo.recordFileLocation)
@@ -264,6 +271,7 @@ class MainActivity : AppCompatActivity() {
                 isNote=true
                 checkPermissions(permissions)
                 isNote=false
+
                 return true
             }
             else -> return super.onOptionsItemSelected(item)
@@ -279,7 +287,6 @@ class MainActivity : AppCompatActivity() {
             var permissionCheck = ContextCompat.checkSelfPermission(this, curPermission)
             if(permissionCheck == PackageManager.PERMISSION_GRANTED) { // 권한이 이미 부여된 경우
                 System.out.println("***** 저장소 권한 있음 *****")
-
                 fileChooser() // 파일 선택창 띄우기
                 return
             }
@@ -304,8 +311,7 @@ class MainActivity : AppCompatActivity() {
             101 -> { // 사용자 권한 수락했는지 여부 확인
                 if(grantResults.size>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED) {
                     System.out.println("***** 권한 승인 *****")
-
-                        fileChooser() // 파일 선택창 띄우기
+                    fileChooser() // 파일 선택창 띄우기
                 }
                 else
                     System.out.println("***** 권한 거부 *****")

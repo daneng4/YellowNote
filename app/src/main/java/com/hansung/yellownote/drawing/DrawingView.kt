@@ -2,23 +2,15 @@ package com.hansung.yellownote.drawing
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Context.WINDOW_SERVICE
 import android.content.DialogInterface
 import android.graphics.*
-import android.graphics.drawable.BitmapDrawable
-import android.text.Editable
-import android.text.SpannableStringBuilder
 import android.util.AttributeSet
 import android.view.*
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.*
 import androidx.appcompat.widget.AppCompatImageView
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.viewpager2.widget.ViewPager2
 import com.hansung.yellownote.R
-import com.hansung.yellownote.databinding.ActivityPdfBinding
 import com.skydoves.colorpickerview.ColorEnvelope
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
@@ -28,7 +20,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.collections.ArrayList
 import kotlin.math.pow
-
 
 class DrawingView @JvmOverloads constructor(
     context: Context?,
@@ -54,10 +45,9 @@ class DrawingView @JvmOverloads constructor(
     var mScaleFactor = 1.0f
     val mMinZoom = 1.0f
     val mMaxZoom = 3.0f
-    var binding : ActivityPdfBinding
-    var rootLayout:ConstraintLayout
+
     lateinit var pdfReader: PdfReader
-    lateinit var path: SerializablePath
+    lateinit var path: Path
     lateinit var backgroundPaint: Paint
     var drawingPaint: Paint = Paint()
     lateinit var drawingBitmap: Bitmap
@@ -66,7 +56,7 @@ class DrawingView @JvmOverloads constructor(
     lateinit var EditImagematrix: Matrix
     var customPath:CustomPath = CustomPath(PointF(0f,0f))
     val dashPath = DashPathEffect(floatArrayOf(5f, 25f), 2F)
-    val editTexts=ArrayList<EditText>()
+
     // 선택 영역(사각형)의
     var drawClippingBox = true
     var clippingPaint : Paint = Paint()
@@ -78,9 +68,8 @@ class DrawingView @JvmOverloads constructor(
     var offsetY = 0f
     var selectedPaths:ArrayList<CustomPath> = ArrayList<CustomPath>()
     lateinit var popupWindow:PopupWindow
-    val textLayout:ConstraintLayout
     var popup:View? = null
-//    var clickChangeColorBtn = false
+    //    var clickChangeColorBtn = false
 
     var eraserPaint:Paint = Paint()
     var eraserCirclePaint:Paint = Paint()
@@ -92,11 +81,8 @@ class DrawingView @JvmOverloads constructor(
     var eraserPointY = -10f
     val deletePoints=ArrayList<PointF>()
 
-    var textPointX = 0f
-    var textPointY = 0f
-
     var pageInfo: PageInfo? = null
-    var textButton=false
+
     val PEN = 0
     val ERASER = 1
     val TEXT = 2
@@ -105,13 +91,11 @@ class DrawingView @JvmOverloads constructor(
 
     lateinit var penInfo : PenInfo
     lateinit var scope:CoroutineScope
+
     init{
         pdfActivity = this.context as PdfActivity
-        binding=pdfActivity.binding
-        rootLayout=binding.root
-
+        pdfActivity.drawingView = this
         PageMode = DRAWING
-        textLayout=ConstraintLayout(context!!)
         penInfo = pdfActivity.penInfo
         println("DrawingView PageInfo: ${pageInfo}")
         penInfo.PenMode.observe(pdfActivity){
@@ -129,131 +113,9 @@ class DrawingView @JvmOverloads constructor(
                 }catch (e:Exception){}
             }
         }
-        setClippingPen()
-        setEraser()
+//        mScaleGestureDetector= ScaleGestureDetector(getContext(),ScaleListener())
     }
-    @SuppressLint("ClickableViewAccessibility")
-    fun setTextLayout(){
 
-        textLayout.id=View.generateViewId()
-        val sample=binding.sampleLayout
-        textLayout.layoutParams=sample.layoutParams
-        rootLayout.addView(textLayout)
-        var constraintSet=ConstraintSet()
-        constraintSet.clone(textLayout)
-        constraintSet.connect(textLayout.id,ConstraintSet.LEFT,
-            ConstraintSet.PARENT_ID, ConstraintSet.LEFT, 0)
-        constraintSet.connect(textLayout.id,ConstraintSet.TOP,
-            ConstraintSet.PARENT_ID, ConstraintSet.TOP,0)
-        constraintSet.connect(textLayout.id,ConstraintSet.RIGHT,
-            ConstraintSet.PARENT_ID, ConstraintSet.RIGHT,0)
-        constraintSet.connect(textLayout.id,ConstraintSet.BOTTOM,
-            ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM,0)
-        constraintSet.applyTo(textLayout)
-        editTexts.clear()
-        if(pageInfo?.customEditText!=null) {
-            if (pageInfo!!.customEditText.size != 0) {
-                val customEditText=pageInfo!!.customEditText
-                println("editText empty = ${customEditText.isEmpty()}")
-                for (i in 0..customEditText.size-1) {
-                    if(customEditText[i].text=="")continue
-                    constraintSet= ConstraintSet()
-
-                    val text = SpannableStringBuilder(customEditText[i].text)
-                    val point=customEditText[i].textPoint
-                    val editText=EditText(context)
-                    editText.text=text
-                    editText.id=customEditText[i].textId
-                    textLayout.addView(editText)
-                    editTexts.add(editText)
-                    constraintSet.clone(textLayout)
-                    constraintSet.connect(editText.id, ConstraintSet.LEFT,
-                        textLayout.id, ConstraintSet.LEFT, point.x.toInt())
-                    constraintSet.connect(editText.id, ConstraintSet.TOP,
-                        textLayout.id, ConstraintSet.TOP, point.y.toInt())
-
-                    println("text = ${text}, pointx = ${point.x}, pointy = ${point.y}, id = ${editText.id}")
-
-                    constraintSet.applyTo(textLayout)
-                    editText.setOnFocusChangeListener{_,hasFocus->
-                        if(!hasFocus){
-                            for(k in 0.. pageInfo!!.customEditText.size-1){
-                                if(editTexts[k]==editText){
-                                    editTexts[k].text=editText.text
-                                    pageInfo!!.customEditText[k].text=editText.text.toString()
-                                }
-                            }
-                        }
-
-                    }
-                }
-            }
-        }
-//
-        println("edit Text 초기 설정 완료")
-        textLayout.setOnTouchListener{_, motionEvent ->
-            val toolType=motionEvent?.getToolType(0)
-            textButton=false
-            when(toolType) {
-                //MotionEvent.TOOL_TYPE_STYLUS-> { // 필기 모드 (S펜 사용 시)
-                MotionEvent.TOOL_TYPE_FINGER->{
-                    val x = motionEvent.x
-                    val y = motionEvent.y
-                    when(penInfo.getPenMode()){
-                        TEXT->{ //텍스트 모드
-                            textButton=true
-                            textPointX=x
-                            textPointY=y
-                            when (motionEvent.action) {
-                                MotionEvent.ACTION_UP -> {
-                                    println("text 좌표 = "+textPointX+textPointY)
-                                    for(text in editTexts){
-                                        text.clearFocus()
-                                    }
-                                    val customEditText=CustomEditText()
-                                    val editText=EditText(context)
-                                    customEditText.textPoint=(PointF(textPointX,textPointY))
-                                    editTexts.add(editText)
-//                                    pageInfo!!.textPaths.add(PointF(textPointX,textPointY))
-                                    editText.id=View.generateViewId()
-                                    customEditText.textId=editText.id
-                                    textLayout.addView(editText)
-                                    constraintSet=ConstraintSet()
-                                    constraintSet.clone(textLayout)
-                                    constraintSet.connect(editText.id,ConstraintSet.LEFT,
-                                        textLayout.id, ConstraintSet.LEFT, textPointX.toInt())
-                                    constraintSet.connect(editText.id,ConstraintSet.TOP,
-                                        textLayout.id, ConstraintSet.TOP,textPointY.toInt())
-
-                                    constraintSet.applyTo(textLayout)
-                                    pageInfo!!.customEditText.add(customEditText)
-                                    editText.setOnFocusChangeListener{_,hasFocus->
-                                        if(!hasFocus){
-                                            for(k in 0.. pageInfo!!.customEditText.size-1){
-                                                if(editTexts[k]==editText){
-                                                    editTexts[k].text=editText.text
-                                                    pageInfo!!.customEditText[k].text=editText.text.toString()
-                                                }
-                                            }
-                                        }
-
-                                    }
-                                }
-                            }
-                        }
-                        else->{
-                            for(text in editTexts){
-                                text.clearFocus()
-                            }
-                        }
-                    }
-                }
-
-            }
-            textButton
-        }
-
-    }
     @SuppressLint("ClickableViewAccessibility")
     fun createDrawingBitmap(backgroundBitmap:Bitmap){
         this.backgroundBitmap = backgroundBitmap
@@ -273,7 +135,7 @@ class DrawingView @JvmOverloads constructor(
 
     fun setupDrawing(){
         canvas = Canvas(drawingBitmap)
-        path = SerializablePath()
+        path = Path()
         backgroundPaint = Paint(Paint.DITHER_FLAG)
         setPenStyle()
         drawingPaint.setAntiAlias(true) // 가장자리 표면 매끄럽게
@@ -283,12 +145,10 @@ class DrawingView @JvmOverloads constructor(
 
         this.setImageBitmap(drawingBitmap)
         setupDrawingView()
-        /////////////////////////회전해서 다시 그리기 되려나?
-        if(pageInfo!=null){
-            if(pageInfo!!.customPaths.size>0)
-                redrawPath(false)
-        }
 
+        /////////////////////////회전해서 다시 그리기 되려나?
+//        if(pageInfo!!.customPaths.size>0)
+//            redrawPath(false)
 //        this.setImageBitmap(backgroundBitmap)
     }
 
@@ -326,10 +186,8 @@ class DrawingView @JvmOverloads constructor(
     fun setEraser(){
         eraserPaint = Paint().apply{
             style = Paint.Style.STROKE
-//            strokeJoin = Paint.Join.ROUND
-//            strokeCap = Paint.Cap.ROUND
             strokeWidth = penInfo.getPenWidth()
-            color = Color.RED
+            color = Color.WHITE
             setXfermode(PorterDuffXfermode(PorterDuff.Mode.CLEAR))
         }
 
@@ -337,7 +195,7 @@ class DrawingView @JvmOverloads constructor(
             style = Paint.Style.STROKE
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
-            strokeWidth = 5f
+            strokeWidth = 5F
             color = Color.BLACK
         }
     }
@@ -345,19 +203,16 @@ class DrawingView @JvmOverloads constructor(
     // 다른 페이지로 이동 시 불림
     override fun refreshDrawableState() {
         super.refreshDrawableState()
-        println("refresh draw")
-//        textLayout.removeAllViews()
-//        rootLayout.removeView(textLayout)
+
         pdfReader.drawingView = this // pdfReader의 drawingView 변경
     }
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-
         if (canvas != null) {
             canvas.drawBitmap(backgroundBitmap,EditImagematrix,backgroundPaint) // backgroundBitmap 그리기
             canvas.drawBitmap(drawingBitmap,EditImagematrix,backgroundPaint) // drawingBitmap 그리기
-            canvas.drawBitmap(drawingBitmap,EditImagematrix,backgroundPaint) // drawingBitmap 그리기
+
 
             when(penInfo.getPenMode()){
                 CLIPPING -> { // CLIPPING 모드인 경우 사각형 모양의 그물 그리기
@@ -410,12 +265,10 @@ class DrawingView @JvmOverloads constructor(
                 canvas.drawPath(customPath.path, customPath.drawingPaint)
             }
         }
-
     }
 
     // 클리핑 후 뜨는 팝업창
     fun showClippingPopup(){
-        System.out.println("${this.x},${this.y}")
         popupWindow = PopupWindow(this)
         var layoutInflater = LayoutInflater.from(this.context)
         popup = layoutInflater.inflate(R.layout.clipping_popup,null)
@@ -464,24 +317,24 @@ class DrawingView @JvmOverloads constructor(
             var numberBtn = popup!!.findViewById<Button>(R.id.numberBtn)
 
             englishBtn.setOnClickListener {
-                Toast.makeText(pdfActivity, "영어 손글씨 변환 시도", Toast.LENGTH_LONG).show()
                 saveCanvas("English")
+                Toast.makeText(pdfActivity, "영어 손글씨 변환 시도", Toast.LENGTH_LONG).show()
                 popupWindow.dismiss()
                 popup=null
                 drawClippingBox = false
                 redrawPath(false)
             }
             hangulBtn.setOnClickListener {
-                Toast.makeText(pdfActivity, "한글 손글씨 변환 시도", Toast.LENGTH_LONG).show()
                 saveCanvas("Hangul")
+                Toast.makeText(pdfActivity, "한글 손글씨 변환 시도", Toast.LENGTH_LONG).show()
                 popupWindow.dismiss()
                 popup=null
                 drawClippingBox = false
                 redrawPath(false)
             }
             numberBtn.setOnClickListener {
-                Toast.makeText(pdfActivity, "숫자 손글씨 변환 시도", Toast.LENGTH_LONG).show()
                 saveCanvas("Number")
+                Toast.makeText(pdfActivity, "숫자 손글씨 변환 시도", Toast.LENGTH_LONG).show()
                 popupWindow.dismiss()
                 popup=null
                 drawClippingBox = false
@@ -592,7 +445,6 @@ class DrawingView @JvmOverloads constructor(
                             }
                         }
                         MotionEvent.ACTION_MOVE->{
-//                            System.out.println("${motionEvent.x},${motionEvent.y}")
                             if(isZoomed && PageMode==DRAG){
                                 // 확대된 상태인 경우 페이지 내에서 위치 이동
                                 var newX = motionEvent.x
@@ -608,7 +460,6 @@ class DrawingView @JvmOverloads constructor(
                             }
                         }
                         MotionEvent.ACTION_POINTER_UP -> { // 손가락 2개
-                            System.out.println("***************** ACTION_POINTER_UP *****************")
                             PageMode = NONE
                         }
                     }
@@ -630,7 +481,6 @@ class DrawingView @JvmOverloads constructor(
                                     if(selectedPaths.size!=0 && checkContainPoint(PointF(x,y))){
                                         // 선택된 path들을 이동시키는 모드로 변경 (MOVING MODE)
                                         penInfo.setMovingClipping(true)
-                                        System.out.println("${penInfo.getPenMode()}, ${penInfo.getMovingClipping()}")
                                         pathOldX = x
                                         pathOldY = y
                                         redrawPath(true) // selectedPaths 제외한 path들 다시 그리기
@@ -669,21 +519,18 @@ class DrawingView @JvmOverloads constructor(
                                     invalidate()
                                 }
                                 MotionEvent.ACTION_UP -> {
-                                    System.out.println("${penInfo.getPenMode()}, ${penInfo.getMovingClipping()}")
                                     if(penInfo.getMovingClipping()){
                                         offsetX = 0f
                                         offsetY = 0f
                                         invalidate()
                                     }
                                     else{
-                                        if(pageInfo!= null){
+                                        if(pageInfo!= null) {
                                             checkContainSelectedPath()
-                                            if(selectedPaths.size==0) {
+                                            if (selectedPaths.size == 0) {
                                                 clippingEndPoint = clippingStartPoint
                                                 invalidate()
-                                            }
-                                            else {
-                                                System.out.println("showMenu")
+                                            } else {
                                                 showClippingPopup()
                                             }
                                         }
@@ -699,12 +546,11 @@ class DrawingView @JvmOverloads constructor(
                                     if(selectedPaths.size!=0)
                                         selectedPaths.clear()
                                     setDrawingPen()
-//                                    System.out.println("현재 drawingView ==> ${this}")
                                     viewPager2.isUserInputEnabled = false // 페이지 넘기기 비활성화
                                     PageMode = DRAWING // mode 변경
 
 //                                    path.reset()
-                                    path = SerializablePath()
+                                    path = Path()
                                     path.moveTo(x, y)
                                     customPath = CustomPath(PointF(x,y)) // path 시작점 저장
                                     canvas.drawPath(path,drawingPaint)
@@ -718,11 +564,9 @@ class DrawingView @JvmOverloads constructor(
                                     path.lineTo(x, y)
                                     customPath.endPoint = PointF(x,y) // path 끝점 저장
                                     customPath.path = path
-                                    customPath.drawingPaint = drawingPaint
+                                    customPath.savePaint(drawingPaint)
                                     pageInfo?.customPaths?.add(customPath) // pageInfo에 customPath 저장
-//                                    customPath.changeToByte()
                                     canvas.drawPath(path, drawingPaint)
-//                                    System.out.println("path 개수 = ${pageInfo?.customPaths?.size}")
                                 }
                             }
                             invalidate()
@@ -733,20 +577,19 @@ class DrawingView @JvmOverloads constructor(
                             eraserCircleRadius = penInfo.getPenWidth()/2
                             when (motionEvent.action) {
                                 MotionEvent.ACTION_DOWN -> {
+                                    if(selectedPaths.size!=0)
+                                        selectedPaths.clear()
                                     setEraser()
                                     viewPager2.isUserInputEnabled = false // 페이지 넘기기 비활성화
                                     PageMode = DRAWING // mode 변경
 
-
                                     eraserPath = Path()
-//                                    eraserPath.addCircle(x,y,eraserCircleRadius,Path.Direction.CCW)
-                                    eraserPath.moveTo(x,y)
+                                    eraserPath.lineTo(x,y)
                                     eraserPoints= CustomPath(PointF(eraserPointX,eraserPointY))
                                     eraserPoints.points.add(PointF(eraserPointX,eraserPointY))
                                     canvas.drawPath(eraserPath,eraserPaint)
                                 }
                                 MotionEvent.ACTION_MOVE -> {
-//                                    eraserPath.addCircle(x,y,eraserCircleRadius,Path.Direction.CCW)
                                     eraserPath.lineTo(x,y)
                                     eraserPoints.points.add(PointF(eraserPointX,eraserPointY))
                                     canvas.drawPath(eraserPath,eraserPaint)
@@ -756,11 +599,21 @@ class DrawingView @JvmOverloads constructor(
                                     checkErasePath()
                                     erasedPaths.clear()
                                     eraserPath.reset()
+                                    eraserCirclePaint.color = Color.TRANSPARENT
                                 }
                             }
                             invalidate()
                         }
+                        TEXT->{ //텍스트 모드
+//                            textPointX=x
+//                            textPointY=y
+                            when (motionEvent.action) {
+                                MotionEvent.ACTION_DOWN -> {
 
+                                }
+                            }
+                            invalidate()
+                        }
                     }
                 }
             }
@@ -809,8 +662,8 @@ class DrawingView @JvmOverloads constructor(
                     for (line in pageInfo?.customPaths!!) {
                         for (point in line.points) {
                             for (p in eraserPoints.points) {
-                                if (penInfo.getPenWidth().toDouble().pow(2.0) >=
-                                    ((p.x - point.x ).toDouble().pow(2.0) +
+                                if (15.0.pow(2.0) >=
+                                    (penInfo.getPenWidth().toDouble().pow(2.0) +
                                             (p.y - point.y).toDouble().pow(2.0))) {
                                     deletePoints.add(PointF(point.x, point.y))
                                 }
@@ -868,7 +721,7 @@ class DrawingView @JvmOverloads constructor(
                 }
             }
         }
-//        System.out.println("selectedPaths개수 = ${selectedPaths.size}")
+        System.out.println("selectedPaths개수 = ${selectedPaths.size}")
     }
 
     // 사각형 안에 point 포함되는지 판단
@@ -907,12 +760,11 @@ class DrawingView @JvmOverloads constructor(
             if(b!=0)b=255
             returnPixels[i]=(b/255).toByte()
         }
-        pdfActivity.client.sendImageSizeMessage(backgroundBitmap.width)
+//        pdfActivity.client.sendImageSizeMessage(backgroundBitmap.width)
         when(textType){
-
-            "English" -> pdfActivity.client.sendEnglishPixelMessage(returnPixels)
-            "Hangul" -> pdfActivity.client.sendHangulPixelMessage(returnPixels)
-            "Number" -> pdfActivity.client.sendNumberPixelMessage(returnPixels)
+//            "English" -> pdfActivity.client.sendEnglishPixelMessage(returnPixels)
+//            "Hangul" -> pdfActivity.client.sendHangulPixelMessage(returnPixels)
+//            "Number" -> pdfActivity.client.sendNumberPixelMessage(returnPixels)
         }
     }
 
@@ -934,7 +786,6 @@ class DrawingView @JvmOverloads constructor(
             super.onScaleBegin(detector)
             PageMode = ZOOM
             System.out.println("PageMode = ZOOM")
-//            viewPager2.isUserInputEnabled = false // 페이지 넘기기 비활성화
 
             // 확대/축소되는 중심점 변경
             val newX = detector.focusX
@@ -950,7 +801,6 @@ class DrawingView @JvmOverloads constructor(
         override fun onScale(detector: ScaleGestureDetector): Boolean {
             if(gestureTolerance(detector)){
                 if(detector.timeDelta>10 && detector.timeDelta<20){
-//                    System.out.println("${detector.timeDelta}")
 
                     mScaleFactor*=detector.scaleFactor
                     mScaleFactor=Math.max(mMinZoom,Math.min(mScaleFactor,mMaxZoom))
@@ -976,7 +826,6 @@ class DrawingView @JvmOverloads constructor(
 
         private fun gestureTolerance(detector: ScaleGestureDetector): Boolean {
             val spanDelta = Math.abs(detector.currentSpan - detector.previousSpan)
-//            System.out.println("spanDelta = ${spanDelta}")
             return spanDelta > SPAN_SLOP && spanDelta < 25
         }
     }

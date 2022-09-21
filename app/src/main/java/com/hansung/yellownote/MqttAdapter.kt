@@ -16,9 +16,8 @@ class MqttAdapter() {
         scope= CoroutineScope(Dispatchers.IO).apply {
             launch {
                 try {
-                    System.out.println("client 연결 시도")
                     client =
-                        MqttClient("tcp://223.194.134.124:1883", MqttClient.generateClientId(), null)
+                        MqttClient("tcp://223.194.131.47:1883", MqttClient.generateClientId(), null)
                     if (!client.isConnected) {
                         println("연결")
                         withContext(Dispatchers.Main) {
@@ -55,11 +54,11 @@ class MqttAdapter() {
                 try {
                     if (!client.isConnected) {
                         withContext(Dispatchers.Main) {
-                        client.connect()
+                            client.connect()
                         }
                     }
 
-                      client.publish("easyocr/hangul", MqttMessage(drawings))
+                    client.publish("easyocr/hangul", MqttMessage(drawings))
 
                 } catch (e: MqttException) {
                     e.printStackTrace()

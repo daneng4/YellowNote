@@ -21,7 +21,7 @@ class PenSettingDialog(context:Context) {
 
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun show(myDAO: MyDAO, penInfo: PenInfo, x:Int, y:Int){
+    fun show(myDAO: MyDAO, penInfo: PenInfo){
         dialog.apply {
             setContentView(R.layout.pen_popup)
             window!!.setLayout(
@@ -29,23 +29,12 @@ class PenSettingDialog(context:Context) {
                 WindowManager.LayoutParams.WRAP_CONTENT,
             )
 
-            var Measuredwidth = 0
-            var Measuredheight = 0
-            val size = Point()
-            val windowManager = window!!.windowManager
+            if(penInfo.getPenColor()!=null) // 펜인 경우
+                window!!.attributes.x = -530
+            else // 지우개인 경우
+                window!!.attributes.x = -350
+            window!!.attributes.y = -220
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                windowManager.defaultDisplay.getSize(size)
-                Measuredwidth = size.x
-                Measuredheight = size.y
-            } else {
-                val d = windowManager.defaultDisplay
-                Measuredwidth = d.getWidth()
-                Measuredheight = d.getHeight()
-            }
-
-            window!!.attributes.x = -Measuredwidth/2+x+100
-            window!!.attributes.y = -Measuredheight/2+y+120
             window!!.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
             setCanceledOnTouchOutside(true)
             setCancelable(true)
@@ -54,8 +43,7 @@ class PenSettingDialog(context:Context) {
         }
 
         widthTextKor = dialog.findViewById<TextView>(R.id.widthKor)
-        widthText =
-            dialog.findViewById<TextView>(R.id.widthTextView)
+        widthText = dialog.findViewById<TextView>(R.id.widthTextView)
         widthSeekBar = dialog.findViewById<SeekBar>(R.id.penWidthSeekbar)
 
         widthSeekBar.min = 5
@@ -83,7 +71,6 @@ class PenSettingDialog(context:Context) {
                     myDAO.updatePenData("PEN",penInfo.getPenWidth(),penInfo.getPenColor(),true)
                 else // 지우개인 경우
                     myDAO.updatePenData("ERASER",penInfo.getPenWidth(),null,true)
-                System.out.println("OnStopTrackingTouch = ${penInfo.getPenWidth()}")
             }
         })
     }

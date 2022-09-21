@@ -26,7 +26,7 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
 
     val pageCount = pdfRenderer.pageCount
     var firstOpen=true
-    var drawingView: DrawingView?=null
+    lateinit var drawingView: DrawingView
     var pageInfoMap = HashMap<Int,PageInfo>() // <page번호, PageInfo>
     lateinit var pageInfo:PageInfo // 현재 page의 PageInfo
 
@@ -39,12 +39,10 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
     val TEXT = 2
     val CLIPPING = 3
     val MOVING = 4
-    var drawingMode = PEN
+
 
     fun openPage(page: Int, drawingView: DrawingView) {
-        System.out.println("================= PdfReader.OpenPage ===================")
         if (page >= pageCount) return
-
         this.drawingView = drawingView
         drawingView.pdfReader = this
         drawingView.viewPager2 = view_pager
@@ -55,17 +53,18 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
             var pageRatio = width/(height).toDouble()
             System.out.println("view_pager : ${view_pager.width}x${view_pager.height}")
             System.out.println("currentPage : ${width}x${height}")
+
             if(pageInfoMap[page]!=null){
-                System.out.println("******************** PdfReader) drawingView.pageInfo = pageInfoMap[page] ********************")
                 drawingView.pageInfo = pageInfoMap[page]
-                CoroutineScope(Dispatchers.Main).launch{
-                    for(i in 0..pageInfo!!.customPaths.size-1){
-                        var customPath = pageInfo.customPaths[i]
-                        drawingView.canvas.drawPath(customPath.path, customPath.drawingPaint)
-                    }
-                    drawingView.invalidate()
-                }
+//                CoroutineScope(Dispatchers.Main).launch{
+//                    for(i in 0..drawingView.pageInfo!!.customPaths.size-1){
+//                        var customPath = pageInfo.customPaths[i]
+//                        drawingView.canvas.drawPath(customPath.path, customPath.drawingPaint)
+//                    }
+//                    drawingView.invalidate()
+//                }
             }
+
             // view_pager에 맞춰서 배경될 pdf 크기 변경
             var backgroundWidth = view_pager.width
             var backgroundHeight = (view_pager.width/pageRatio).toInt()
@@ -80,8 +79,8 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
             backgroundBitmap = Bitmap.createBitmap(
                 backgroundWidth,backgroundHeight, Bitmap.Config.ARGB_8888
             )
-            backgroundBitmap.eraseColor(Color.WHITE)
 
+            backgroundBitmap.eraseColor(Color.WHITE)
             render(backgroundBitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
             drawingView.setImageBitmap(backgroundBitmap)
             drawingView.invalidate()
@@ -105,18 +104,16 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
             val pageInfo=PageInfo(data.drawingInfo.pageNo)
             pageInfo.setCustomPaths(data.drawingInfo.customPaths)
             pageInfo.changePathColor(data.drawingInfo.penColor!!)
-            pageInfo.setCustomEditText(data.drawingInfo.customEditText)
             pageInfoMap[data.drawingInfo.pageNo]=pageInfo
-            System.out.println("pageInfo.pageNo = ${pageInfo.pageNo} / pageInfo.customPaths.size = ${pageInfo.customPaths.size}")
+            System.out.println("pageInfo.pageNo = ${pageInfo.pageNo} / pageInfo.customPaths = ${pageInfo.customPaths}")
         }
         System.out.println("PageInfoMap = ${pageInfoMap.keys}")
     }
 
     fun changePageInfo(pageInfo: PageInfo){ // 현재 page에 맞는 pageInfo 세팅
-        println("changePageInfo")
         this.pageInfo = pageInfo
         println(this.pageInfo)
-        drawingView!!.changePageInfo(pageInfo)
+        drawingView.changePageInfo(pageInfo)
     }
 
     fun close() {

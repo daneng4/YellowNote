@@ -7,9 +7,9 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class PenInfo : ViewModel() {
-   val color:MutableLiveData<Int?> = MutableLiveData<Int?>()
-   val width:MutableLiveData<Float> = MutableLiveData<Float>()
-   val PenMode:MutableLiveData<Int> = MutableLiveData<Int>()
+    val color:MutableLiveData<Int?> = MutableLiveData<Int?>()
+    val width:MutableLiveData<Float> = MutableLiveData<Float>()
+    val PenMode:MutableLiveData<Int> = MutableLiveData<Int>()
 
     val NONE = -1
     val PEN = 0
