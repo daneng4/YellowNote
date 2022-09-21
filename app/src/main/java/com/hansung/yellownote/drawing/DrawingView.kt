@@ -202,7 +202,8 @@ class DrawingView @JvmOverloads constructor(
             val toolType=motionEvent?.getToolType(0)
             textButton=false
             when(toolType) {
-                MotionEvent.TOOL_TYPE_STYLUS-> { // 필기 모드 (S펜 사용 시)
+                MotionEvent.TOOL_TYPE_FINGER->{
+//                MotionEvent.TOOL_TYPE_STYLUS-> { // 필기 모드 (S펜 사용 시)
                     val x = motionEvent.x
                     val y = motionEvent.y
                     println(pageInfo)
@@ -625,7 +626,7 @@ class DrawingView @JvmOverloads constructor(
 //                    }
 //                }
 //                else-> { // 필기 모드 (S펜 사용 시)
-                MotionEvent.TOOL_TYPE_FINGER-> { // 필기 모드 (S펜 사용 시)
+                MotionEvent.TOOL_TYPE_STYLUS-> { // 필기 모드 (S펜 사용 시)
                     val x = motionEvent.x
                     val y = motionEvent.y
                     when(penInfo.getPenMode()){
