@@ -94,6 +94,8 @@ class DrawingView @JvmOverloads constructor(
 
     var textButton=false
 
+    var textButton=false
+
     var eraserPaint:Paint = Paint()
     var eraserCirclePaint:Paint = Paint()
     var eraserCircleRadius = 0f
@@ -172,6 +174,7 @@ class DrawingView @JvmOverloads constructor(
                     val text = SpannableStringBuilder(customEditText[i].text)
                     val point=customEditText[i].textPoint
                     val editText=EditText(context)
+
 
                     editText.text=text
                     editText.id=customEditText[i].textId

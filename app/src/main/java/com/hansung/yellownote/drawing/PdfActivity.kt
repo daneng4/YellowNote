@@ -22,6 +22,13 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 
+import android.widget.Button
+import android.widget.ImageButton
+import android.widget.LinearLayout
+
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isVisible
+
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -29,9 +36,12 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.gson.Gson
 import com.hansung.notedatabase.*
 
+
 import com.hansung.yellownote.AudioAdapter
 import com.hansung.yellownote.MainActivity
 
+
+import com.hansung.yellownote.MqttAdapter
 import com.hansung.yellownote.R
 import com.hansung.yellownote.SocketAdapter
 import com.hansung.yellownote.database.Converters
@@ -139,8 +149,10 @@ class PdfActivity() : AppCompatActivity(){
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
         binding = ActivityPdfBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         init()
 //        client = MqttAdapter()
+
 
 
         myDao = MyDatabase.getDatabase(this).getMyDao()

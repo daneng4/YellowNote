@@ -44,6 +44,7 @@
    <ImageButton
        android:id="@+id/btnStop"
 
+
        android:layout_width="40dp"
        android:layout_height="40dp"
        android:layout_marginTop="8dp"
@@ -58,7 +59,9 @@
        app:srcCompat="@drawable/ic_stop" />
 
    <ImageButton
+
        android:id="@+id/connectBtn"
+
 
        android:layout_width="40dp"
        android:layout_height="40dp"
@@ -68,7 +71,9 @@
        android:background="@null"
        android:scaleType="fitXY"
        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+
        app:layout_constraintEnd_toStartOf="@+id/btnStop"
+
 
        app:layout_constraintTop_toTopOf="parent"
        app:srcCompat="@drawable/ic_audiosend" />
@@ -276,7 +281,6 @@
        app:layout_constraintVertical_bias="0.0" >
 
    </androidx.viewpager2.widget.ViewPager2>
-
 
    <androidx.constraintlayout.widget.ConstraintLayout
        android:id="@+id/sampleLayout"
