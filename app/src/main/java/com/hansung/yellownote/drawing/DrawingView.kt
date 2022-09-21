@@ -61,10 +61,6 @@ class DrawingView @JvmOverloads constructor(
     lateinit var EditImagematrix: Matrix
     var customPath:CustomPath = CustomPath(PointF(0f,0f))
     val dashPath = DashPathEffect(floatArrayOf(5f, 25f), 2F)
-    var binding:ActivityPdfBinding
-    var rootLayout:ConstraintLayout
-    lateinit var textLayout:ConstraintLayout
-    val editTexts=ArrayList<EditText>()
     // 선택 영역(사각형)의
     var drawClippingBox = true
     var clippingPaint : Paint = Paint()
@@ -82,18 +78,11 @@ class DrawingView @JvmOverloads constructor(
     lateinit var popupWindow:PopupWindow
     var popup:View? = null
     //    var clickChangeColorBtn = false
-    var textPointX=0f
-    var textPointY=0f
 
     var binding: ActivityPdfBinding
     var rootLayout: ConstraintLayout
     lateinit var textLayout: ConstraintLayout
     val editTexts=ArrayList<EditText>()
-    var textButton=false
-
-
-    var textButton=false
-
     var textButton=false
 
     var eraserPaint:Paint = Paint()
@@ -150,11 +139,9 @@ class DrawingView @JvmOverloads constructor(
         textLayout.id=View.generateViewId()
         var sample=binding.sampleLayout
         textLayout.layoutParams=sample.layoutParams
+
         rootLayout.addView(textLayout)
         var constraintSet= ConstraintSet()
-        constraintSet.clone(textLayout)
-        constraintSet.connect(textLayout.id,ConstraintSet.LEFT,
-            ConstraintSet.PARENT_ID, ConstraintSet.LEFT, 0)
         constraintSet.connect(textLayout.id,ConstraintSet.TOP,
             ConstraintSet.PARENT_ID, ConstraintSet.TOP,0)
         constraintSet.connect(textLayout.id,ConstraintSet.RIGHT,
@@ -174,6 +161,7 @@ class DrawingView @JvmOverloads constructor(
                     val text = SpannableStringBuilder(customEditText[i].text)
                     val point=customEditText[i].textPoint
                     val editText=EditText(context)
+                    editText.setBackgroundTintList(ColorStateList.valueOf(Color.TRANSPARENT))
 
 
                     editText.text=text
@@ -202,7 +190,6 @@ class DrawingView @JvmOverloads constructor(
                         else{
                             editText.setBackgroundTintList(ColorStateList.valueOf(Color.BLACK))
                         }
-
                     }
                 }
             }
@@ -212,9 +199,43 @@ class DrawingView @JvmOverloads constructor(
         textLayout.setOnTouchListener{_, motionEvent ->
             val toolType=motionEvent?.getToolType(0)
             textButton=false
-            when(toolType) {
+            when(toolType) { // 손가락(슬라이드, 확대.축소, 페이지 내 이동)
+//                MotionEvent.TOOL_TYPE_FINGER-> {
+//                    if(isZoomed == false) // 확대 안되어 있는 경우
+//                        viewPager2.isUserInputEnabled = true // 페이지 넘기기 활성화
+//                    mScaleGestureDetector?.onTouchEvent(motionEvent)
+//
+//                    when(motionEvent.action){
+//                        MotionEvent.ACTION_DOWN->{
+//                            if(isZoomed) {
+//                                PageMode = DRAG
+//                                viewPager2.isUserInputEnabled = false
+//                                oldY = motionEvent.y
+//                                oldX = motionEvent.x
+//                            }
+//                        }
+//                        MotionEvent.ACTION_MOVE->{
+//                            if(isZoomed && PageMode==DRAG){
+//                                // 확대된 상태인 경우 페이지 내에서 위치 이동
+//                                var newX = motionEvent.x
+//                                var newY = motionEvent.y
+//
+//                                this.x += newX - oldX
+//                                this.y += newY - oldY
+//
+//                                oldX = newX
+//                                oldY = newY
+//
+//                                invalidate()
+//                            }
+//                        }
+//                        MotionEvent.ACTION_POINTER_UP -> { // 손가락 2개
+//                            PageMode = NONE
+//                        }
+//                    }
+//                }
                 MotionEvent.TOOL_TYPE_FINGER->{
-//                MotionEvent.TOOL_TYPE_STYLUS-> { // 필기 모드 (S펜 사용 시)
+//                else-> { // 필기 모드 (S펜 사용 시)
                     val x = motionEvent.x
                     val y = motionEvent.y
                     println(pageInfo)

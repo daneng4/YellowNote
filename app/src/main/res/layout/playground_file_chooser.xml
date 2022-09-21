@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/AngelImg"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="40dp"
+        app:layout_constraintEnd_toStartOf="@+id/VegetableImg"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/angel" />
+
+    <ImageView
+        android:id="@+id/VegetableImg"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="40dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/AngelImg"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/vegetables" />
+
+    <ImageView
+        android:id="@+id/BabyImg"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="25dp"
+        app:layout_constraintEnd_toEndOf="@+id/vegetablesTxt"
+        app:layout_constraintStart_toStartOf="@+id/vegetablesTxt"
+        app:layout_constraintTop_toBottomOf="@+id/vegetablesTxt"
+        app:srcCompat="@drawable/baby" />
+
+    <ImageView
+        android:id="@+id/FairyImg"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="25dp"
+        app:layout_constraintEnd_toEndOf="@+id/babyTxt"
+        app:layout_constraintStart_toStartOf="@+id/babyTxt"
+        app:layout_constraintTop_toBottomOf="@+id/babyTxt"
+        app:srcCompat="@drawable/fairy" />
+
+    <ImageView
+        android:id="@+id/RabbitImg"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="25dp"
+        app:layout_constraintEnd_toEndOf="@+id/angelTxt"
+        app:layout_constraintStart_toStartOf="@+id/angelTxt"
+        app:layout_constraintTop_toBottomOf="@+id/angelTxt"
+        app:srcCompat="@drawable/rabbit" />
+
+    <ImageView
+        android:id="@+id/GirlsImg"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="25dp"
+        app:layout_constraintEnd_toEndOf="@+id/rabbitTxt"
+        app:layout_constraintStart_toStartOf="@+id/rabbitTxt"
+        app:layout_constraintTop_toBottomOf="@+id/rabbitTxt"
+        app:srcCompat="@drawable/girls" />
+
+    <TextView
+        android:id="@+id/angelTxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="Angel"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@android:color/black"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/AngelImg"
+        app:layout_constraintStart_toStartOf="@+id/AngelImg"
+        app:layout_constraintTop_toBottomOf="@+id/AngelImg"
+        app:textAllCaps="true" />
+
+    <TextView
+        android:id="@+id/rabbitTxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="rabbit"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@android:color/black"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/RabbitImg"
+        app:layout_constraintStart_toStartOf="@+id/RabbitImg"
+        app:layout_constraintTop_toBottomOf="@+id/RabbitImg"
+        app:textAllCaps="true" />
+
+    <TextView
+        android:id="@+id/girlsTxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="40dp"
+        android:text="Girls"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@android:color/black"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/GirlsImg"
+        app:layout_constraintStart_toStartOf="@+id/GirlsImg"
+        app:layout_constraintTop_toBottomOf="@+id/GirlsImg"
+        app:textAllCaps="true" />
+
+    <TextView
+        android:id="@+id/fairyTxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="fairy"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@android:color/black"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/FairyImg"
+        app:layout_constraintStart_toStartOf="@+id/FairyImg"
+        app:layout_constraintTop_toBottomOf="@+id/FairyImg"
+        app:textAllCaps="true" />
+
+    <TextView
+        android:id="@+id/babyTxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="baby"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@android:color/black"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/BabyImg"
+        app:layout_constraintStart_toStartOf="@+id/BabyImg"
+        app:layout_constraintTop_toBottomOf="@+id/BabyImg"
+        app:textAllCaps="true" />
+
+    <TextView
+        android:id="@+id/vegetablesTxt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="Vegetables"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@android:color/black"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/VegetableImg"
+        app:layout_constraintHorizontal_bias="0.536"
+        app:layout_constraintStart_toStartOf="@+id/VegetableImg"
+        app:layout_constraintTop_toBottomOf="@+id/VegetableImg"
+        app:textAllCaps="true" />
+</androidx.constraintlayout.widget.ConstraintLayout>

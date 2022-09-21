@@ -12,7 +12,6 @@ class PageInfo(pageNo:Int) {
     var customPaths = ArrayList<CustomPath>()
     var customEditText=ArrayList<CustomEditText>()
     var penColor:Int? = Color.BLACK
-    var customEditText=ArrayList<CustomEditText>()
 
     fun changePathColor(penColor:Int){
         this.penColor = penColor
