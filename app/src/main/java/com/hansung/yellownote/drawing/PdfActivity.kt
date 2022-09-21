@@ -1,6 +1,7 @@
 package com.hansung.yellownote.drawing
 
 import android.content.DialogInterface
+import android.content.pm.ActivityInfo
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PointF
@@ -79,6 +80,7 @@ class PdfActivity() : AppCompatActivity(){
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
         binding = ActivityPdfBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

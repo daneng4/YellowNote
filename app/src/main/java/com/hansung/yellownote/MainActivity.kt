@@ -3,6 +3,7 @@ package com.hansung.yellownote
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.database.Cursor
@@ -69,6 +70,7 @@ class MainActivity : AppCompatActivity() {
         setTheme(R.style.Theme_YellowNote)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
         setContentView(binding.root)
         println("onCreate")
         // toolbar 설정
