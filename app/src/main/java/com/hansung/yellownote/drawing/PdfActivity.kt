@@ -28,6 +28,7 @@ import android.widget.LinearLayout
 
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
+import androidx.core.view.iterator
 
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -193,6 +194,11 @@ class PdfActivity() : AppCompatActivity(){
                 println("page : $page")
                 println("pageInfo : ${pdfReader!!.pageInfoMap[page]?.customPaths}")
                 pdfReader!!.pageInfoMap[page]?.let {
+
+                    for(text in pdfReader!!.drawingView.textLayout){
+                        pdfReader!!.drawingView.textLayout.removeView(text)
+                    }
+                    pdfReader!!.drawingView.rootLayout.removeView(pdfReader!!.drawingView.textLayout)
                     pdfReader!!.changePageInfo(it)
                     pdfReader!!.drawingView.setTextLayout()
                 } // 변경된 page의 pageInfo 세팅

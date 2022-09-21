@@ -61,10 +61,6 @@ class DrawingView @JvmOverloads constructor(
     lateinit var EditImagematrix: Matrix
     var customPath:CustomPath = CustomPath(PointF(0f,0f))
     val dashPath = DashPathEffect(floatArrayOf(5f, 25f), 2F)
-    var binding:ActivityPdfBinding
-    var rootLayout:ConstraintLayout
-    lateinit var textLayout:ConstraintLayout
-    val editTexts=ArrayList<EditText>()
     // 선택 영역(사각형)의
     var drawClippingBox = true
     var clippingPaint : Paint = Paint()
@@ -82,19 +78,14 @@ class DrawingView @JvmOverloads constructor(
     lateinit var popupWindow:PopupWindow
     var popup:View? = null
     //    var clickChangeColorBtn = false
-    var textPointX=0f
-    var textPointY=0f
+
 
     var binding: ActivityPdfBinding
     var rootLayout: ConstraintLayout
-    lateinit var textLayout: ConstraintLayout
+    var textLayout: ConstraintLayout
     val editTexts=ArrayList<EditText>()
     var textButton=false
 
-
-    var textButton=false
-
-    var textButton=false
 
     var eraserPaint:Paint = Paint()
     var eraserCirclePaint:Paint = Paint()
@@ -126,11 +117,11 @@ class DrawingView @JvmOverloads constructor(
         penInfo = pdfActivity.penInfo
         textLayout= ConstraintLayout(this.context)
 
-        println("DrawingView PageInfo: ${pageInfo}")
+        //println("DrawingView PageInfo: ${pageInfo}")
         penInfo.PenMode.observe(pdfActivity){
-            System.out.println("${penInfo.getPenMode()}, ${penInfo.getMovingClipping()}")
+            //System.out.println("${penInfo.getPenMode()}, ${penInfo.getMovingClipping()}")
             if(penInfo.getMovingClipping()){
-                System.out.println("다시 그리기")
+                //System.out.println("다시 그리기")
                 try{
                     if(pageInfo!!.customPaths.size>0){
                         for(i in 0..pageInfo!!.customPaths.size-1) {
@@ -166,7 +157,7 @@ class DrawingView @JvmOverloads constructor(
         if(pageInfo?.customEditText!=null) {
             if (pageInfo!!.customEditText.size != 0) {
                 val customEditText=pageInfo!!.customEditText
-                println("editText empty = ${customEditText.isEmpty()}")
+                //println("editText empty = ${customEditText.isEmpty()}")
                 for (i in 0..customEditText.size-1) {
                     if(customEditText[i].text=="")continue
                     constraintSet= ConstraintSet()
@@ -209,15 +200,18 @@ class DrawingView @JvmOverloads constructor(
         }
 //
         println("edit Text 초기 설정 완료")
+        println(textLayout)
         textLayout.setOnTouchListener{_, motionEvent ->
             val toolType=motionEvent?.getToolType(0)
             textButton=false
+            println("${motionEvent.x}, ${motionEvent.y}")
             when(toolType) {
                 MotionEvent.TOOL_TYPE_FINGER->{
 //                MotionEvent.TOOL_TYPE_STYLUS-> { // 필기 모드 (S펜 사용 시)
                     val x = motionEvent.x
                     val y = motionEvent.y
                     println(pageInfo)
+                    println("$x, $y")
                     when(penInfo.getPenMode()){
                         TEXT->{ //텍스트 모드
                             textButton=true
@@ -375,13 +369,13 @@ class DrawingView @JvmOverloads constructor(
     // 다른 페이지로 이동 시 불림
     override fun refreshDrawableState() {
         super.refreshDrawableState()
-        if(textLayout!=null){
-            for(text in editTexts){
-                textLayout!!.removeView(text)
-            }
-            rootLayout.removeView(textLayout)
-
-        }
+//        if(textLayout!=null){
+//            for(text in editTexts){
+//                textLayout!!.removeView(text)
+//            }
+//            rootLayout.removeView(textLayout)
+//
+//        }
         pdfReader.drawingView = this // pdfReader의 drawingView 변경
     }
 
@@ -608,42 +602,42 @@ class DrawingView @JvmOverloads constructor(
             val toolType=motionEvent?.getToolType(0)
 
             when(toolType) { // 손가락(슬라이드, 확대.축소, 페이지 내 이동)
-//                MotionEvent.TOOL_TYPE_FINGER-> {
-//                    if(isZoomed == false) // 확대 안되어 있는 경우
-//                        viewPager2.isUserInputEnabled = true // 페이지 넘기기 활성화
-//                    mScaleGestureDetector?.onTouchEvent(motionEvent)
-//
-//                    when(motionEvent.action){
-//                        MotionEvent.ACTION_DOWN->{
-//                            if(isZoomed) {
-//                                PageMode = DRAG
-//                                viewPager2.isUserInputEnabled = false
-//                                oldY = motionEvent.y
-//                                oldX = motionEvent.x
-//                            }
-//                        }
-//                        MotionEvent.ACTION_MOVE->{
-//                            if(isZoomed && PageMode==DRAG){
-//                                // 확대된 상태인 경우 페이지 내에서 위치 이동
-//                                var newX = motionEvent.x
-//                                var newY = motionEvent.y
-//
-//                                this.x += newX - oldX
-//                                this.y += newY - oldY
-//
-//                                oldX = newX
-//                                oldY = newY
-//
-//                                invalidate()
-//                            }
-//                        }
-//                        MotionEvent.ACTION_POINTER_UP -> { // 손가락 2개
-//                            PageMode = NONE
-//                        }
-//                    }
-//                }
-                MotionEvent.TOOL_TYPE_FINGER -> { // 필기 모드 (S펜 사용 시)
-//                else-> { // 필기 모드 (S펜 사용 시)
+                MotionEvent.TOOL_TYPE_FINGER-> {
+                    if(isZoomed == false) // 확대 안되어 있는 경우
+                        viewPager2.isUserInputEnabled = true // 페이지 넘기기 활성화
+                    mScaleGestureDetector?.onTouchEvent(motionEvent)
+
+                    when(motionEvent.action){
+                        MotionEvent.ACTION_DOWN->{
+                            if(isZoomed) {
+                                PageMode = DRAG
+                                viewPager2.isUserInputEnabled = false
+                                oldY = motionEvent.y
+                                oldX = motionEvent.x
+                            }
+                        }
+                        MotionEvent.ACTION_MOVE->{
+                            if(isZoomed && PageMode==DRAG){
+                                // 확대된 상태인 경우 페이지 내에서 위치 이동
+                                var newX = motionEvent.x
+                                var newY = motionEvent.y
+
+                                this.x += newX - oldX
+                                this.y += newY - oldY
+
+                                oldX = newX
+                                oldY = newY
+
+                                invalidate()
+                            }
+                        }
+                        MotionEvent.ACTION_POINTER_UP -> { // 손가락 2개
+                            PageMode = NONE
+                        }
+                    }
+                }
+//                MotionEvent.TOOL_TYPE_FINGER -> { // 필기 모드 (S펜 사용 시)
+                else-> { // 필기 모드 (S펜 사용 시)
                     val x = motionEvent.x
                     val y = motionEvent.y
                     when(penInfo.getPenMode()){
@@ -651,7 +645,7 @@ class DrawingView @JvmOverloads constructor(
                             when (motionEvent.action) {
                                 MotionEvent.ACTION_DOWN -> {
                                     setClippingPen()
-                                    System.out.println("현재 drawingView ==> ${this}")
+                                    //System.out.println("현재 drawingView ==> ${this}")
                                     viewPager2.isUserInputEnabled = false // 페이지 넘기기 비활성화
                                     PageMode = DRAWING // mode 변경
                                     drawClippingBox = true
@@ -795,17 +789,17 @@ class DrawingView @JvmOverloads constructor(
             launch {
                 var isDelete=false
                 if (pageInfo?.customPaths != null) {
-                    println("customPaths not null")
-                    println("pageInfo?.customPaths!!.size : ${pageInfo?.customPaths!!.size}")
+                    //("customPaths not null")
+                    //println("pageInfo?.customPaths!!.size : ${pageInfo?.customPaths!!.size}")
                     for (i in pageInfo?.customPaths!!.size-1 downTo 0) {
                         println("i = $i")
                         val line=pageInfo?.customPaths!![i]
                         isDelete=false
-                        println("customPaths size = ${line.points.size}")
+                        //println("customPaths size = ${line.points.size}")
                         for (p in deletePoints) {
                             for (point in line.points) {
                                 if(p.x==point.x&&p.y==point.y){
-                                    println("delete point")
+                                    //println("delete point")
                                     pageInfo?.customPaths!!.remove(line)
                                     isDelete=true
                                     break
@@ -841,7 +835,7 @@ class DrawingView @JvmOverloads constructor(
                         }
                     }
                 }
-                println("find point size = ${deletePoints.size}")
+                //println("find point size = ${deletePoints.size}")
                 removeDeletePath()
             }
         }
@@ -877,7 +871,7 @@ class DrawingView @JvmOverloads constructor(
 
         clippingStartPoint = PointF(minX,minY)
         clippingEndPoint = PointF(maxX,maxY)
-        println("checkContainSelectedPath pageInfo: $pageInfo")
+        //println("checkContainSelectedPath pageInfo: $pageInfo")
 
         // customPaths 중 사각형 내에 포함되는 customPath 찾기
         for(i in 0..pageInfo!!.customPaths.size-1){
@@ -891,7 +885,7 @@ class DrawingView @JvmOverloads constructor(
                 }
             }
         }
-        System.out.println("selectedPaths개수 = ${selectedPaths.size}")
+        //System.out.println("selectedPaths개수 = ${selectedPaths.size}")
     }
 
     // 사각형 안에 point 포함되는지 판단
@@ -955,7 +949,7 @@ class DrawingView @JvmOverloads constructor(
         override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
             super.onScaleBegin(detector)
             PageMode = ZOOM
-            System.out.println("PageMode = ZOOM")
+            //System.out.println("PageMode = ZOOM")
 
             // 확대/축소되는 중심점 변경
             val newX = detector.focusX
