@@ -19,6 +19,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
 import com.google.gson.Gson
 import com.hansung.notedatabase.*
+import com.hansung.yellownote.MqttAdapter
 import com.hansung.yellownote.R
 import com.hansung.yellownote.database.Converters
 import com.hansung.yellownote.databinding.ActivityPdfBinding
@@ -72,7 +73,7 @@ class PdfActivity() : AppCompatActivity(){
 
     private var penSettingPopup:PenSettingDialog? = null
     private var eraserSettingPopup:PenSettingDialog? = null
-//    val client=MqttAdapter()
+    lateinit var client:MqttAdapter
 
     // DrawingView.kt에서 정의된 mode와 같아야함
     val PenModes = ArrayList<String>(Arrays.asList("PEN","ERASER","TEXT","CLIPPING"))
@@ -88,7 +89,7 @@ class PdfActivity() : AppCompatActivity(){
         binding = ActivityPdfBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-//        client = MqttAdapter()
+        //client = MqttAdapter()
 
         myDao = MyDatabase.getDatabase(this).getMyDao()
 //        getPenDataTable()
@@ -129,7 +130,7 @@ class PdfActivity() : AppCompatActivity(){
                 println("pageInfo : ${pdfReader!!.pageInfoMap[page]?.customPaths}")
                 pdfReader!!.pageInfoMap[page]?.let {
                     pdfReader!!.changePageInfo(it)
-//                    pdfReader!!.drawingView.setTextLayout()
+                    pdfReader!!.drawingView.setTextLayout()
                 } // 변경된 page의 pageInfo 세팅
 //                System.out.println("Page$position path개수 = ${pdfReader!!.pageInfoMap[position]?.customPaths?.size}")
             }
@@ -397,7 +398,7 @@ class PdfActivity() : AppCompatActivity(){
             val drawingInfo=pdfReader!!.pageInfoMap[i]
 
             if(drawingInfo!=null) {
-                if(drawingInfo.customPaths.isNotEmpty()) {
+                if(drawingInfo.customPaths.isNotEmpty()||drawingInfo.customEditText.isNotEmpty()) {
                     runBlocking {
                         myDao.insertFileData(FileData(noteName ,drawingInfo))
                     }

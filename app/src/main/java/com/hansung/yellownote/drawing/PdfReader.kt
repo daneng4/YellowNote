@@ -114,14 +114,13 @@ class PdfReader(file: File, filePath: String, view_pager:ViewPager2) {
     fun changePageInfo(pageInfo: PageInfo){ // 현재 page에 맞는 pageInfo 세팅
         this.pageInfo = pageInfo
         println(this.pageInfo)
-//        for(text in drawingView.editTexts){
-//            drawingView.textLayout!!.removeView(text)
-//        }
-//        drawingView.rootLayout.removeView(drawingView.textLayout)
-//        drawingView.textLayout=null
+        for(text in drawingView.editTexts){
+            drawingView.textLayout.removeView(text)
+        }
+        drawingView.rootLayout.removeView(drawingView.textLayout)
         drawingView.changePageInfo(pageInfo)
 //        drawingView.changePageInfo(pageInfo)
-//        drawingView.setTextLayout()
+        drawingView.setTextLayout()
     }
 
     fun close() {
