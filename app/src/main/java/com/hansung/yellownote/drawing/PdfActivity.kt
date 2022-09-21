@@ -1,15 +1,20 @@
 package com.hansung.yellownote.drawing
 
 import android.content.DialogInterface
+import android.content.pm.ActivityInfo
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PointF
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
 import com.google.gson.Gson
@@ -47,6 +52,7 @@ class PdfActivity() : AppCompatActivity(){
     lateinit var ColorButton4:Button
     lateinit var ColorButton5:Button
     lateinit var ColorButton6:Button
+    lateinit var ColorButtonLayout:ConstraintLayout
 
     var color1:Int = Color.BLACK
     var color2:Int = Color.BLACK
@@ -78,6 +84,7 @@ class PdfActivity() : AppCompatActivity(){
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
         binding = ActivityPdfBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -132,6 +139,8 @@ class PdfActivity() : AppCompatActivity(){
         clippingBtn = binding.ClippingBtn
         eraserBtn = binding.EraserBtn
         textBtn = binding.TextBtn
+
+        ColorButtonLayout = binding.ColorButtonLayout
         ColorButton1 = binding.ColorButton1
         ColorButton2 = binding.ColorButton2
         ColorButton3 = binding.ColorButton3
@@ -167,18 +176,24 @@ class PdfActivity() : AppCompatActivity(){
             setColorBtn(ColorButton6)
         }
 
-        penBtn.setOnClickListener{
-            System.out.println("click")
-            if (penBtn.tag == R.drawable.ic_pen_clicked) {
-                // clipping 네모 표시 있으면 없애기
-                checkResetClipping()
+//        undoBtn.setOnClickListener{
+//            var customPaths = drawingView.pageInfo!!.customPaths
+//            if(customPaths.size>0){
+//                drawingView.pageInfo!!.customPaths.removeAt(customPaths.size-1)
+//                drawingView.redrawPath(false)
+//                drawingView.invalidate()
+//            }
+//        }
 
-                if (penBtn.tag == R.drawable.ic_pen_clicked) {
-                    if (penSettingPopup == null) {
-                        System.out.println("penSettingPopup == null")
-                        penSettingPopup = PenSettingDialog(this)
-                        penSettingPopup!!.show(myDao, penInfo)
-                    }
+        penBtn.setOnClickListener{
+            // clipping 네모 표시 있으면 없애기
+            checkResetClipping()
+
+            if (penBtn.tag == R.drawable.ic_pen_clicked) {
+                if (penSettingPopup == null) {
+                    System.out.println("penSettingPopup == null")
+                    penSettingPopup = PenSettingDialog(this)
+                    penSettingPopup!!.show(myDao, penInfo)
                 }
                 else{
                     if(penSettingPopup!!.isDialogShowing()){
@@ -192,7 +207,6 @@ class PdfActivity() : AppCompatActivity(){
                     }
                 }
             } else {
-                System.out.println("penBtn.tag != R.drawable.ic_pen_clicked")
                 changeBtnImage(PEN)
             }
         }
@@ -203,8 +217,6 @@ class PdfActivity() : AppCompatActivity(){
 
             if (eraserBtn.tag == R.drawable.ic_eraser_clicked) {
                 if(eraserSettingPopup == null){
-                    var location = IntArray(2)
-                    eraserBtn.getLocationOnScreen(location)
                     eraserSettingPopup = PenSettingDialog(this)
                     eraserSettingPopup!!.show(myDao, penInfo)
                     eraserSettingPopup!!.changeText()
@@ -216,8 +228,6 @@ class PdfActivity() : AppCompatActivity(){
                         eraserSettingPopup = null
                     }
                     else{
-                        var location = IntArray(2)
-                        penBtn.getLocationOnScreen(location)
                         eraserSettingPopup = PenSettingDialog(this)
                         eraserSettingPopup!!.show(myDao, penInfo)
                         eraserSettingPopup!!.changeText()

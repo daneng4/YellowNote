@@ -430,41 +430,42 @@ class DrawingView @JvmOverloads constructor(
             val toolType=motionEvent?.getToolType(0)
 
             when(toolType) { // 손가락(슬라이드, 확대.축소, 페이지 내 이동)
-                MotionEvent.TOOL_TYPE_FINGER-> {
-                    if(isZoomed == false) // 확대 안되어 있는 경우
-                        viewPager2.isUserInputEnabled = true // 페이지 넘기기 활성화
-                    mScaleGestureDetector?.onTouchEvent(motionEvent)
-
-                    when(motionEvent.action){
-                        MotionEvent.ACTION_DOWN->{
-                            if(isZoomed) {
-                                PageMode = DRAG
-                                viewPager2.isUserInputEnabled = false
-                                oldY = motionEvent.y
-                                oldX = motionEvent.x
-                            }
-                        }
-                        MotionEvent.ACTION_MOVE->{
-                            if(isZoomed && PageMode==DRAG){
-                                // 확대된 상태인 경우 페이지 내에서 위치 이동
-                                var newX = motionEvent.x
-                                var newY = motionEvent.y
-
-                                this.x += newX - oldX
-                                this.y += newY - oldY
-
-                                oldX = newX
-                                oldY = newY
-
-                                invalidate()
-                            }
-                        }
-                        MotionEvent.ACTION_POINTER_UP -> { // 손가락 2개
-                            PageMode = NONE
-                        }
-                    }
-                }
-                else-> { // 필기 모드 (S펜 사용 시)
+//                MotionEvent.TOOL_TYPE_FINGER-> {
+//                    if(isZoomed == false) // 확대 안되어 있는 경우
+//                        viewPager2.isUserInputEnabled = true // 페이지 넘기기 활성화
+//                    mScaleGestureDetector?.onTouchEvent(motionEvent)
+//
+//                    when(motionEvent.action){
+//                        MotionEvent.ACTION_DOWN->{
+//                            if(isZoomed) {
+//                                PageMode = DRAG
+//                                viewPager2.isUserInputEnabled = false
+//                                oldY = motionEvent.y
+//                                oldX = motionEvent.x
+//                            }
+//                        }
+//                        MotionEvent.ACTION_MOVE->{
+//                            if(isZoomed && PageMode==DRAG){
+//                                // 확대된 상태인 경우 페이지 내에서 위치 이동
+//                                var newX = motionEvent.x
+//                                var newY = motionEvent.y
+//
+//                                this.x += newX - oldX
+//                                this.y += newY - oldY
+//
+//                                oldX = newX
+//                                oldY = newY
+//
+//                                invalidate()
+//                            }
+//                        }
+//                        MotionEvent.ACTION_POINTER_UP -> { // 손가락 2개
+//                            PageMode = NONE
+//                        }
+//                    }
+//                }
+//                else-> { // 필기 모드 (S펜 사용 시)
+                MotionEvent.TOOL_TYPE_FINGER-> { // 필기 모드 (S펜 사용 시)
                     val x = motionEvent.x
                     val y = motionEvent.y
                     when(penInfo.getPenMode()){
@@ -583,8 +584,9 @@ class DrawingView @JvmOverloads constructor(
                                     viewPager2.isUserInputEnabled = false // 페이지 넘기기 비활성화
                                     PageMode = DRAWING // mode 변경
 
+                                    eraserPath.reset()
                                     eraserPath = Path()
-                                    eraserPath.lineTo(x,y)
+                                    eraserPath.moveTo(x,y)
                                     eraserPoints= CustomPath(PointF(eraserPointX,eraserPointY))
                                     eraserPoints.points.add(PointF(eraserPointX,eraserPointY))
                                     canvas.drawPath(eraserPath,eraserPaint)
@@ -655,6 +657,7 @@ class DrawingView @JvmOverloads constructor(
             }
         }
     }
+
     private fun checkErasePath(){
         scope= CoroutineScope(Dispatchers.Default).apply {
             launch {
@@ -662,8 +665,8 @@ class DrawingView @JvmOverloads constructor(
                     for (line in pageInfo?.customPaths!!) {
                         for (point in line.points) {
                             for (p in eraserPoints.points) {
-                                if (15.0.pow(2.0) >=
-                                    (penInfo.getPenWidth().toDouble().pow(2.0) +
+                                if ((penInfo.getPenWidth().toDouble()).pow(2.0) >=
+                                    ((p.x - point.x ).toDouble().pow(2.0) +
                                             (p.y - point.y).toDouble().pow(2.0))) {
                                     deletePoints.add(PointF(point.x, point.y))
                                 }
