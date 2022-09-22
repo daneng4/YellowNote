@@ -87,6 +87,8 @@ class DrawingView @JvmOverloads constructor(
     var textButton=false
 
 
+    var drawnHandToTexts = ArrayList<DrawnHandToText>()
+
     var eraserPaint:Paint = Paint()
     var eraserCirclePaint:Paint = Paint()
     var eraserCircleRadius = 0f
@@ -431,6 +433,12 @@ class DrawingView @JvmOverloads constructor(
             }
         }
         else{
+            if(drawnHandToTexts.size>0){
+                for(drawnHandToText in drawnHandToTexts){
+                    canvas.drawText(drawnHandToText.text, drawnHandToText.x, drawnHandToText.y, drawnHandToText.textPaint)
+                }
+            }
+
             for (i in 0..pageInfo!!.customPaths.size - 1) {
                 var customPath = pageInfo!!.customPaths[i]
                 if(selectedPaths.contains(customPath)){
@@ -595,7 +603,10 @@ class DrawingView @JvmOverloads constructor(
         else{
             y=(clippingStartPoint!!.y+clippingEndPoint!!.y)/2
         }
+
         canvas.drawText(word,x,y,textPaint)
+        drawnHandToTexts.add(DrawnHandToText(word,x,y,textPaint))
+
         invalidate()
     }
 
