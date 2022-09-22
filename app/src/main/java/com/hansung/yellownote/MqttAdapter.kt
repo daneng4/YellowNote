@@ -1,11 +1,12 @@
 package com.hansung.yellownote
 
 import android.util.Log
+import com.hansung.yellownote.drawing.PdfActivity
 import kotlinx.coroutines.*
 import org.eclipse.paho.client.mqttv3.*
 import java.io.Serializable
 
-class MqttAdapter() {
+class MqttAdapter(var pdfActivity: PdfActivity) {
     private lateinit var client: MqttClient
     private lateinit var scope: CoroutineScope
     private lateinit var word:String
@@ -34,7 +35,7 @@ class MqttAdapter() {
                             if (topic == "result") {
                                 val msg=message
                                 word=msg.toString()
-                                println(word)
+                                pdfActivity.drawingView.handWritetoText(word)
                             }
                         }
 
@@ -52,6 +53,7 @@ class MqttAdapter() {
         scope= CoroutineScope(Dispatchers.IO).apply {
             launch {
                 try {
+                    println(client.isConnected)
                     if (!client.isConnected) {
                         withContext(Dispatchers.Main) {
                             client.connect()

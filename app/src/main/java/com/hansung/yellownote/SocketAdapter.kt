@@ -18,7 +18,7 @@ class SocketAdapter {
     private var socket: Socket? = null
     private var dos: DataOutputStream? = null
     private var dis: DataInputStream? = null
-    private val ip = "192.168.255.161" // IP 번호
+    private val ip = "192.168.137.27" // IP 번호
     private val port = 9999 // port 번호
 
     // 로그인 정보 db에 넣어주고 연결시켜야 함.

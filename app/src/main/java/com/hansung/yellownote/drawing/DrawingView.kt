@@ -23,8 +23,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.collections.ArrayList
 import kotlin.math.pow
-
 
 class DrawingView @JvmOverloads constructor(
     context: Context?,
@@ -33,7 +33,6 @@ class DrawingView @JvmOverloads constructor(
 ) : AppCompatImageView(
     context!!, attr, defStyle
 ) {
-    var isFirst = true
     lateinit var pdfActivity:PdfActivity
     lateinit var viewPager2 :ViewPager2
     var PageMode = -1 // page mode (그림,확대/축소,이동)
@@ -80,11 +79,13 @@ class DrawingView @JvmOverloads constructor(
     var popup:View? = null
     //    var clickChangeColorBtn = false
 
+
     var binding: ActivityPdfBinding
     var rootLayout: ConstraintLayout
     var textLayout: ConstraintLayout
     val editTexts=ArrayList<EditText>()
     var textButton=false
+
 
     var eraserPaint:Paint = Paint()
     var eraserCirclePaint:Paint = Paint()
@@ -136,13 +137,18 @@ class DrawingView @JvmOverloads constructor(
     }
     @SuppressLint("ClickableViewAccessibility")
     fun setTextLayout(){
+        textLayout.removeAllViews()
+        println("setTextLayout")
         textLayout= ConstraintLayout(context)
         textLayout.id=View.generateViewId()
         var sample=binding.sampleLayout
         textLayout.layoutParams=sample.layoutParams
-
+        println("setTextLayout")
         rootLayout.addView(textLayout)
         var constraintSet= ConstraintSet()
+        constraintSet.clone(textLayout)
+        constraintSet.connect(textLayout.id,ConstraintSet.LEFT,
+            ConstraintSet.PARENT_ID, ConstraintSet.LEFT, 0)
         constraintSet.connect(textLayout.id,ConstraintSet.TOP,
             ConstraintSet.PARENT_ID, ConstraintSet.TOP,0)
         constraintSet.connect(textLayout.id,ConstraintSet.RIGHT,
@@ -151,19 +157,17 @@ class DrawingView @JvmOverloads constructor(
             ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM,0)
         constraintSet.applyTo(textLayout)
         editTexts.clear()
-
         if(pageInfo?.customEditText!=null) {
             if (pageInfo!!.customEditText.size != 0) {
                 val customEditText=pageInfo!!.customEditText
-                //println("editText empty = ${customEditText.isEmpty()}")
+                println("editText empty = ${customEditText.isEmpty()}")
                 for (i in 0..customEditText.size-1) {
-                    if(customEditText[i].text=="") continue
+                    if(customEditText[i].text=="")continue
                     constraintSet= ConstraintSet()
 
                     val text = SpannableStringBuilder(customEditText[i].text)
                     val point=customEditText[i].textPoint
                     val editText=EditText(context)
-                    editText.setBackgroundTintList(ColorStateList.valueOf(Color.TRANSPARENT))
 
 
                     editText.text=text
@@ -179,7 +183,6 @@ class DrawingView @JvmOverloads constructor(
                     println("text = ${text}, pointx = ${point.x}, pointy = ${point.y}, id = ${editText.id}")
 
                     constraintSet.applyTo(textLayout)
-                    System.out.println("editText.text = ${editText.text}")
                     editText.setOnFocusChangeListener{_,hasFocus->
                         if(!hasFocus){
                             for(k in 0.. pageInfo!!.customEditText.size-1){
@@ -193,6 +196,7 @@ class DrawingView @JvmOverloads constructor(
                         else{
                             editText.setBackgroundTintList(ColorStateList.valueOf(Color.BLACK))
                         }
+
                     }
                 }
             }
@@ -205,8 +209,8 @@ class DrawingView @JvmOverloads constructor(
             textButton=false
             println("${motionEvent.x}, ${motionEvent.y}")
             when(toolType) {
-                MotionEvent.TOOL_TYPE_FINGER->{
-//                else-> { // 필기 모드 (S펜 사용 시)
+//                MotionEvent.TOOL_TYPE_FINGER->{
+                MotionEvent.TOOL_TYPE_STYLUS-> { // 필기 모드 (S펜 사용 시)
                     val x = motionEvent.x
                     val y = motionEvent.y
                     println(pageInfo)
@@ -299,7 +303,6 @@ class DrawingView @JvmOverloads constructor(
     }
 
     fun setupDrawing(){
-        System.out.println("setup drawing")
         canvas = Canvas(drawingBitmap)
         path = Path()
         backgroundPaint = Paint(Paint.DITHER_FLAG)
@@ -310,7 +313,6 @@ class DrawingView @JvmOverloads constructor(
         canvas.drawBitmap(backgroundBitmap, EditImagematrix, drawingPaint)
 
         this.setImageBitmap(drawingBitmap)
-
         setupDrawingView()
 
         /////////////////////////회전해서 다시 그리기 되려나?
@@ -385,19 +387,6 @@ class DrawingView @JvmOverloads constructor(
         if (canvas != null) {
             canvas.drawBitmap(backgroundBitmap,EditImagematrix,backgroundPaint) // backgroundBitmap 그리기
             canvas.drawBitmap(drawingBitmap,EditImagematrix,backgroundPaint) // drawingBitmap 그리기
-
-            //// 1번 외의 페이지에서 멈추고 다시 열었을때 그림 그려져있도록
-            if(isFirst){
-                isFirst = false
-                if(pdfReader.pageInfoMap[pdfActivity.pageNo]!=null)
-                    if(pdfReader.pageInfoMap[pdfActivity.pageNo]!!.customPaths.size>0){
-                        redrawPath(false)
-                    }
-                    else{
-                    System.out.println("기존 데이터 없어요,,,")
-                }
-            }
-            /////
 
 
             when(penInfo.getPenMode()){
@@ -508,7 +497,10 @@ class DrawingView @JvmOverloads constructor(
                 popupWindow.dismiss()
                 popup=null
                 drawClippingBox = false
+                pageInfo!!.customPaths.removeAll(selectedPaths)
+                selectedPaths.clear()
                 redrawPath(false)
+
             }
             hangulBtn.setOnClickListener {
                 saveCanvas("Hangul")
@@ -516,6 +508,8 @@ class DrawingView @JvmOverloads constructor(
                 popupWindow.dismiss()
                 popup=null
                 drawClippingBox = false
+                pageInfo!!.customPaths.removeAll(selectedPaths)
+                selectedPaths.clear()
                 redrawPath(false)
             }
             numberBtn.setOnClickListener {
@@ -524,10 +518,10 @@ class DrawingView @JvmOverloads constructor(
                 popupWindow.dismiss()
                 popup=null
                 drawClippingBox = false
+                pageInfo!!.customPaths.removeAll(selectedPaths)
+                selectedPaths.clear()
                 redrawPath(false)
             }
-
-            selectedPaths.clear()
         }
 
         // 색상 버튼 클릭 시 색상 선택 팝업창 뜸
@@ -579,6 +573,31 @@ class DrawingView @JvmOverloads constructor(
             }
         }
     }
+    fun handWritetoText(word:String){
+        var x=0f
+        var y=0f
+        val textPaint=Paint().apply{
+            color = Color.BLACK
+            style = Paint.Style.FILL
+            strokeJoin = Paint.Join.ROUND
+            strokeCap = Paint.Cap.ROUND
+            textSize=40F
+        }
+        if(clippingStartPoint!!.x>clippingEndPoint!!.x){
+            x=(clippingStartPoint!!.x-clippingEndPoint!!.x)/2
+        }
+        else{
+            x=(clippingStartPoint!!.x+clippingEndPoint!!.x)/2
+        }
+        if(clippingStartPoint!!.y>clippingEndPoint!!.y){
+            y=(clippingStartPoint!!.y-clippingEndPoint!!.y)/2
+        }
+        else{
+            y=(clippingStartPoint!!.y+clippingEndPoint!!.y)/2
+        }
+        canvas.drawText(word,x,y,textPaint)
+        invalidate()
+    }
 
     // 선택된 path 색 변경
     private fun changePathColor(color:Int){
@@ -586,7 +605,6 @@ class DrawingView @JvmOverloads constructor(
             var selectedPath = selectedPaths[i]
             var idx = pageInfo!!.customPaths.indexOf(selectedPath)
             selectedPath.drawingPaint.color = color
-            selectedPath.penColor = color
             pageInfo!!.customPaths[idx] = selectedPath
             canvas.drawPath(selectedPath.path, selectedPath.drawingPaint)
         }

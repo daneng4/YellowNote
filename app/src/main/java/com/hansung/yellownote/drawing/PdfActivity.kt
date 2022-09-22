@@ -39,9 +39,6 @@ import com.hansung.notedatabase.*
 import com.hansung.yellownote.AudioAdapter
 import com.hansung.yellownote.MainActivity
 
-import com.hansung.yellownote.AudioAdapter
-import com.hansung.yellownote.MainActivity
-
 import com.hansung.yellownote.MqttAdapter
 import com.hansung.yellownote.R
 import com.hansung.yellownote.SocketAdapter
@@ -50,6 +47,7 @@ import com.hansung.yellownote.databinding.ActivityPdfBinding
 import com.skydoves.colorpickerview.ColorEnvelope
 import com.skydoves.colorpickerview.ColorPickerDialog
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
+import kotlinx.android.synthetic.main.activity_pdf.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -135,7 +133,7 @@ class PdfActivity() : AppCompatActivity(){
 
     private var penSettingPopup:PenSettingDialog? = null
     private var eraserSettingPopup:PenSettingDialog? = null
-    var client:MqttAdapter = MqttAdapter()
+    lateinit var client:MqttAdapter
 
     // DrawingView.kt에서 정의된 mode와 같아야함
     val PenModes = ArrayList<String>(Arrays.asList("PEN","ERASER","TEXT","CLIPPING"))
@@ -152,9 +150,7 @@ class PdfActivity() : AppCompatActivity(){
         setContentView(binding.root)
 
         init()
-//        client = MqttAdapter()
-
-
+        client = MqttAdapter(this)
 
         myDao = MyDatabase.getDatabase(this).getMyDao()
 //        getPenDataTable()
@@ -327,10 +323,10 @@ class PdfActivity() : AppCompatActivity(){
             if (isRecording) {
                 // 현재 녹음 중 O
                 // 녹음 상태에 따른 변수 아이콘 & 텍스트 변경
-                isRecording = false // 녹음 상태 값
+//                isRecording = false // 녹음 상태 값
                 audioRecordImageBtn!!.setImageDrawable(
                     resources.getDrawable(
-                        R.drawable.record,
+                        R.drawable.beforecord,
                         null
                     )
                 ) // 녹음 상태 아이콘 변경
@@ -344,10 +340,10 @@ class PdfActivity() : AppCompatActivity(){
                          * */
                 if (checkAudioPermission()) {
                     // 녹음 상태에 따른 변수 아이콘 & 텍스트 변경
-                    isRecording = true // 녹음 상태 값
+//                    isRecording = true // 녹음 상태 값
                     audioRecordImageBtn!!.setImageDrawable(
                         resources.getDrawable(
-                            R.drawable.stopped,
+                            R.drawable.record,
                             null
                         )
                     ) // 녹음 상태 아이콘 변경
@@ -434,8 +430,8 @@ class PdfActivity() : AppCompatActivity(){
     }
 
     private fun setButtonHandlers() {
-        (findViewById<View>(R.id.btnStart) as ImageButton).setOnClickListener(btnClick)
-        (findViewById<View>(R.id.btnStop) as ImageButton).setOnClickListener(btnClick)
+//        (findViewById<View>(R.id.btnStart) as ImageButton).setOnClickListener(btnClick)
+//        (findViewById<View>(R.id.btnStop) as ImageButton).setOnClickListener(btnClick)
         (findViewById<View>(R.id.connectBtn) as ImageButton).setOnClickListener(btnClick)
     }
 
@@ -446,19 +442,20 @@ class PdfActivity() : AppCompatActivity(){
         return super.onKeyDown(keyCode, event)
     }
 
+    @RequiresApi(33)
     private val btnClick: View.OnClickListener = View.OnClickListener { v ->
         when (v.id) {
-            R.id.btnStart -> {
-                System.out.println("btnStart 누름")
-                btnStart.setImageDrawable(resources.getDrawable(R.drawable.record, null))
-                startRecording()
-
-            }
-            R.id.btnStop -> {
-                System.out.println("btnStop 누름")
-                btnStart.setImageDrawable(resources.getDrawable(R.drawable.beforecord, null))
-                stopRecording()
-            }
+//            R.id.btnStart -> {
+//                System.out.println("btnStart 누름")
+//                btnStart.setImageDrawable(resources.getDrawable(R.drawable.record, null))
+//                startRecording()
+//
+//            }
+//            R.id.btnStop -> {
+//                System.out.println("btnStop 누름")
+//                btnStart.setImageDrawable(resources.getDrawable(R.drawable.beforecord, null))
+//                stopRecording()
+//            }
             R.id.connectBtn -> {
                 System.out.println("connect버튼 누름")
                 sendRawData = globalfilepath
@@ -474,6 +471,7 @@ class PdfActivity() : AppCompatActivity(){
     private fun stopRecording() {
         // stops the recording activity
         if (null != recorder) {
+            System.out.println("녹음 종료")
             isRecording = false
             recorder!!.stop()
             recorder!!.release()
@@ -487,6 +485,7 @@ class PdfActivity() : AppCompatActivity(){
     }
 
     private fun startRecording() {
+        System.out.println("녹음 시작")
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.RECORD_AUDIO
